@@ -340,10 +340,74 @@ document.getElementById("exportDeck").addEventListener("click", () => {
     }
   }
 
-  Promise.all(promises).then(() => {
-    const link = document.createElement("a");
-    link.download = filename;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  });
+Promise.all(promises).then(async () => {
+  const link = document.createElement("a");
+  link.download = filename;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+
+  // ---------------- Firebase投稿機能追加 ----------------
+  try {
+    // ユーザー名やID
+    const username = "user123";
+
+    // デッキのカードパス順で文字列化 → SHA-256でハッシュ化
+    const deckCardsArray = [...deckCards];
+    const deckString = deckCardsArray.join(",");
+    const deckHash = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(deckString)
+    ).then(buf =>
+      Array.from(new Uint8Array(buf))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("")
+    );
+
+    // Firestoreで最後の投稿をチェック
+    const postsRef = firebase.firestore().collection("posts");
+    const lastPostQuery = await postsRef
+      .where("userId", "==", username)
+      .orderBy("createdAt", "desc")
+      .limit(1)
+      .get();
+
+    if (!lastPostQuery.empty) {
+      const lastPost = lastPostQuery.docs[0].data();
+      if (lastPost.deckHash === deckHash) {
+        alert("同じデッキは連続投稿できません。");
+        return;
+      }
+    }
+
+    // canvasからBlob取得
+    const blob = await new Promise(resolve =>
+      canvas.toBlob(resolve, "image/png")
+    );
+
+    // Storageにアップロード
+    const storageRef = firebase.storage().ref();
+    const fileRef = storageRef.child(`deck_images/${Date.now()}_${username}.png`);
+    await fileRef.put(blob);
+    const imageUrl = await fileRef.getDownloadURL();
+
+    // Firestoreに投稿データ保存
+    const deckNameInput = document.getElementById("deckName")?.value.trim() || "";
+    const memoInput = document.getElementById("deckMemo")?.value.trim() || "";
+    await postsRef.add({
+      userId: username,
+      deckHash: deckHash,
+      deckName: deckNameInput,
+      memo: memoInput,
+      imageUrl: imageUrl,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    console.log("Firebase投稿完了:", imageUrl);
+    // alert("投稿完了しました！");
+
+  } catch (err) {
+    console.error("Firebase投稿エラー:", err);
+    alert("投稿に失敗しました。");
+  }
 });
+
