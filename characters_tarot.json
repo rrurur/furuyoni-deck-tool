@@ -1,0 +1,863 @@
+[
+  {
+    "name": "yurina",
+    "img": "tarots/tarot_01.png",
+    "cards": [
+      "images/na_01_yurina_o_n_1.png",
+      "images/na_01_yurina_o_n_2.png",
+      "images/na_01_yurina_o_n_3.png",
+      "images/na_01_yurina_o_n_4_s2.png",
+      "images/na_01_yurina_o_n_5_s9_5.png",
+      "images/na_01_yurina_o_n_6.png",
+      "images/na_01_yurina_o_n_7.png",
+      "images/na_01_yurina_o_s_1.png",
+      "images/na_01_yurina_o_s_2_s5.png",
+      "images/na_01_yurina_o_s_3_s2.png",
+      "images/na_01_yurina_o_s_4.png"
+    ]
+  },
+  {
+    "name": "yurina_a1",
+    "img": "tarots/tarot_01_a1.png",
+    "cards": [
+      "images/na_01_yurina_a1_n_1.png",
+      "images/na_01_yurina_o_n_2.png",
+      "images/na_01_yurina_o_n_3.png",
+      "images/na_01_yurina_o_n_4_s2.png",
+      "images/na_01_yurina_o_n_5_s9_5.png",
+      "images/na_01_yurina_a1_n_6.png",
+      "images/na_01_yurina_o_n_7.png",
+      "images/na_01_yurina_o_s_1.png",
+      "images/na_01_yurina_a1_s_2_s5.png",
+      "images/na_01_yurina_o_s_3_s2.png",
+      "images/na_01_yurina_o_s_4.png"
+    ]
+  },
+    {
+    "name": "yurina_a2",
+    "img": "tarots/tarot_01_a2.png",
+    "cards": [
+      "images/na_01_yurina_o_n_1.png",
+      "images/na_01_yurina_o_n_2.png",
+      "images/na_01_yurina_a2_n_3.png",
+      "images/na_01_yurina_o_n_4_s2.png",
+      "images/na_01_yurina_o_n_5_s9_5.png",
+      "images/na_01_yurina_o_n_6.png",
+      "images/na_01_yurina_a2_n_7.png",
+      "images/na_01_yurina_a2_s_1.png",
+      "images/na_01_yurina_o_s_2_s5.png",
+      "images/na_01_yurina_o_s_3_s2.png",
+      "images/na_01_yurina_o_s_4.png"
+    ]
+  },
+  {
+    "name": "saine",
+    "img": "tarots/tarot_02.png",
+    "cards": [
+      "images/na_02_saine_o_n_1_s6_2.png",
+      "images/na_02_saine_o_n_2.png",
+      "images/na_02_saine_o_n_3_s6_2.png",
+      "images/na_02_saine_o_n_4_s6_2.png",
+      "images/na_02_saine_o_n_5_s5.png",
+      "images/na_02_saine_o_n_6_s3.png",
+      "images/na_02_saine_o_n_7.png",
+      "images/na_02_saine_o_s_1_s2.png",
+      "images/na_02_saine_o_s_2_s2.png",
+      "images/na_02_saine_o_s_3_s6_2.png",
+      "images/na_02_saine_o_s_4_s2.png"
+    ]
+  },
+  {
+    "name": "saine_a1",
+    "img": "tarots/tarot_02_a1.png",
+    "cards": [
+      "images/na_02_saine_a1_n_1_rework.png",
+      "images/na_02_saine_o_n_2.png",
+      "images/na_02_saine_o_n_3.png",
+      "images/na_02_saine_o_n_4_s6_2.png",
+      "images/na_02_saine_o_n_5_s5.png",
+      "images/na_02_saine_a1_n_6_rework.png",
+      "images/na_02_saine_o_n_7.png",
+      "images/na_02_saine_o_s_1_s2.png",
+      "images/na_02_saine_a1_s_2_rework.png",
+      "images/na_02_saine_o_s_3_s6_2.png",
+      "images/na_02_saine_o_s_4_s2.png"
+    ]
+  },
+  {
+    "name": "saine_a2",
+    "img": "tarots/tarot_02_a2.png",
+    "cards": [
+      "images/na_02_saine_o_n_1_s6_2.png",
+      "images/na_02_saine_a2_n_2_s8_2.png",
+      "images/na_02_saine_o_n_3_s6_2.png",
+      "images/na_02_saine_o_n_4_s6_2.png",
+      "images/na_02_saine_o_n_5_s5.png",
+      "images/na_02_saine_o_n_6_s3.png",
+      "images/na_02_saine_a2_n_7_s7_2.png",
+      "images/na_02_saine_o_s_1_s2.png",
+      "images/na_02_saine_o_s_2_s2.png",
+      "images/na_02_saine_a2_s_3_s6_2.png",
+      "images/na_02_saine_o_s_4_s2.png"
+    ]
+  },
+  {
+    "name": "himika",
+    "img": "tarots/tarot_03.png",
+    "cards": [
+      "images/na_03_himika_o_n_1.png",
+      "images/na_03_himika_o_n_2_s4.png",
+      "images/na_03_himika_o_n_3.png",
+      "images/na_03_himika_o_n_4.png",
+      "images/na_03_himika_o_n_5.png",
+      "images/na_03_himika_o_n_6_s5.png",
+      "images/na_03_himika_o_n_7.png",
+      "images/na_03_himika_o_s_1.png",
+      "images/na_03_himika_o_s_2.png",
+      "images/na_03_himika_o_s_3.png",
+      "images/na_03_himika_o_s_4.png"
+    ]
+  },
+  {
+    "name": "himika_a1",
+    "img": "tarots/tarot_03_a1.png",
+    "cards": [
+      "images/na_03_himika_o_n_1.png",
+      "images/na_03_himika_a1_n_2.png",
+      "images/na_03_himika_o_n_3.png",
+      "images/na_03_himika_o_n_4.png",
+      "images/na_03_himika_a1_n_5.png",
+      "images/na_03_himika_o_n_6_s5.png",
+      "images/na_03_himika_o_n_7.png",
+      "images/na_03_himika_o_s_1.png",
+      "images/na_03_himika_a1_s_2_s6_2.png",
+      "images/na_03_himika_o_s_3.png",
+      "images/na_03_himika_o_s_4.png"
+    ]
+  },
+  {
+    "name": "tokoyo",
+    "img": "tarots/tarot_04.png",
+    "cards": [
+      "images/na_04_tokoyo_o_n_1_s2.png",
+      "images/na_04_tokoyo_o_n_2.png",
+      "images/na_04_tokoyo_o_n_3.png",
+      "images/na_04_tokoyo_o_n_4.png",
+      "images/na_04_tokoyo_o_n_5.png",
+      "images/na_04_tokoyo_o_n_6.png",
+      "images/na_04_tokoyo_o_n_7_s6_2.png",
+      "images/na_04_tokoyo_o_s_1.png",
+      "images/na_04_tokoyo_o_s_2.png",
+      "images/na_04_tokoyo_o_s_3_s2.png",
+      "images/na_04_tokoyo_o_s_4.png"
+    ]
+  },
+  {
+    "name": "tokoyo_a1",
+    "img": "tarots/tarot_04_a1.png",
+    "cards": [
+      "images/na_04_tokoyo_a1_n_1_rework.png",
+      "images/na_04_tokoyo_o_n_2.png",
+      "images/na_04_tokoyo_o_n_3.png",
+      "images/na_04_tokoyo_a1_n_4_rework.png",
+      "images/na_04_tokoyo_o_n_5.png",
+      "images/na_04_tokoyo_o_n_6.png",
+      "images/na_04_tokoyo_o_n_7_s6_2.png",
+      "images/na_04_tokoyo_o_s_1.png",
+      "images/na_04_tokoyo_o_s_2.png",
+      "images/na_04_tokoyo_a1_s_3_rework.png",
+      "images/na_04_tokoyo_o_s_4.png"
+    ]
+  },
+    {
+    "name": "tokoyo_a2",
+    "img": "tarots/tarot_04_a2.png",
+    "cards": [
+      "images/na_04_tokoyo_o_n_1_s2.png",
+      "images/na_04_tokoyo_a2_n_2.png",
+      "images/na_04_tokoyo_o_n_3.png",
+      "images/na_04_tokoyo_o_n_4.png",
+      "images/na_04_tokoyo_o_n_5.png",
+      "images/na_04_tokoyo_o_n_6.png",
+      "images/na_04_tokoyo_o_n_7_s6_2.png",
+      "images/na_04_tokoyo_o_s_1.png",
+      "images/na_04_tokoyo_a2_s_2.png",
+      "images/na_04_tokoyo_a2_s_3.png",
+      "images/na_04_tokoyo_o_s_4.png"
+    ]
+  },
+  {
+    "name": "oboro",
+    "img": "tarots/tarot_05.png",
+    "cards": [
+      "images/na_05_oboro_o_n_1.png",
+      "images/na_05_oboro_o_n_2_s2.png",
+      "images/na_05_oboro_o_n_3.png",
+      "images/na_05_oboro_o_n_4_s3.png",
+      "images/na_05_oboro_o_n_5.png",
+      "images/na_05_oboro_o_n_6.png",
+      "images/na_05_oboro_o_n_7.png",
+      "images/na_05_oboro_o_s_1.png",
+      "images/na_05_oboro_o_s_2_s3.png",
+      "images/na_05_oboro_o_s_3_s8_2.png",
+      "images/na_05_oboro_o_s_4_s3.png"
+    ]
+  },
+  {
+    "name": "oboro_a1",
+    "img": "tarots/tarot_05_a1.png",
+    "cards": [
+      "images/na_05_oboro_o_n_1.png",
+      "images/na_05_oboro_a1_n_2.png",
+      "images/na_05_oboro_a1_n_3_s5.png",
+      "images/na_05_oboro_o_n_4_s3.png",
+      "images/na_05_oboro_o_n_5.png",
+      "images/na_05_oboro_o_n_6.png",
+      "images/na_05_oboro_o_n_7.png",
+      "images/na_05_oboro_o_s_1.png",
+      "images/na_05_oboro_o_s_2_s3.png",
+      "images/na_05_oboro_o_s_3_s8_2.png",
+      "images/na_05_oboro_a1_s_4_ex1_s5.png"
+    ]
+  },
+  {
+    "name": "oboro_a2",
+    "img": "tarots/tarot_05_a2.png",
+    "cards": [
+      "images/na_05_oboro_a2_n_1.png",
+      "images/na_05_oboro_o_n_2_s2.png",
+      "images/na_05_oboro_o_n_3.png",
+      "images/na_05_oboro_o_n_4_s3.png",
+      "images/na_05_oboro_o_n_5.png",
+      "images/na_05_oboro_o_n_6.png",
+      "images/na_05_oboro_o_n_7.png",
+      "images/na_05_oboro_a2_s_1.png",
+      "images/na_05_oboro_o_s_2_s3.png",
+      "images/na_05_oboro_a2_s_3.png",
+      "images/na_05_oboro_o_s_4_s3.png"
+    ]
+  },
+  {
+    "name": "yukihi_a",
+    "img": "tarots/tarot_06.png",
+    "cards": [
+      "images/na_06_yukihi_o_n_1.png",
+      "images/na_06_yukihi_o_n_2_s8_2.png",
+      "images/na_06_yukihi_o_n_3.png",
+      "images/na_06_yukihi_o_n_4.png",
+      "images/na_06_yukihi_o_n_5_s9_5.png",
+      "images/na_06_yukihi_o_n_6.png",
+      "images/na_06_yukihi_o_n_7.png",
+      "images/na_06_yukihi_o_s_1_s8.png",
+      "images/na_06_yukihi_o_s_2.png",
+      "images/na_06_yukihi_o_s_3.png",
+      "images/na_06_yukihi_o_s_4.png"
+    ]
+  },
+  {
+    "name": "yukihi_a1",
+    "img": "tarots/tarot_06_a1.png",
+    "cards": [
+      "images/na_06_yukihi_o_n_1.png",
+      "images/na_06_yukihi_a1_n_2.png",
+      "images/na_06_yukihi_o_n_3.png",
+      "images/na_06_yukihi_a1_n_4.png",
+      "images/na_06_yukihi_o_n_5_s9_5.png",
+      "images/na_06_yukihi_o_n_6.png",
+      "images/na_06_yukihi_o_n_7.png",
+      "images/na_06_yukihi_o_s_1_s8.png",
+      "images/na_06_yukihi_a1_s_2.png",
+      "images/na_06_yukihi_o_s_3.png",
+      "images/na_06_yukihi_o_s_4.png"
+    ]
+  },
+  {
+    "name": "shinra",
+    "img": "tarots/tarot_07.png",
+    "cards": [
+      "images/na_07_shinra_o_n_1.png",
+      "images/na_07_shinra_o_n_2_s10.png",
+      "images/na_07_shinra_o_n_3.png",
+      "images/na_07_shinra_o_n_4.png",
+      "images/na_07_shinra_o_n_5.png",
+      "images/na_07_shinra_o_n_6_s3.png",
+      "images/na_07_shinra_o_n_7.png",
+      "images/na_07_shinra_o_s_1_s6.png",
+      "images/na_07_shinra_o_s_2_s2.png",
+      "images/na_07_shinra_o_s_3.png",
+      "images/na_07_shinra_o_s_4.png"
+    ]
+  },
+  {
+    "name": "shinra_a1",
+    "img": "tarots/tarot_07_a1.png",
+    "cards": [
+      "images/na_07_shinra_o_n_1.png",
+      "images/na_07_shinra_a1_n_2.png",
+      "images/na_07_shinra_o_n_3.png",
+      "images/na_07_shinra_o_n_4.png",
+      "images/na_07_shinra_o_n_5.png",
+      "images/na_07_shinra_o_n_6_s3.png",
+      "images/na_07_shinra_a1_n_7_s8_2.png",
+      "images/na_07_shinra_o_s_1_s6.png",
+      "images/na_07_shinra_o_s_2_s2.png",
+      "images/na_07_shinra_a1_s_3.png",
+      "images/na_07_shinra_o_s_4.png"
+    ]
+  },
+  {
+    "name": "hagane",
+    "img": "tarots/tarot_08.png",
+    "cards": [
+      "images/na_08_hagane_o_n_1_s2.png",
+      "images/na_08_hagane_o_n_2.png",
+      "images/na_08_hagane_o_n_3.png",
+      "images/na_08_hagane_o_n_4_s6_2.png",
+      "images/na_08_hagane_o_n_5.png",
+      "images/na_08_hagane_o_n_6_s8.png",
+      "images/na_08_hagane_o_n_7_s7_2.png",
+      "images/na_08_hagane_o_s_1_s5.png",
+      "images/na_08_hagane_o_s_2.png",
+      "images/na_08_hagane_o_s_3.png",
+      "images/na_08_hagane_o_s_4_s10.png"
+    ]
+  },
+  {
+    "name": "hagane_a1",
+    "img": "tarots/tarot_08_a1.png",
+    "cards": [
+      "images/na_08_hagane_a1_n_1.png",
+      "images/na_08_hagane_a1_n_2.png",
+      "images/na_08_hagane_o_n_3.png",
+      "images/na_08_hagane_o_n_4_s6_2.png",
+      "images/na_08_hagane_o_n_5.png",
+      "images/na_08_hagane_o_n_6_s8.png",
+      "images/na_08_hagane_o_n_7_s7_2.png",
+      "images/na_08_hagane_a1_s_1_ex1.png",
+      "images/na_08_hagane_o_s_2.png",
+      "images/na_08_hagane_o_s_3.png",
+      "images/na_08_hagane_o_s_4_s10.png"
+    ]
+  },
+  {
+    "name": "chikage",
+    "img": "tarots/tarot_09.png",
+    "cards": [
+      "images/na_09_chikage_o_n_1.png",
+      "images/na_09_chikage_o_n_2.png",
+      "images/na_09_chikage_o_n_3_s5.png",
+      "images/na_09_chikage_o_n_4_s8_2.png",
+      "images/na_09_chikage_o_n_5.png",
+      "images/na_09_chikage_o_n_6.png",
+      "images/na_09_chikage_o_n_7.png",
+      "images/na_09_chikage_o_s_1.png",
+      "images/na_09_chikage_o_s_2.png",
+      "images/na_09_chikage_o_s_3.png",
+      "images/na_09_chikage_o_s_4.png"
+    ]
+  },
+  {
+    "name": "chikage_a1",
+    "img": "tarots/tarot_09_a1.png",
+    "cards": [
+      "images/na_09_chikage_o_n_1.png",
+      "images/na_09_chikage_o_n_2.png",
+      "images/na_09_chikage_o_n_3_s5.png",
+      "images/na_09_chikage_o_n_4_s8_2.png",
+      "images/na_09_chikage_a1_n_5.png",
+      "images/na_09_chikage_a1_n_6.png",
+      "images/na_09_chikage_o_n_7.png",
+      "images/na_09_chikage_o_s_1.png",
+      "images/na_09_chikage_o_s_2.png",
+      "images/na_09_chikage_o_s_3.png",
+      "images/na_09_chikage_a1_s_4_s6_2.png"
+    ]
+  },
+  {
+    "name": "kururu",
+    "img": "tarots/tarot_10.png",
+    "cards": [
+      "images/na_10_kururu_o_n_1.png",
+      "images/na_10_kururu_o_n_2.png",
+      "images/na_10_kururu_o_n_3.png",
+      "images/na_10_kururu_o_n_4.png",
+      "images/na_10_kururu_o_n_5_s7_2.png",
+      "images/na_10_kururu_o_n_6.png",
+      "images/na_10_kururu_o_n_7.png",
+      "images/na_10_kururu_o_s_1.png",
+      "images/na_10_kururu_o_s_2_s2.png",
+      "images/na_10_kururu_o_s_3.png",
+      "images/na_10_kururu_o_s_4.png"
+    ]
+  },
+  {
+    "name": "kururu_a1",
+    "img": "tarots/tarot_10_a1.png",
+    "cards": [
+      "images/na_10_kururu_a1_n_1.png",
+      "images/na_10_kururu_o_n_2.png",
+      "images/na_10_kururu_a1_n_3.png",
+      "images/na_10_kururu_o_n_4.png",
+      "images/na_10_kururu_o_n_5_s7_2.png",
+      "images/na_10_kururu_o_n_6.png",
+      "images/na_10_kururu_o_n_7.png",
+      "images/na_10_kururu_o_s_1.png",
+      "images/na_10_kururu_o_s_2_s2.png",
+      "images/na_10_kururu_a1_s_3_s8_2.png",
+      "images/na_10_kururu_o_s_4.png"
+    ]
+  },
+  {
+    "name": "kururu_a2",
+    "img": "tarots/tarot_10_a2.png",
+    "cards": [
+      "images/na_10_kururu_a2_n_1.png",
+      "images/na_10_kururu_a2_n_2.png",
+      "images/na_10_kururu_o_n_3.png",
+      "images/na_10_kururu_o_n_4.png",
+      "images/na_10_kururu_o_n_5_s7_2.png",
+      "images/na_10_kururu_o_n_6.png",
+      "images/na_10_kururu_o_n_7.png",
+      "images/na_10_kururu_o_s_1.png",
+      "images/na_10_kururu_o_s_2_s2.png",
+      "images/na_10_kururu_o_s_3.png",
+      "images/na_10_kururu_a2_s_4.png"
+    ]
+  },
+  {
+    "name": "thallya",
+    "img": "tarots/tarot_11.png",
+    "cards": [
+      "images/na_11_thallya_o_n_1.png",
+      "images/na_11_thallya_o_n_2_s9_5.png",
+      "images/na_11_thallya_o_n_3.png",
+      "images/na_11_thallya_o_n_4_s8_2.png",
+      "images/na_11_thallya_o_n_5.png",
+      "images/na_11_thallya_o_n_6.png",
+      "images/na_11_thallya_o_n_7.png",
+      "images/na_11_thallya_o_s_1.png",
+      "images/na_11_thallya_o_s_2.png",
+      "images/na_11_thallya_o_s_3_s9_5.png",
+      "images/na_11_thallya_o_s_4_s3.png"
+    ]
+  },
+  {
+    "name": "thallya_a1",
+    "img": "tarots/tarot_11_a1.png",
+    "cards": [
+      "images/na_11_thallya_o_n_1.png",
+      "images/na_11_thallya_o_n_2_s9_5.png",
+      "images/na_11_thallya_o_n_3.png",
+      "images/na_11_thallya_o_n_4_s8_2.png",
+      "images/na_11_thallya_a1_n_5.png",
+      "images/na_11_thallya_o_n_6.png",
+      "images/na_11_thallya_o_n_7.png",
+      "images/na_11_thallya_a1_s_1.png",
+      "images/na_11_thallya_a1_s_2.png",
+      "images/na_11_thallya_o_s_3_s9_5.png",
+      "images/na_11_thallya_o_s_4_s3.png"
+    ]
+  },
+  {
+    "name": "raira",
+    "img": "tarots/tarot_12.png",
+    "cards": [
+      "images/na_12_raira_o_n_1_s2.png",
+      "images/na_12_raira_o_n_2_s8_2.png",
+      "images/na_12_raira_o_n_3.png",
+      "images/na_12_raira_o_n_4.png",
+      "images/na_12_raira_o_n_5.png",
+      "images/na_12_raira_o_n_6_s9_5.png",
+      "images/na_12_raira_o_n_7.png",
+      "images/na_12_raira_o_s_1.png",
+      "images/na_12_raira_o_s_2.png",
+      "images/na_12_raira_o_s_3_ex1.png",
+      "images/na_12_raira_o_s_4_s5.png"
+    ]
+  },
+  {
+    "name": "raira_a1",
+    "img": "tarots/tarot_12_a1.png",
+    "cards": [
+      "images/na_12_raira_o_n_1_s2.png",
+      "images/na_12_raira_a1_n_2_s6.png",
+      "images/na_12_raira_o_n_3.png",
+      "images/na_12_raira_o_n_4.png",
+      "images/na_12_raira_o_n_5.png",
+      "images/na_12_raira_a1_n_6.png",
+      "images/na_12_raira_o_n_7.png",
+      "images/na_12_raira_o_s_1.png",
+      "images/na_12_raira_o_s_2.png",
+      "images/na_12_raira_a1_s_3.png",
+      "images/na_12_raira_o_s_4_s5.png"
+    ]
+  },
+  {
+    "name": "utsuro",
+    "img": "tarots/tarot_13.png",
+    "cards": [
+      "images/na_13_utsuro_o_n_1_s7_2.png",
+      "images/na_13_utsuro_o_n_2.png",
+      "images/na_13_utsuro_o_n_3.png",
+      "images/na_13_utsuro_o_n_4.png",
+      "images/na_13_utsuro_o_n_5.png",
+      "images/na_13_utsuro_o_n_6.png",
+      "images/na_13_utsuro_o_n_7.png",
+      "images/na_13_utsuro_o_s_1.png",
+      "images/na_13_utsuro_o_s_2.png",
+      "images/na_13_utsuro_o_s_3.png",
+      "images/na_13_utsuro_o_s_4_s5.png"
+    ]
+  },
+  {
+    "name": "utsuro_a1",
+    "img": "tarots/tarot_13_a1.png",
+    "cards": [
+      "images/na_13_utsuro_o_n_1_s7_2.png",
+      "images/na_13_utsuro_a1_n_2.png",
+      "images/na_13_utsuro_o_n_3.png",
+      "images/na_13_utsuro_o_n_4.png",
+      "images/na_13_utsuro_o_n_5.png",
+      "images/na_13_utsuro_o_n_6.png",
+      "images/na_13_utsuro_o_n_7.png",
+      "images/na_13_utsuro_a1_s_1_s8_2.png",
+      "images/na_13_utsuro_o_s_2.png",
+      "images/na_13_utsuro_o_s_3.png",
+      "images/na_13_utsuro_o_s_4_s5.png"
+    ]
+  },
+  {
+    "name": "honoka",
+    "img": "tarots/tarot_14.png",
+    "cards": [
+      "images/na_14_honoka_o_n_1_ex2_s7_2.png",
+      "images/na_14_honoka_o_n_2_s5.png",
+      "images/na_14_honoka_o_n_3.png",
+      "images/na_14_honoka_o_n_4_ex1.png",
+      "images/na_14_honoka_o_n_5_ex1.png",
+      "images/na_14_honoka_o_n_6_s4.png",
+      "images/na_14_honoka_o_n_7.png",
+      "images/na_14_honoka_o_s_1_ex1_s5.png",
+      "images/na_14_honoka_o_s_2.png",
+      "images/na_14_honoka_o_s_3_s4.png",
+      "images/na_14_honoka_o_s_4.png"
+    ]
+  },
+  {
+    "name": "honoka_a1",
+    "img": "tarots/tarot_14_a1.png",
+    "cards": [
+      "images/na_14_honoka_a1_n_1_ex1.png",
+      "images/na_14_honoka_o_n_2_s5.png",
+      "images/na_14_honoka_o_n_3.png",
+      "images/na_14_honoka_o_n_4_ex1.png",
+      "images/na_14_honoka_o_n_5_ex1.png",
+      "images/na_14_honoka_o_n_6_s4.png",
+      "images/na_14_honoka_o_n_7.png",
+      "images/na_14_honoka_a1_s_1_ex3_s6_2.png",
+      "images/na_14_honoka_o_s_2.png",
+      "images/na_14_honoka_o_s_3_s4.png",
+      "images/na_14_honoka_o_s_4.png"
+    ]
+  },
+  {
+    "name": "korunu",
+    "img": "tarots/tarot_15.png",
+    "cards": [
+      "images/na_15_korunu_o_n_1.png",
+      "images/na_15_korunu_o_n_2.png",
+      "images/na_15_korunu_o_n_3.png",
+      "images/na_15_korunu_o_n_4.png",
+      "images/na_15_korunu_o_n_5_s7_2.png",
+      "images/na_15_korunu_o_n_6.png",
+      "images/na_15_korunu_o_n_7_s6.png",
+      "images/na_15_korunu_o_s_1.png",
+      "images/na_15_korunu_o_s_2.png",
+      "images/na_15_korunu_o_s_3.png",
+      "images/na_15_korunu_o_s_4_s6.png"
+    ]
+  },
+  {
+    "name": "yatsuha",
+    "img": "tarots/tarot_16.png",
+    "cards": [
+      "images/na_16_yatsuha_o_n_1_s5.png",
+      "images/na_16_yatsuha_o_n_2_s5.png",
+      "images/na_16_yatsuha_o_n_3.png",
+      "images/na_16_yatsuha_o_n_4.png",
+      "images/na_16_yatsuha_o_n_5.png",
+      "images/na_16_yatsuha_o_n_6.png",
+      "images/na_16_yatsuha_o_n_7.png",
+      "images/na_16_yatsuha_o_s_1.png",
+      "images/na_16_yatsuha_o_s_2_s6_2.png",
+      "images/na_16_yatsuha_o_s_3.png",
+      "images/na_16_yatsuha_o_s_4.png"
+    ]
+  },
+  {
+    "name": "yatsuha_a1",
+    "img": "tarots/tarot_16_a1.png",
+    "cards": [
+      "images/na_16_yatsuha_o_n_1_s5.png",
+      "images/na_16_yatsuha_o_n_2_s5.png",
+      "images/na_16_yatsuha_o_n_3.png",
+      "images/na_16_yatsuha_o_n_4.png",
+      "images/na_16_yatsuha_o_n_5.png",
+      "images/na_16_yatsuha_o_n_6.png",
+      "images/na_16_yatsuha_o_n_7.png",
+      "images/na_16_yatsuha_a1_s_4_s7_2.png"
+    ]
+  },
+  {
+    "name": "yatsuha_aa1",
+    "img": "tarots/tarot_16_aa1.png",
+    "cards": [
+      "images/na_16_yatsuha_o_n_1_s5.png",
+      "images/na_16_yatsuha_o_n_2_s5.png",
+      "images/na_16_yatsuha_o_n_3.png",
+      "images/na_16_yatsuha_o_n_4.png",
+      "images/na_16_yatsuha_o_n_5.png",
+      "images/na_16_yatsuha_o_n_6.png",
+      "images/na_16_yatsuha_aa1_n_7.png",
+      "images/na_16_yatsuha_aa1_s_4.png"
+    ]
+  },
+  {
+    "name": "hatsumi",
+    "img": "tarots/tarot_17.png",
+    "cards": [
+      "images/na_17_hatsumi_o_n_1.png",
+      "images/na_17_hatsumi_o_n_2.png",
+      "images/na_17_hatsumi_o_n_3.png",
+      "images/na_17_hatsumi_o_n_4.png",
+      "images/na_17_hatsumi_o_n_5_s7_2.png",
+      "images/na_17_hatsumi_o_n_6.png",
+      "images/na_17_hatsumi_o_n_7_s8.png",
+      "images/na_17_hatsumi_o_s_1.png",
+      "images/na_17_hatsumi_o_s_2.png",
+      "images/na_17_hatsumi_o_s_3.png",
+      "images/na_17_hatsumi_o_s_4.png"
+    ]
+  },
+  {
+    "name": "hatsumi_a1",
+    "img": "tarots/tarot_17_a1.png",
+    "cards": [
+      "images/na_17_hatsumi_o_n_1.png",
+      "images/na_17_hatsumi_o_n_2.png",
+      "images/na_17_hatsumi_o_n_3.png",
+      "images/na_17_hatsumi_a1_n_4.png",
+      "images/na_17_hatsumi_o_n_5_s7_2.png",
+      "images/na_17_hatsumi_o_n_6.png",
+      "images/na_17_hatsumi_o_n_7_s8.png",
+      "images/na_17_hatsumi_a1_s_1.png",
+      "images/na_17_hatsumi_o_s_2.png",
+      "images/na_17_hatsumi_o_s_3.png",
+      "images/na_17_hatsumi_a1_s_4.png"
+    ]
+  },
+  {
+    "name": "mizuki",
+    "img": "tarots/tarot_18.png",
+    "cards": [
+      "images/na_18_mizuki_o_n_1.png",
+      "images/na_18_mizuki_o_n_2_s6.png",
+      "images/na_18_mizuki_o_n_3.png",
+      "images/na_18_mizuki_o_n_4.png",
+      "images/na_18_mizuki_o_n_5.png",
+      "images/na_18_mizuki_o_n_6_s6.png",
+      "images/na_18_mizuki_o_n_7.png",
+      "images/na_18_mizuki_o_s_1.png",
+      "images/na_18_mizuki_o_s_2.png",
+      "images/na_18_mizuki_o_s_3_s7_2.png",
+      "images/na_18_mizuki_o_s_4.png"
+    ]
+  },
+  {
+    "name": "megumi",
+    "img": "tarots/tarot_19.png",
+    "cards": [
+      "images/na_19_megumi_o_n_1.png",
+      "images/na_19_megumi_o_n_2.png",
+      "images/na_19_megumi_o_n_3.png",
+      "images/na_19_megumi_o_n_4.png",
+      "images/na_19_megumi_o_n_5.png",
+      "images/na_19_megumi_o_n_6.png",
+      "images/na_19_megumi_o_n_7.png",
+      "images/na_19_megumi_o_s_1.png",
+      "images/na_19_megumi_o_s_2_s8.png",
+      "images/na_19_megumi_o_s_3.png",
+      "images/na_19_megumi_o_s_4.png"
+    ]
+  },
+  {
+    "name": "kanawe",
+    "img": "tarots/tarot_20.png",
+    "cards": [
+      "images/na_20_kanawe_o_n_1.png",
+      "images/na_20_kanawe_o_n_2_s7_2.png",
+      "images/na_20_kanawe_o_n_3.png",
+      "images/na_20_kanawe_o_n_4.png",
+      "images/na_20_kanawe_o_n_5_s6_2.png",
+      "images/na_20_kanawe_o_n_6.png",
+      "images/na_20_kanawe_o_n_7_s7.png",
+      "images/na_20_kanawe_o_s_1_s6_2.png",
+      "images/na_20_kanawe_o_s_2_s7.png",
+      "images/na_20_kanawe_o_s_3_s7.png",
+      "images/na_20_kanawe_o_s_4.png"
+    ]
+  },
+  {
+    "name": "kamuwi",
+    "img": "tarots/tarot_21.png",
+    "cards": [
+      "images/na_21_kamuwi_o_n_1.png",
+      "images/na_21_kamuwi_o_n_2_s8_2.png",
+      "images/na_21_kamuwi_o_n_3.png",
+      "images/na_21_kamuwi_o_n_4_s7_2.png",
+      "images/na_21_kamuwi_o_n_5.png",
+      "images/na_21_kamuwi_o_n_6.png",
+      "images/na_21_kamuwi_o_n_7.png",
+      "images/na_21_kamuwi_o_s_1_s7_2.png",
+      "images/na_21_kamuwi_o_s_2_s7_2.png",
+      "images/na_21_kamuwi_o_s_3.png",
+      "images/na_21_kamuwi_o_s_4_s8_2.png"
+    ]
+  },
+  {
+    "name": "renri",
+    "img": "tarots/tarot_22.png",
+    "cards": [
+      "images/na_22_renri_o_n_1.png",
+      "images/na_22_renri_o_n_2.png",
+      "images/na_22_renri_o_n_3.png",
+      "images/na_22_renri_o_n_4.png",
+      "images/na_22_renri_o_n_5.png",
+      "images/na_22_renri_o_n_6_s8_2.png",
+      "images/na_22_renri_o_n_7.png",
+      "images/na_22_renri_o_s_1.png",
+      "images/na_22_renri_o_s_2.png",
+      "images/na_22_renri_o_s_3.png",
+      "images/na_22_renri_o_s_4.png"
+    ]
+  },
+  {
+    "name": "renri_a1",
+    "img": "tarots/tarot_22_a1.png",
+    "cards": [
+      "images/na_22_renri_o_n_1.png",
+      "images/na_22_renri_a1_n_2.png",
+      "images/na_22_renri_o_n_3.png",
+      "images/na_22_renri_o_n_4.png",
+      "images/na_22_renri_o_n_5.png",
+      "images/na_22_renri_a1_n_6_s9_5.png",
+      "images/na_22_renri_o_n_7.png",
+      "images/na_22_renri_a1_s_1.png",
+      "images/na_22_renri_o_s_2.png",
+      "images/na_22_renri_o_s_3.png",
+      "images/na_22_renri_o_s_4.png"
+    ]
+  },
+  {
+    "name": "akina",
+    "img": "tarots/tarot_23.png",
+    "cards": [
+      "images/na_23_akina_o_n_1.png",
+      "images/na_23_akina_o_n_2_s9_5.png",
+      "images/na_23_akina_o_n_3.png",
+      "images/na_23_akina_o_n_4.png",
+      "images/na_23_akina_o_n_5_s10.png",
+      "images/na_23_akina_o_n_6_s10.png",
+      "images/na_23_akina_o_n_7_s8_2.png",
+      "images/na_23_akina_o_s_1.png",
+      "images/na_23_akina_o_s_2.png",
+      "images/na_23_akina_o_s_3.png",
+      "images/na_23_akina_o_s_4_s8_2.png"
+    ]
+  },
+  {
+    "name": "shisui",
+    "img": "tarots/tarot_24.png",
+    "cards": [
+      "images/na_24_shisui_o_n_1.png",
+      "images/na_24_shisui_o_n_2.png",
+      "images/na_24_shisui_o_n_3.png",
+      "images/na_24_shisui_o_n_4_s10.png",
+      "images/na_24_shisui_o_n_5.png",
+      "images/na_24_shisui_o_n_6_s9.png",
+      "images/na_24_shisui_o_n_7_s8_2.png",
+      "images/na_24_shisui_o_s_1_s8_2.png",
+      "images/na_24_shisui_o_s_2_s9.png",
+      "images/na_24_shisui_o_s_3.png",
+      "images/na_24_shisui_o_s_4.png"
+    ]
+  },
+  {
+    "name": "misora",
+    "img": "tarots/tarot_25.png",
+    "cards": [
+      "images/na_25_misora_o_n_1.png",
+      "images/na_25_misora_o_n_2.png",
+      "images/na_25_misora_o_n_3.png",
+      "images/na_25_misora_o_n_4.png",
+      "images/na_25_misora_o_n_5.png",
+      "images/na_25_misora_o_n_6.png",
+      "images/na_25_misora_o_n_7.png",
+      "images/na_25_misora_o_s_1.png",
+      "images/na_25_misora_o_s_2.png",
+      "images/na_25_misora_o_s_3.png",
+      "images/na_25_misora_o_s_4.png"
+    ]
+  },
+  {
+    "name": "innealra_nornir_1",
+    "img": "tarots/tarot_26_o1.png",
+    "cards": [
+      "images/na_26_innealra_o_n_1.png",
+      "images/na_26_innealra_o1_n_2.png",
+      "images/na_26_innealra_o1_n_3.png",
+      "images/na_26_innealra_o1_n_4.png",
+      "images/na_26_innealra_o_n_5.png",
+      "images/na_26_innealra_o1_n_6.png",
+      "images/na_26_innealra_o_n_7.png",
+      "images/na_26_innealra_o1_s_1.png",
+      "images/na_26_innealra_o1_s_2.png",
+      "images/na_26_innealra_o1_s_3.png",
+      "images/na_26_innealra_o_s_4.png"
+    ]
+  },
+  {
+    "name": "innealra_nornir_2",
+    "img": "tarots/tarot_26_o2.png",
+    "cards": [
+      "images/na_26_innealra_o_n_1.png",
+      "images/na_26_innealra_o2_n_2.png",
+      "images/na_26_innealra_o2_n_3.png",
+      "images/na_26_innealra_o2_n_4.png",
+      "images/na_26_innealra_o_n_5.png",
+      "images/na_26_innealra_o2_n_6.png",
+      "images/na_26_innealra_o_n_7.png",
+      "images/na_26_innealra_o2_s_1.png",
+      "images/na_26_innealra_o2_s_2.png",
+      "images/na_26_innealra_o2_s_3.png",
+      "images/na_26_innealra_o_s_4.png"
+    ]
+  },
+  {
+    "name": "innealra_nornir_3",
+    "img": "tarots/tarot_26_o3.png",
+    "cards": [
+      "images/na_26_innealra_o_n_1.png",
+      "images/na_26_innealra_o3_n_2.png",
+      "images/na_26_innealra_o3_n_3.png",
+      "images/na_26_innealra_o3_n_4.png",
+      "images/na_26_innealra_o_n_5.png",
+      "images/na_26_innealra_o3_n_6.png",
+      "images/na_26_innealra_o_n_7.png",
+      "images/na_26_innealra_o3_s_1.png",
+      "images/na_26_innealra_o3_s_2.png",
+      "images/na_26_innealra_o3_s_3.png",
+      "images/na_26_innealra_o_s_4.png"
+    ]
+  }
+]
