@@ -410,4 +410,6 @@ Promise.all(promises).then(async () => {
     alert("投稿に失敗しました。");
   }
 });
+});
+
 
