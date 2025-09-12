@@ -75,7 +75,7 @@ row.appendChild(cardImg);
 // 次に切り札（_s_ を含む）
 tarot.cards.filter(c => c.includes("_s_")).forEach(cardPath => {
 const cardImg = createCardImg(cardPath);
-cardImg.style.marginLeft = "6px"; /
+cardImg.style.marginLeft = "6px"; 
 row.appendChild(cardImg);
 });
 
@@ -434,6 +434,7 @@ alert("投稿に失敗しました。");
 }
 });
 });
+
 
 
 
