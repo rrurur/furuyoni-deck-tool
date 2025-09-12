@@ -68,7 +68,7 @@ row.style.gap = "0"; // カード間の余白はゼロ
 // 先に通常カード（_s_ を含まない）
 tarot.cards.filter(c => !c.includes("_s_")).forEach(cardPath => {
 const cardImg = createCardImg(cardPath);
-cardImg.style.margin = "0"; // 余白を消す
+cardImg.style.marginRight = "2px"
 row.appendChild(cardImg);
 });
 
@@ -411,4 +411,5 @@ alert("投稿に失敗しました。");
 }
 });
 });
+
 
