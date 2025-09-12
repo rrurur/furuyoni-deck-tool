@@ -68,14 +68,14 @@ row.style.gap = "0"; // カード間の余白はゼロ
 // 先に通常カード（_s_ を含まない）
 tarot.cards.filter(c => !c.includes("_s_")).forEach(cardPath => {
 const cardImg = createCardImg(cardPath);
-cardImg.style.marginRight = "2px"
+cardImg.style.marginRight = "2px";
 row.appendChild(cardImg);
 });
 
 // 次に切り札（_s_ を含む）
 tarot.cards.filter(c => c.includes("_s_")).forEach(cardPath => {
 const cardImg = createCardImg(cardPath);
-cardImg.style.margin = "0";
+cardImg.style.marginLeft = "6px"; /
 row.appendChild(cardImg);
 });
 
@@ -231,6 +231,29 @@ fromSlot.innerHTML = tmp;
 deck.appendChild(slot);
 }
 }
+// 名前取得（入力がなければ固定乱数）
+let userNameInput = document.getElementById("userName")?.value.trim();
+if (!userNameInput) {
+    // ブラウザごと固定乱数生成
+    if (!localStorage.getItem("deckUserName")) {
+        const rand = Math.floor(Math.random()*10000);
+        localStorage.setItem("deckUserName", "user" + rand);
+    }
+    userNameInput = localStorage.getItem("deckUserName");
+}
+
+// シーズン固定
+const season = "S10-1";
+
+// デッキ画像描画右側
+const rightX = canvas.width - 80*scale; // 右端から少し内側
+ctx.fillStyle = "#000000";
+ctx.font = `${8*scale}px sans-serif`;
+ctx.textAlign = "left";
+ctx.textBaseline = "top";
+ctx.fillText("@" + userNameInput, rightX, 10*scale);
+ctx.fillText(season, rightX, 20*scale);
+
 
 // ---------------- デッキ画像出力（背景桜色 #f7edf1 を反映） ----------------
 document.getElementById("exportDeck").addEventListener("click", () => {
@@ -411,5 +434,6 @@ alert("投稿に失敗しました。");
 }
 });
 });
+
 
 
