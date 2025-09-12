@@ -150,5 +150,5 @@ const filenameBase = deckNameInput ? deckNameInput : 'deck';
 
 
 const canvas = document.getElementById('deckCanvas');
-const ctx = canva
+const ctx = canvas.getContext('2d');
 
