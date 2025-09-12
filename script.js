@@ -1,8 +1,8 @@
 /* script.js — 匿名ID、JPG出力、Firestore/Storage投稿、タイムライン対応 */
 
 // --- 設定 ---
-const SEASON = 'S10-1'; // 表示と保存フォルダ名
-const JPG_QUALITY = 0.85; // JPEG品質（0.0〜1.0）
+const SEASON = 'S10-1';
+const JPG_QUALITY = 0.85;
 
 let tarotData = [];
 let selectedTarots = [];
@@ -18,17 +18,6 @@ function makeAnonId() {
   return id;
 }
 
-function updateDeckMetaDisplay() {
-  const id = makeAnonId();
-  const meta = document.getElementById('deckMeta');
-  if (meta) meta.textContent = '';
-}
-
-async function sha256Hex(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
-
 // ---------------- JSON読み込み ----------------
 fetch('characters_tarot.json')
   .then(res => res.json())
@@ -36,11 +25,10 @@ fetch('characters_tarot.json')
     tarotData = data; 
     renderTarots(); 
     setupDeck(); 
-    updateDeckMetaDisplay(); 
   })
   .catch(err => console.error('JSON読み込みエラー:', err));
 
-// ---------------- レンダリング/操作関数 ----------------
+// ---------------- レンダリング ----------------
 function renderTarots() {
   const container = document.getElementById('tarotContainer');
   container.innerHTML = '';
@@ -76,15 +64,10 @@ function renderCards() {
   container.innerHTML = '';
   selectedTarots.forEach(tarot => {
     const row = document.createElement('div');
-    row.className = 'card-row';
     row.style.display = 'flex';
     row.style.flexWrap = 'wrap';
-    row.style.gap = '4px'; // カード間にスペース
-    tarot.cards.filter(c => !c.includes('_s_')).forEach(cardPath => { 
-      const cardImg = createCardImg(cardPath); 
-      row.appendChild(cardImg); 
-    });
-    tarot.cards.filter(c => c.includes('_s_')).forEach(cardPath => { 
+    row.style.gap = '4px';
+    tarot.cards.forEach(cardPath => { 
       const cardImg = createCardImg(cardPath); 
       row.appendChild(cardImg); 
     });
@@ -94,25 +77,22 @@ function renderCards() {
 
 function createCardImg(cardPath) {
   const img = document.createElement('img');
-  img.src = cardPath; 
-  img.alt = 'カード'; 
-  img.style.width='80px'; 
-  img.style.height='auto'; 
-  img.style.cursor='pointer'; 
+  img.src = cardPath;
+  img.alt = 'カード';
+  img.style.width='80px';
+  img.style.height='auto';
+  img.style.cursor='pointer';
   img.dataset.cardPath = cardPath;
 
   img.addEventListener('click', () => {
     const deck = document.getElementById('deck');
-    const isTrump = cardPath.includes('_s_');
     const slots = deck.querySelectorAll('.slot');
     let targetSlot = null;
+    const isTrump = cardPath.includes('_s_');
 
     if (deckCards.has(cardPath)) {
       deckCards.delete(cardPath);
-      slots.forEach(slot => {
-        const slotImg = slot.querySelector('img');
-        if (slotImg && slotImg.src.endsWith(cardPath)) slot.innerHTML = '';
-      });
+      slots.forEach(slot => { const s = slot.querySelector('img'); if(s && s.src.endsWith(cardPath)) slot.innerHTML=''; });
       img.classList.remove('in-deck');
       return;
     }
@@ -127,10 +107,8 @@ function createCardImg(cardPath) {
     deckCards.add(cardPath);
     const deckImg = document.createElement('img');
     deckImg.src = cardPath;
-    deckImg.alt = 'デッキカード';
     deckImg.style.width='100%';
     deckImg.style.height='auto';
-    deckImg.draggable=true;
     targetSlot.innerHTML = '';
     targetSlot.appendChild(deckImg);
     img.classList.add('in-deck');
@@ -162,14 +140,13 @@ function setupDeck() {
 document.getElementById('exportDeck').addEventListener('click', async () => {
   const deckNameInput = document.getElementById('deckName').value.trim();
   const deckName = deckNameInput ? deckNameInput : 'deck';
+
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  const width = 800;
-  const height = 120;
-  canvas.width = width;
-  canvas.height = height;
+  canvas.width = 900;
+  canvas.height = 200;
   ctx.fillStyle = '#fff';
-  ctx.fillRect(0,0,width,height);
+  ctx.fillRect(0,0,canvas.width,canvas.height);
 
   const anonId = makeAnonId();
   ctx.fillStyle = '#000';
@@ -177,7 +154,6 @@ document.getElementById('exportDeck').addEventListener('click', async () => {
   ctx.fillText(`@${anonId}`, 10, 20);
   ctx.fillText(SEASON, 10, 40);
 
-  // デッキカード描画
   const slots = document.querySelectorAll('#deck .slot img');
   let x = 0;
   for (const slotImg of slots) {
@@ -186,10 +162,9 @@ document.getElementById('exportDeck').addEventListener('click', async () => {
     img.src = slotImg.src;
     await new Promise(res => { img.onload = res; });
     ctx.drawImage(img, x, 60, 80, 120);
-    x += 82; // カード間スペース
+    x += 82;
   }
 
-  // ダウンロード
   const link = document.createElement('a');
   link.download = `${deckName}.jpg`;
   link.href = canvas.toDataURL('image/jpeg', JPG_QUALITY);
