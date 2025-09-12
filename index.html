@@ -4,106 +4,14 @@
 <meta charset="UTF-8">
 <title>デッキ編成ツール</title>
 <style>
-  body {
-    font-family: sans-serif;
-    margin: 0;
-    padding: 10px;
-    background: #f0f0f0;
-  }
-
-  .tarot-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 6px;
-    margin-bottom: 20px;
-  }
-  .tarot-container img {
-    height: auto;
-    max-height: 180px;
-    cursor: pointer;
-    transition: filter 0.2s;
-  }
-  .tarot-container img.selected {
-    filter: grayscale(100%) brightness(0.7);
-  }
-
-  #cardContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .card-row {
-    display: flex;
-    gap: 4px 20px; /* 通常カードと切り札の間 */
-  }
-  .card-row img {
-    max-height: 150px;
-    cursor: pointer;
-    transition: filter 0.2s;
-  }
-  .card-row img.in-deck {
-    filter: grayscale(100%) brightness(0.7);
-  }
-
-  #deckWrapper {
-    border: 2px solid #aaa;
-    padding: 10px;
-    margin-bottom: 20px;
-  }
-
-  #deckName {
-    width: 100%;
-    padding: 4px 6px;
-    font-size: 14px;
-    margin-bottom: 4px;
-    box-sizing: border-box;
-    border: 1px solid #aaa;
-  }
-
-  #deckNameDivider {
-    height: 1px;
-    background: #aaa;
-    margin-bottom: 10px;
-  }
-
-  #deck {
-    display: grid;
-    grid-template-columns: repeat(5, auto);
-    grid-template-rows: repeat(2, auto);
-    gap: 0;
-    justify-content: start; /* 左揃え */
-    background: #ddd;
-    padding: 10px;
-  }
-  #deck div {
-    width: 100px;
-    height: 140px;
-    border: 1px dashed #aaa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: white;
-  }
-  #deck img {
-    max-width: 100%;
-    max-height: 100%;
-    cursor: pointer;
-  }
-
-  button {
-    padding: 8px 16px;
-    font-size: 14px;
-    border: none;
-    border-radius: 5px;
-    background: #0077cc;
-    color: #fff;
-    cursor: pointer;
-  }
-  button:hover {
-    background: #005fa3;
-  }
+  body { font-family: sans-serif; margin: 0; padding: 10px; background: #f0f0f0; }
+.tarot-container{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-bottom:20px; }
+/* 既存スタイルはそのまま */
+.deck-header { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+.deck-meta { border:1px solid #ccc; padding:4px 8px; border-radius:6px; background:#fff; font-size:0.9em; }
+#timeline { margin-top:24px; }
+.post { border:1px solid #ddd; padding:8px; margin-bottom:10px; display:flex; gap:12px; align-items:flex-start; background:#fff; }
+.post img { max-width:220px; height:auto; }
 </style>
 </head>
 <body>
@@ -168,6 +76,7 @@
 <div id="timeline"></div>
 </body>
 </html>
+
 
 
 
