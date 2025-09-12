@@ -4,6 +4,10 @@ let tarotData = [];
 let selectedTarots = [];
 let deckCards = new Set(); // デッキに入っているカードのパス集合
 
+// シーズン固定
+const season = "S10-1";
+
+
 // ---------------- JSON読み込み ----------------
 fetch("characters_tarot.json")
 .then(res => res.json())
@@ -242,8 +246,6 @@ if (!userNameInput) {
     userNameInput = localStorage.getItem("deckUserName");
 }
 
-// シーズン固定
-const season = "S10-1";
 
 
 
@@ -432,7 +434,7 @@ canvas.toBlob(resolve, "image/png")
 
 // Storageにアップロード
 const storageRef = firebase.storage().ref();
-const fileRef = storageRef.child(`deck_images/${Date.now()}_${username}.png`);
+const fileRef = storageRef.child(season/${Date.now()}_${username}.png`);
 await fileRef.put(blob);
 const imageUrl = await fileRef.getDownloadURL();
 
@@ -457,6 +459,7 @@ alert("投稿に失敗しました。");
 }
 });
 });
+
 
 
 
