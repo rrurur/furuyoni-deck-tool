@@ -423,7 +423,7 @@ if (!lastPostQuery.empty) {
 const lastPost = lastPostQuery.docs[0].data();
 return;
 }
-}
+
 
 // canvasからBlob取得
 const blob = await new Promise(resolve =>
@@ -457,6 +457,7 @@ alert("投稿に失敗しました。");
 }
 });
 });
+
 
 
 
