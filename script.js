@@ -257,6 +257,8 @@ const filename = deckNameInput ? `${deckNameInput}.png` : "deck.png";
 
 const canvas = document.getElementById("deckCanvas");
 const ctx = canvas.getContext("2d");
+
+const scale = 3; // 高解像度
 const rightX = canvas.width - 80*scale; // 右端から少し内側
 
 const slots = deck.querySelectorAll(".slot");
@@ -273,7 +275,7 @@ const memoHeight = memoInput ? 50 : 0;
 const leftMargin = 1;
 const rightMargin = 2;
 const hGap = 1;
-const scale = 3; // 高解像度
+
 
 canvas.width = (slotWidth * cols + leftMargin + rightMargin) * scale;
 canvas.height = (deckNameHeight + slotHeight * rows + memoHeight + hGap * 2) * scale;
@@ -457,6 +459,7 @@ alert("投稿に失敗しました。");
 }
 });
 });
+
 
 
 
