@@ -245,14 +245,7 @@ if (!userNameInput) {
 // シーズン固定
 const season = "S10-1";
 
-// デッキ画像描画右側
 
-ctx.fillStyle = "#000000";
-ctx.font = `${8*scale}px sans-serif`;
-ctx.textAlign = "left";
-ctx.textBaseline = "top";
-ctx.fillText("@" + userNameInput, rightX, 10*scale);
-ctx.fillText(season, rightX, 20*scale);
 
 
 // ---------------- デッキ画像出力（背景桜色 #f7edf1 を反映） ----------------
@@ -328,6 +321,14 @@ tmp.onerror = () => resolve(); // 画像失敗でも続行
 }));
 }
 });
+    // デッキ画像描画右側
+
+ctx.fillStyle = "#000000";
+ctx.font = `${8*scale}px sans-serif`;
+ctx.textAlign = "left";
+ctx.textBaseline = "top";
+ctx.fillText("@" + userNameInput, rightX, 10*scale);
+ctx.fillText(season, rightX, 20*scale);
 
 // メモ描画（画像出力時のみ折返し）
 if (memoInput) {
@@ -435,6 +436,7 @@ alert("投稿に失敗しました。");
 }
 });
 });
+
 
 
 
