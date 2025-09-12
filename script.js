@@ -421,8 +421,6 @@ const lastPostQuery = await postsRef
 
 if (!lastPostQuery.empty) {
 const lastPost = lastPostQuery.docs[0].data();
-if (lastPost.deckHash === deckHash) {
-alert("同じデッキは連続投稿できません。");
 return;
 }
 }
@@ -459,6 +457,7 @@ alert("投稿に失敗しました。");
 }
 });
 });
+
 
 
 
