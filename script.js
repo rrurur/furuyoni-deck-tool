@@ -1,8 +1,4 @@
 /* script.js — 匿名ID、JPG出力、Firestore/Storage投稿、タイムライン対応 */
-fetch('characters_tarot.json')
-.then(res => res.json())
-.then(data => { tarotData = data; renderTarots(); setupDeck(); updateDeckMetaDisplay(); })
-.catch(err => console.error('JSON読み込みエラー:', err));
 
 
 // ---------------- 既存のレンダリング/操作関数（オリジナルを基本そのまま） ----------------
