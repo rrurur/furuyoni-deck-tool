@@ -423,7 +423,7 @@ const lastPostQuery = await postsRef
 
 if (!lastPostQuery.empty) {
 const lastPost = lastPostQuery.docs[0].data();
-return;
+    if (lastPost.deckHash === deckHash) {return; }
 }
 
 
@@ -459,6 +459,7 @@ alert("投稿に失敗しました。");
 }
 });
 });
+
 
 
 
