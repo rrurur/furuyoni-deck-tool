@@ -434,7 +434,7 @@ canvas.toBlob(resolve, "image/png")
 
 // Storageにアップロード
 const storageRef = firebase.storage().ref();
-const fileRef = storageRef.child(`${season}/${Date.now()}_${username}.png`);
+const fileRef = storageRef.child(`s10_1/${Date.now()}_${username}.png`);
 await fileRef.put(blob);
 const imageUrl = await fileRef.getDownloadURL();
 
@@ -459,6 +459,7 @@ alert("投稿に失敗しました。");
 }
 });
 });
+
 
 
 
