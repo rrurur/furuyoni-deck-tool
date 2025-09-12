@@ -346,7 +346,7 @@ ctx.lineWidth = 2 * scale;
 ctx.strokeRect(memoX, memoY, memoWidth, memoHeightInner);
 
 ctx.fillStyle = "#000000";
-ctx.font = `${9 * scale}px 'HGMaruGothicMPRO', sans-serif`;
+ctx.font = `${11 * scale}px 'HGMaruGothicMPRO', sans-serif`;
 ctx.textAlign = "left";
 ctx.textBaseline = "top";
 
@@ -459,6 +459,7 @@ alert("投稿に失敗しました。");
 }
 });
 });
+
 
 
 
