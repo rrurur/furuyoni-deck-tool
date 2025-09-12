@@ -246,7 +246,7 @@ if (!userNameInput) {
 const season = "S10-1";
 
 // デッキ画像描画右側
-const rightX = canvas.width - 80*scale; // 右端から少し内側
+
 ctx.fillStyle = "#000000";
 ctx.font = `${8*scale}px sans-serif`;
 ctx.textAlign = "left";
@@ -264,6 +264,7 @@ const filename = deckNameInput ? `${deckNameInput}.png` : "deck.png";
 
 const canvas = document.getElementById("deckCanvas");
 const ctx = canvas.getContext("2d");
+const rightX = canvas.width - 80*scale; // 右端から少し内側
 
 const slots = deck.querySelectorAll(".slot");
 const cols = 5;
@@ -434,6 +435,7 @@ alert("投稿に失敗しました。");
 }
 });
 });
+
 
 
 
