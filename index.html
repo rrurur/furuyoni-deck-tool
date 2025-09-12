@@ -129,7 +129,13 @@ style="width:200px; height:auto; display:block; border:1px solid #ccc; padding:4
 
 <h2>デッキ</h2>
 <div id="deckWrapper">
-<input type="text" id="deckName" placeholder="デッキ名を入力">
+<!-- デッキ名入力は短く -->
+<input type="text" id="deckName" placeholder="デッキ名を入力" style="width:120px;">
+
+<!-- 名前入力枠を追加 -->
+<label for="userName">@</label>
+<input type="text" id="userName" placeholder="名前を入力" style="width:80px;">
+
 <div id="deckNameDivider"></div>
 <div id="deck"></div>
 </div>
@@ -163,4 +169,5 @@ firebase.initializeApp(firebaseConfig);
 <script src="script.js"></script>
 </body>
 </html>
+
 
