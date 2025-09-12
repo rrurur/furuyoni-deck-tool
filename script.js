@@ -327,7 +327,7 @@ tmp.onerror = () => resolve(); // 画像失敗でも続行
 });
     // デッキ画像描画右側
 
-ctx.fillStyle = "#000000";
+ctx.fillStyle = "#FFFFFF";
 ctx.font = `${8*scale}px sans-serif`;
 ctx.textAlign = "left";
 ctx.textBaseline = "top";
@@ -459,6 +459,7 @@ alert("投稿に失敗しました。");
 }
 });
 });
+
 
 
 
