@@ -1,6 +1,49 @@
 /* script.js — 匿名ID、JPG出力、Firestore/Storage投稿、タイムライン対応 */
 
 
+// --- 設定 ---
+const SEASON = 'S10-1'; // 表示と保存フォルダ名（必要に応じて書き換え）
+const JPG_QUALITY = 0.85; // JPEG品質（0.0〜1.0）
+
+
+let tarotData = [];
+let selectedTarots = [];
+let deckCards = new Set();
+
+
+// ------------------ ユーティリティ ------------------
+function makeAnonId() {
+// localStorage に anonId がなければ作る
+let id = localStorage.getItem('anonId');
+if (!id) {
+id = 'u' + Math.random().toString(36).slice(2, 10);
+localStorage.setItem('anonId', id);
+}
+return id;
+}
+
+
+function updateDeckMetaDisplay() {
+const id = makeAnonId();
+const meta = document.getElementById('deckMeta');
+if (meta) meta.textContent = `@${id} | ${SEASON}`;
+}
+
+
+async function sha256Hex(str) {
+const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+
+// ---------------- JSON読み込み ----------------
+fetch('characters_tarot.json')
+.then(res => res.json())
+.then(data => { tarotData = data; renderTarots(); setupDeck(); updateDeckMetaDisplay(); })
+.catch(err => console.error('JSON読み込みエラー:', err));
+/* script.js — 匿名ID、JPG出力、Firestore/Storage投稿、タイムライン対応 */
+
+
 // ---------------- 既存のレンダリング/操作関数（オリジナルを基本そのまま） ----------------
 function renderTarots() { /*... 同じ内容 ...*/
 const container = document.getElementById('tarotContainer');
@@ -108,3 +151,4 @@ const filenameBase = deckNameInput ? deckNameInput : 'deck';
 
 const canvas = document.getElementById('deckCanvas');
 const ctx = canva
+
