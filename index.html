@@ -1,83 +1,19 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>デッキ編成ツール</title>
-<style>
-  body { font-family: sans-serif; margin: 0; padding: 10px; background: #f0f0f0; }
-.tarot-container{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-bottom:20px; }
-/* 既存スタイルはそのまま */
-.deck-header { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
-.deck-meta { border:1px solid #ccc; padding:4px 8px; border-radius:6px; background:#fff; font-size:0.9em; }
-#timeline { margin-top:24px; }
-.post { border:1px solid #ddd; padding:8px; margin-bottom:10px; display:flex; gap:12px; align-items:flex-start; background:#fff; }
-.post img { max-width:220px; height:auto; }
-</style>
+  <meta charset="UTF-8">
+  <title>デッキ投稿ツール</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="script.js"></script>
 </head>
 <body>
+  <h1>デッキ投稿</h1>
+  <input type="text" id="deckName" placeholder="デッキ名">
+  <input type="text" id="userName" placeholder="ユーザー名（任意）">
+  <textarea id="notes" placeholder="メモ"></textarea>
+  <button id="submitBtn">投稿</button>
 
-<h2>メガミ選択（最大2柱）</h2>
-<div id="tarotContainer" class="tarot-container"></div>
-
-<h2>カード一覧</h2>
-<!-- カード一覧とプレビューを横並びにするコンテナを追加 -->
-<div id="cardListContainer" style="display: flex; gap: 48px; align-items: flex-start;">
-  
-  <!-- 左側：カード一覧 -->
-  <div id="cardContainer"></div>
-  
-  <!-- 右側：拡大表示 -->
-  <div id="card-preview" style="flex-shrink: 0;">
-    <img id="preview-image" src="" alt=""
-         style="width:200px; height:auto; display:block; border:1px solid #ccc; padding:4px; background:transparent;">
-  </div>
-  
-</div>
-
-
-<h2>デッキ</h2>
-<div id="deckWrapper">
-<div class="deck-header">
-<input type="text" id="deckName" placeholder="デッキ名を入力">
-<div id="deckMeta" class="deck-meta">@anon | S10-1</div>
-</div>
-<div id="deckNameDivider"></div>
-<div id="deck"></div>
-</div>
-
-<button id="exportDeck">デッキを画像として出力（画像はJPGで保存）</button>
-<canvas id="deckCanvas" style="display:none;"></canvas>
-
-
-<textarea id="deckMemo" placeholder="メモを入力" style="width:100%; height:60px; resize:none;"></textarea>
-<!-- Firebase SDK読み込み -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
-
-<!-- Firebase 初期化 -->
-<script>
-  const firebaseConfig = {
-  apiKey: "AIzaSyABKEbvIc5hSJzKrCSjAzFIhns5o_HhSkg",
-  authDomain: "furuyoni-diary-1918f.firebaseapp.com",
-  projectId: "furuyoni-diary-1918f",
-  storageBucket: "furuyoni-diary-1918f.firebasestorage.app",
-  messagingSenderId: "1031976761542",
-  appId: "1:1031976761542:web:da9bd7fe26790c8940ffc7"
-  };
-  firebase.initializeApp(firebaseConfig);
-</script>
-
-<!-- 元のスクリプト -->
-<script src="script.js"></script>
-
-  <!-- 簡易タイムライン表示領域 -->
-<h2>タイムライン（最新）</h2>
-<div id="timeline"></div>
+  <h2>タイムライン</h2>
+  <div id="timeline"></div>
 </body>
 </html>
-
-
-
-
-
