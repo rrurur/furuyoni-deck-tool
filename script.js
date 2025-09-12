@@ -374,7 +374,28 @@ link.click();
 // ---------------- Firebase投稿機能追加 ----------------
 try {
 // ユーザー名やID
-const username = "user123";
+// ユーザー名を決定する処理
+function generateRandomName(length = 8) {
+  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return "@" + result;
+}
+
+let username = document.getElementById("userName")?.value.trim();
+
+if (!username) {
+  // 入力がなければ localStorage に保存された名前を探す
+  if (!localStorage.getItem("deckUserName")) {
+    // 保存されていなければランダム生成して保存
+    const randName = generateRandomName(8); // 8文字の英数字
+    localStorage.setItem("deckUserName", randName);
+  }
+  username = localStorage.getItem("deckUserName");
+}
+
 
 // デッキのカードパス順で文字列化 → SHA-256でハッシュ化
 const deckCardsArray = [...deckCards];
@@ -436,6 +457,7 @@ alert("投稿に失敗しました。");
 }
 });
 });
+
 
 
 
