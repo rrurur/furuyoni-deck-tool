@@ -407,9 +407,14 @@ Promise.all(promises).then(async () => {
         );
         const thumbRef = storageRef.child(`${baseFolder}/thumbs/${Date.now()}_${username}.jpg`);
         await thumbRef.put(thumbBlob);
-        const thumbUrl = await thumbRef.getDownloadURL();
 
-        // 2. フルサイズアップロード
+　　　　// data.imageUrl からファイル名だけ取り出す
+　　　　const fullPath = data.imageUrl.split("/").pop().split("?")[0]; // 例: 1758808941751_user3057.png
+
+　　　　// baseFolder を使ってサムネイルURLを作る
+　　　　const thumbUrl = `${baseFolder}/thumbs/${fullPath.replace(".png", ".jpg")}`;
+        
+      　// 2. フルサイズアップロード
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
         const fileRef = storageRef.child(`${baseFolder}/${Date.now()}_${username}.png`);
         await fileRef.put(blob);
@@ -437,5 +442,6 @@ Promise.all(promises).then(async () => {
 });
 });  
   
+
 
 
