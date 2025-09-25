@@ -442,5 +442,7 @@ async function uploadDeckToFirebase(canvas) {
     }
 };
 });
-                           
+}
+                                                       
+
 
