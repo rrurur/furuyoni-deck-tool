@@ -440,6 +440,7 @@ async function uploadDeckToFirebase(canvas) {
     } catch (err) {
         console.error("Firebase投稿エラー:", err);
     }
-}
+};
 });
                            
+
