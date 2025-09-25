@@ -350,6 +350,7 @@ Promise.all(promises).then(async () => {
   try {
   // ユーザー名やID 
     const username = "user123";
+    const baseFolder = "S10-1";
   // ---------------- サムネイル生成 ----------------
     // サムネイルサイズ（縮小）
     const thumbWidth = 160;  // 横幅
@@ -370,7 +371,7 @@ Promise.all(promises).then(async () => {
 
     // Firebase Storage にアップロード
     const storageRef = firebase.storage().ref();
-    const thumbRef = storageRef.child(`deck_images/thumbs/${Date.now()}_${username}.jpg`);
+    const thumbRef = storageRef.child(`S10-1/thumbs/${Date.now()}_${username}.jpg`);
     await thumbRef.put(thumbBlob);
     const thumbUrl = await thumbRef.getDownloadURL();
 
@@ -413,7 +414,7 @@ Promise.all(promises).then(async () => {
     );
 
     // Storageにアップロード
-    const fileRef = storageRef.child(`deck_images/${Date.now()}_${username}.png`);
+    const fileRef = storageRef.child(`S10-1/${Date.now()}_${username}.png`);
     await fileRef.put(blob);
     const imageUrl = await fileRef.getDownloadURL();
 
@@ -439,5 +440,6 @@ Promise.all(promises).then(async () => {
   }
 });
 });
+
 
 
