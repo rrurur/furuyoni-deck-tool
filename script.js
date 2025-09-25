@@ -347,11 +347,7 @@ Promise.all(promises).then(async () => {
     link.href = canvas.toDataURL("image/png");
     link.click();
 
-async function uploadDeckToFirebase(canvas) {
     try {
-        const storageRef = firebase.storage().ref();
-        const postsRef = firebase.firestore().collection("posts");
-
         // ユーザー名の決定
         function generateRandomName(length = 8) {
             const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -383,7 +379,7 @@ async function uploadDeckToFirebase(canvas) {
                 .join("")
         );
 
-        // 直近の投稿と同じハッシュならアップロードをスキップ
+        const postsRef = firebase.firestore().collection("posts");
         const lastPostQuery = await postsRef
             .where("userId", "==", username)
             .orderBy("createdAt", "desc")
@@ -395,34 +391,31 @@ async function uploadDeckToFirebase(canvas) {
             if (lastPost.deckHash === deckHash) return;
         }
 
-        // --- サムネイル作成 ---
-        const thumbWidth = 160, thumbHeight = 240;
-        const thumbCanvas = document.createElement("canvas");
-        thumbCanvas.width = thumbWidth;
-        thumbCanvas.height = thumbHeight;
-        const thumbCtx = thumbCanvas.getContext("2d");
-        thumbCtx.drawImage(canvas, 0, 0, thumbWidth, thumbHeight);
+        const storageRef = firebase.storage().ref();
+        const baseFolder = "S10-1";
 
-        const thumbBlob = await new Promise(resolve =>
-            thumbCanvas.toBlob(resolve, "image/jpeg", 0.7)
-        );
+// 1. サムネイル生成
+const thumbWidth = 160, thumbHeight = 240;
+const thumbCanvas = document.createElement("canvas");
+thumbCanvas.width = thumbWidth;
+thumbCanvas.height = thumbHeight;
+const thumbCtx = thumbCanvas.getContext("2d");
+thumbCtx.drawImage(canvas, 0, 0, thumbWidth, thumbHeight);
 
-        const timestamp = Date.now();
-        const thumbFileName = `${timestamp}_${username}.jpg`;
-        const thumbRef = storageRef.child(`${baseFolder}/thumbs/${thumbFileName}`);
-        await thumbRef.put(thumbBlob);
+const thumbBlob = await new Promise(resolve =>
+    thumbCanvas.toBlob(resolve, "image/jpeg", 0.7)
+);
+const thumbRef = storageRef.child(`${baseFolder}/thumbs/${Date.now()}_${username}.jpg`);
+await thumbRef.put(thumbBlob);
 
-        // サムネイルURL（ブラウザで読み込む用）
-        const thumbUrl = `${baseFolder}/thumbs/${thumbFileName}`;
-
-        // --- フルサイズアップロード ---
+// ここを修正：getDownloadURL() を使ってサムネイルURLを取得
+const thumbUrl = await thumbRef.getDownloadURL();  // ← これで %2F が回避される      　// 2. フルサイズアップロード
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
-        const fileFileName = `${timestamp}_${username}.png`;
-        const fileRef = storageRef.child(`${baseFolder}/${fileFileName}`);
+        const fileRef = storageRef.child(`${baseFolder}/${Date.now()}_${username}.png`);
         await fileRef.put(blob);
         const imageUrl = await fileRef.getDownloadURL();
 
-        // --- Firestoreに投稿 ---
+        // 3. Firestoreに投稿
         const deckNameInput = document.getElementById("deckName")?.value.trim() || "";
         const memoInput = document.getElementById("deckMemo")?.value.trim() || "";
         await postsRef.add({
@@ -431,7 +424,7 @@ async function uploadDeckToFirebase(canvas) {
             deckName: deckNameInput,
             memo: memoInput,
             imageUrl: imageUrl,
-            thumbnailUrl: thumbUrl,
+            thumbnailUrl: thumbUrl, // サムネイルURLも保存
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
@@ -439,11 +432,10 @@ async function uploadDeckToFirebase(canvas) {
 
     } catch (err) {
         console.error("Firebase投稿エラー:", err);
+        
     }
-};
 });
-});
-                                                       
-
+});  
+  
 
 
