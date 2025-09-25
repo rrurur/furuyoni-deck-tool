@@ -432,9 +432,10 @@ Promise.all(promises).then(async () => {
 
     } catch (err) {
         console.error("Firebase投稿エラー:", err);
-        alert("投稿に失敗しました。");
+        
     }
 });
 });  
   
+
 
