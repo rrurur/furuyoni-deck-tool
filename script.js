@@ -1,4 +1,5 @@
 /* script.js - 修正版（入れ替え・プレビュー・桜色出力） */
+const baseFolder = "S10-1";
 
 let tarotData = [];
 let selectedTarots = [];
@@ -433,6 +434,4 @@ Promise.all(promises).then(async () => {
         console.error("Firebase投稿エラー:", err);
         alert("投稿に失敗しました。");
     }
-});
-
 });
