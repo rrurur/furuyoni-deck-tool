@@ -341,105 +341,96 @@ document.getElementById("exportDeck").addEventListener("click", () => {
   }
 
 Promise.all(promises).then(async () => {
-  const link = document.createElement("a");
-  link.download = filename;
-  link.href = canvas.toDataURL("image/png");
-  link.click();
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
 
-  // ---------------- Firebase投稿機能追加 ----------------
-  try {
-  // ユーザー名やID 
-    const username = "user123";
-    const baseFolder = "S10-1";
-  // ---------------- サムネイル生成 ----------------
-    // サムネイルサイズ（縮小）
-    const thumbWidth = 160;  // 横幅
-    const thumbHeight = 240; // 縦幅
+    try {
+        // ユーザー名の決定
+        function generateRandomName(length = 8) {
+            const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            let result = "";
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return "@" + result;
+        }
 
-    const thumbCanvas = document.createElement("canvas");
-    thumbCanvas.width = thumbWidth;
-    thumbCanvas.height = thumbHeight;
-    const thumbCtx = thumbCanvas.getContext("2d");
+        let username = document.getElementById("userName")?.value.trim();
+        if (!username) {
+            if (!localStorage.getItem("deckUserName")) {
+                const randName = generateRandomName(8);
+                localStorage.setItem("deckUserName", randName);
+            }
+            username = localStorage.getItem("deckUserName");
+        }
 
-    // 元のデッキ画像を縮小して描画
-    thumbCtx.drawImage(canvas, 0, 0, thumbWidth, thumbHeight);
+        // デッキハッシュ計算
+        const deckCardsArray = [...deckCards];
+        const deckString = deckCardsArray.join(",");
+        const deckHash = await crypto.subtle.digest(
+            "SHA-256",
+            new TextEncoder().encode(deckString)
+        ).then(buf =>
+            Array.from(new Uint8Array(buf))
+                .map(b => b.toString(16).padStart(2, "0"))
+                .join("")
+        );
 
-    // JPEG形式でBlob化（軽量化）
-    const thumbBlob = await new Promise(resolve =>
-      thumbCanvas.toBlob(resolve, "image/jpeg", 0.7) // 品質70%
-    );
+        const postsRef = firebase.firestore().collection("posts");
+        const lastPostQuery = await postsRef
+            .where("userId", "==", username)
+            .orderBy("createdAt", "desc")
+            .limit(1)
+            .get();
 
-    // Firebase Storage にアップロード
-    const storageRef = firebase.storage().ref();
-    const thumbRef = storageRef.child(`S10-1/thumbs/${Date.now()}_${username}.jpg`);
-    await thumbRef.put(thumbBlob);
-    const thumbUrl = await thumbRef.getDownloadURL();
+        if (!lastPostQuery.empty) {
+            const lastPost = lastPostQuery.docs[0].data();
+            if (lastPost.deckHash === deckHash) return;
+        }
 
-    console.log("サムネイルURL:", thumbUrl);
+        const storageRef = firebase.storage().ref();
+        const baseFolder = "S10-1";
 
-    // ---------------- ここから既存のフルサイズ投稿 ----------------
-    
+        // 1. サムネイル生成
+        const thumbWidth = 160, thumbHeight = 240;
+        const thumbCanvas = document.createElement("canvas");
+        thumbCanvas.width = thumbWidth;
+        thumbCanvas.height = thumbHeight;
+        const thumbCtx = thumbCanvas.getContext("2d");
+        thumbCtx.drawImage(canvas, 0, 0, thumbWidth, thumbHeight);
 
-    // デッキのカードパス順で文字列化 → SHA-256でハッシュ化
-    const deckCardsArray = [...deckCards];
-    const deckString = deckCardsArray.join(",");
-    const deckHash = await crypto.subtle.digest(
-      "SHA-256",
-      new TextEncoder().encode(deckString)
-    ).then(buf =>
-      Array.from(new Uint8Array(buf))
-        .map(b => b.toString(16).padStart(2, "0"))
-        .join("")
-    );
+        const thumbBlob = await new Promise(resolve =>
+            thumbCanvas.toBlob(resolve, "image/jpeg", 0.7)
+        );
+        const thumbRef = storageRef.child(`${baseFolder}/thumbs/${Date.now()}_${username}.jpg`);
+        await thumbRef.put(thumbBlob);
+        const thumbUrl = await thumbRef.getDownloadURL();
 
-    // Firestoreで最後の投稿をチェック
-    const postsRef = firebase.firestore().collection("posts");
-    const lastPostQuery = await postsRef
-      .where("userId", "==", username)
-      .orderBy("createdAt", "desc")
-      .limit(1)
-      .get();
+        // 2. フルサイズアップロード
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+        const fileRef = storageRef.child(`${baseFolder}/${Date.now()}_${username}.png`);
+        await fileRef.put(blob);
+        const imageUrl = await fileRef.getDownloadURL();
 
-    if (!lastPostQuery.empty) {
-      const lastPost = lastPostQuery.docs[0].data();
-      if (lastPost.deckHash === deckHash) {
-        alert("同じデッキは連続投稿できません。");
-        return;
-      }
+        // 3. Firestoreに投稿
+        const deckNameInput = document.getElementById("deckName")?.value.trim() || "";
+        const memoInput = document.getElementById("deckMemo")?.value.trim() || "";
+        await postsRef.add({
+            userId: username,
+            deckHash: deckHash,
+            deckName: deckNameInput,
+            memo: memoInput,
+            imageUrl: imageUrl,
+            thumbnailUrl: thumbUrl, // サムネイルURLも保存
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        console.log("Firebase投稿完了:", imageUrl, "サムネイル:", thumbUrl);
+
+    } catch (err) {
+        console.error("Firebase投稿エラー:", err);
+        alert("投稿に失敗しました。");
     }
-
-    // canvasからBlob取得
-    const blob = await new Promise(resolve =>
-      canvas.toBlob(resolve, "image/png")
-    );
-
-    // Storageにアップロード
-    const fileRef = storageRef.child(`S10-1/${Date.now()}_${username}.png`);
-    await fileRef.put(blob);
-    const imageUrl = await fileRef.getDownloadURL();
-
-    // Firestoreに投稿データ保存
-    const deckNameInput = document.getElementById("deckName")?.value.trim() || "";
-    const memoInput = document.getElementById("deckMemo")?.value.trim() || "";
-    await postsRef.add({
-      userId: username,
-      deckHash: deckHash,
-      deckName: deckNameInput,
-      memo: memoInput,
-      imageUrl: imageUrl,
-      thumbnailUrl: thumbUrl, 
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    console.log("Firebase投稿完了:", imageUrl);
-    // alert("投稿完了しました！");
-
-  } catch (err) {
-    console.error("Firebase投稿エラー:", err);
-    alert("投稿に失敗しました。");
-  }
 });
-});
-
-
-
