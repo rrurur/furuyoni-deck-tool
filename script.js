@@ -395,7 +395,10 @@ Promise.all(promises).then(async () => {
         const baseFolder = "S10-1";
 
 // 1. サムネイル生成
-const thumbWidth = 160, thumbHeight = 240;
+const thumbWidth = 160;
+const ratio = canvas.height / canvas.width;
+const thumbHeight = Math.round(thumbWidth * ratio);
+
 const thumbCanvas = document.createElement("canvas");
 thumbCanvas.width = thumbWidth;
 thumbCanvas.height = thumbHeight;
@@ -403,7 +406,7 @@ const thumbCtx = thumbCanvas.getContext("2d");
 thumbCtx.drawImage(canvas, 0, 0, thumbWidth, thumbHeight);
 
 const thumbBlob = await new Promise(resolve =>
-    thumbCanvas.toBlob(resolve, "image/jpeg", 0.7)
+    thumbCanvas.toBlob(resolve, "image/jpeg", 0.8)
 );
 const thumbRef = storageRef.child(`${baseFolder}/thumbs/${Date.now()}_${username}.jpg`);
 await thumbRef.put(thumbBlob);
