@@ -274,7 +274,7 @@ document.getElementById("exportDeck").addEventListener("click", () => {
   // デッキ名（上部）
   if (deckNameInput) {
     ctx.fillStyle = "#000000";
-    ctx.font = `${24 * scale}px 'Noto Serif JP', serif`;
+    ctx.font = `${24 * scale}px 'HGMaruGothicMPRO', sans-serif`;
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
     ctx.fillText(deckNameInput, leftMargin * scale, 10 * scale);
@@ -428,6 +428,7 @@ const thumbUrl = await thumbRef.getDownloadURL();  // ← これで %2F が回�
             memo: memoInput,
             imageUrl: imageUrl,
             thumbnailUrl: thumbUrl, // サムネイルURLも保存
+            tarots: selectedTarots.map(t => t.name) ,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
