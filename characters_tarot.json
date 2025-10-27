@@ -217,7 +217,7 @@
       "images/na_05_oboro_o_s_1.png",
       "images/na_05_oboro_o_s_2_s3.png",
       "images/na_05_oboro_o_s_3_s8_2.png",
-      "images/na_05_oboro_a1_s_4_ex1_s5.png"
+      "images/na_05_oboro_a1_s_4.png"
     ]
   },
   {
@@ -333,7 +333,7 @@
       "images/na_08_hagane_o_n_5.png",
       "images/na_08_hagane_o_n_6_s8.png",
       "images/na_08_hagane_o_n_7_s7_2.png",
-      "images/na_08_hagane_a1_s_1_ex1.png",
+      "images/na_08_hagane_a1_s_1.png",
       "images/na_08_hagane_o_s_2.png",
       "images/na_08_hagane_o_s_3.png",
       "images/na_08_hagane_o_s_4_s10.png"
@@ -530,14 +530,14 @@
     "name": "honoka",
     "img": "tarots/tarot_14.png",
     "cards": [
-      "images/na_14_honoka_o_n_1_ex2_s7_2.png",
+      "images/na_14_honoka_o_n_1_s7_2.png",
       "images/na_14_honoka_o_n_2_s5.png",
       "images/na_14_honoka_o_n_3.png",
-      "images/na_14_honoka_o_n_4_ex1.png",
-      "images/na_14_honoka_o_n_5_ex1.png",
+      "images/na_14_honoka_o_n_4.png",
+      "images/na_14_honoka_o_n_5.png",
       "images/na_14_honoka_o_n_6_s4.png",
       "images/na_14_honoka_o_n_7.png",
-      "images/na_14_honoka_o_s_1_ex1_s5.png",
+      "images/na_14_honoka_o_s_1.png",
       "images/na_14_honoka_o_s_2.png",
       "images/na_14_honoka_o_s_3_s4.png",
       "images/na_14_honoka_o_s_4.png"
@@ -547,14 +547,14 @@
     "name": "honoka_a1",
     "img": "tarots/tarot_14_a1.png",
     "cards": [
-      "images/na_14_honoka_a1_n_1_ex1.png",
+      "images/na_14_honoka_a1_n_1.png",
       "images/na_14_honoka_o_n_2_s5.png",
       "images/na_14_honoka_o_n_3.png",
-      "images/na_14_honoka_o_n_4_ex1.png",
-      "images/na_14_honoka_o_n_5_ex1.png",
+      "images/na_14_honoka_o_n_4.png",
+      "images/na_14_honoka_o_n_5.png",
       "images/na_14_honoka_o_n_6_s4.png",
       "images/na_14_honoka_o_n_7.png",
-      "images/na_14_honoka_a1_s_1_ex3_s6_2.png",
+      "images/na_14_honoka_a1_s_1_s7.png",
       "images/na_14_honoka_o_s_2.png",
       "images/na_14_honoka_o_s_3_s4.png",
       "images/na_14_honoka_o_s_4.png"
@@ -860,4 +860,5 @@
       "images/na_26_innealra_o_s_4.png"
     ]
   }
+
 ]
