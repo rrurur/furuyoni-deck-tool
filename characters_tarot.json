@@ -2,6 +2,7 @@
   {
     "name": "yurina",
     "img": "tarots/tarot_01.png",
+    "weapon":"刀",
     "cards": [
       "images/na_01_yurina_o_n_1.png",
       "images/na_01_yurina_o_n_2.png",
@@ -19,6 +20,7 @@
   {
     "name": "yurina_a1",
     "img": "tarots/tarot_01_a1.png",
+    "weapon":"古",
     "cards": [
       "images/na_01_yurina_a1_n_1.png",
       "images/na_01_yurina_o_n_2.png",
@@ -35,6 +37,7 @@
   },
     {
     "name": "yurina_a2",
+    "weapon":"心",
     "img": "tarots/tarot_01_a2.png",
     "cards": [
       "images/na_01_yurina_o_n_1.png",
@@ -53,6 +56,7 @@
   {
     "name": "saine",
     "img": "tarots/tarot_02.png",
+    "weapon":"薙",
     "cards": [
       "images/na_02_saine_o_n_1_s6_2.png",
       "images/na_02_saine_o_n_2.png",
@@ -70,6 +74,7 @@
   {
     "name": "saine_a1",
     "img": "tarots/tarot_02_a1.png",
+    "weapon":"琵",
     "cards": [
       "images/na_02_saine_a1_n_1_rework.png",
       "images/na_02_saine_o_n_2.png",
@@ -86,6 +91,7 @@
   },
   {
     "name": "saine_a2",
+    "weapon":"拒",
     "img": "tarots/tarot_02_a2.png",
     "cards": [
       "images/na_02_saine_o_n_1_s6_2.png",
@@ -103,6 +109,7 @@
   },
   {
     "name": "himika",
+    "weapon":"銃",
     "img": "tarots/tarot_03.png",
     "cards": [
       "images/na_03_himika_o_n_1.png",
@@ -120,6 +127,7 @@
   },
   {
     "name": "himika_a1",
+    "weapon":"炎",
     "img": "tarots/tarot_03_a1.png",
     "cards": [
       "images/na_03_himika_o_n_1.png",
@@ -137,6 +145,7 @@
   },
   {
     "name": "tokoyo",
+    "weapon":"扇",
     "img": "tarots/tarot_04.png",
     "cards": [
       "images/na_04_tokoyo_o_n_1_s2.png",
@@ -154,6 +163,7 @@
   },
   {
     "name": "tokoyo_a1",
+    "weapon":"笛",
     "img": "tarots/tarot_04_a1.png",
     "cards": [
       "images/na_04_tokoyo_a1_n_1_rework.png",
@@ -171,6 +181,7 @@
   },
     {
     "name": "tokoyo_a2",
+    "weapon":"恐",
     "img": "tarots/tarot_04_a2.png",
     "cards": [
       "images/na_04_tokoyo_o_n_1_s2.png",
@@ -188,6 +199,7 @@
   },
   {
     "name": "oboro",
+    "weapon":"忍",
     "img": "tarots/tarot_05.png",
     "cards": [
       "images/na_05_oboro_o_n_1.png",
@@ -205,6 +217,7 @@
   },
   {
     "name": "oboro_a1",
+    "weapon":"戦",
     "img": "tarots/tarot_05_a1.png",
     "cards": [
       "images/na_05_oboro_o_n_1.png",
@@ -222,6 +235,7 @@
   },
   {
     "name": "oboro_a2",
+    "weapon":"電",
     "img": "tarots/tarot_05_a2.png",
     "cards": [
       "images/na_05_oboro_a2_n_1.png",
@@ -239,6 +253,7 @@
   },
   {
     "name": "yukihi_a",
+    "weapon":"傘",
     "img": "tarots/tarot_06.png",
     "cards": [
       "images/na_06_yukihi_o_n_1.png",
@@ -256,6 +271,7 @@
   },
   {
     "name": "yukihi_a1",
+    "weapon":"社",
     "img": "tarots/tarot_06_a1.png",
     "cards": [
       "images/na_06_yukihi_o_n_1.png",
@@ -273,6 +289,7 @@
   },
   {
     "name": "shinra",
+    "weapon":"書",
     "img": "tarots/tarot_07.png",
     "cards": [
       "images/na_07_shinra_o_n_1.png",
@@ -290,6 +307,7 @@
   },
   {
     "name": "shinra_a1",
+    "weapon":"経",
     "img": "tarots/tarot_07_a1.png",
     "cards": [
       "images/na_07_shinra_o_n_1.png",
@@ -307,6 +325,7 @@
   },
   {
     "name": "hagane",
+    "weapon":"鎚",
     "img": "tarots/tarot_08.png",
     "cards": [
       "images/na_08_hagane_o_n_1_s2.png",
@@ -324,6 +343,7 @@
   },
   {
     "name": "hagane_a1",
+    "weapon":"金",
     "img": "tarots/tarot_08_a1.png",
     "cards": [
       "images/na_08_hagane_a1_n_1.png",
@@ -341,6 +361,7 @@
   },
   {
     "name": "chikage",
+    "weapon":"毒",
     "img": "tarots/tarot_09.png",
     "cards": [
       "images/na_09_chikage_o_n_1.png",
@@ -358,6 +379,7 @@
   },
   {
     "name": "chikage_a1",
+    "weapon":"絆",
     "img": "tarots/tarot_09_a1.png",
     "cards": [
       "images/na_09_chikage_o_n_1.png",
@@ -375,6 +397,7 @@
   },
   {
     "name": "kururu",
+    "weapon":"絡",
     "img": "tarots/tarot_10.png",
     "cards": [
       "images/na_10_kururu_o_n_1.png",
@@ -392,6 +415,7 @@
   },
   {
     "name": "kururu_a1",
+    "weapon":"機",
     "img": "tarots/tarot_10_a1.png",
     "cards": [
       "images/na_10_kururu_a1_n_1.png",
@@ -409,6 +433,7 @@
   },
   {
     "name": "kururu_a2",
+    "weapon":"友",
     "img": "tarots/tarot_10_a2.png",
     "cards": [
       "images/na_10_kururu_a2_n_1.png",
@@ -426,6 +451,7 @@
   },
   {
     "name": "thallya",
+    "weapon":"騎",
     "img": "tarots/tarot_11.png",
     "cards": [
       "images/na_11_thallya_o_n_1.png",
@@ -443,6 +469,7 @@
   },
   {
     "name": "thallya_a1",
+    "weapon":"新",
     "img": "tarots/tarot_11_a1.png",
     "cards": [
       "images/na_11_thallya_o_n_1.png",
@@ -460,6 +487,7 @@
   },
   {
     "name": "raira",
+    "weapon":"爪",
     "img": "tarots/tarot_12.png",
     "cards": [
       "images/na_12_raira_o_n_1_s2.png",
@@ -477,6 +505,7 @@
   },
   {
     "name": "raira_a1",
+    "weapon":"嵐",
     "img": "tarots/tarot_12_a1.png",
     "cards": [
       "images/na_12_raira_o_n_1_s2.png",
@@ -494,6 +523,7 @@
   },
   {
     "name": "utsuro",
+    "weapon":"鎌",
     "img": "tarots/tarot_13.png",
     "cards": [
       "images/na_13_utsuro_o_n_1_s7_2.png",
@@ -511,6 +541,7 @@
   },
   {
     "name": "utsuro_a1",
+    "weapon":"塵",
     "img": "tarots/tarot_13_a1.png",
     "cards": [
       "images/na_13_utsuro_o_n_1_s7_2.png",
@@ -528,6 +559,7 @@
   },
   {
     "name": "honoka",
+    "weapon":"旗",
     "img": "tarots/tarot_14.png",
     "cards": [
       "images/na_14_honoka_o_n_1_s7_2.png",
@@ -545,6 +577,7 @@
   },
   {
     "name": "honoka_a1",
+    "weapon":"勾",
     "img": "tarots/tarot_14_a1.png",
     "cards": [
       "images/na_14_honoka_a1_n_1.png",
@@ -562,6 +595,7 @@
   },
   {
     "name": "korunu",
+    "weapon":"橇",
     "img": "tarots/tarot_15.png",
     "cards": [
       "images/na_15_korunu_o_n_1.png",
@@ -579,6 +613,7 @@
   },
   {
     "name": "yatsuha",
+    "weapon":"鏡",
     "img": "tarots/tarot_16.png",
     "cards": [
       "images/na_16_yatsuha_o_n_1_s5.png",
@@ -596,6 +631,7 @@
   },
   {
     "name": "yatsuha_a1",
+    "weapon":"花",
     "img": "tarots/tarot_16_a1.png",
     "cards": [
       "images/na_16_yatsuha_o_n_1_s5.png",
@@ -610,6 +646,7 @@
   },
   {
     "name": "yatsuha_aa1",
+    "weapon":"魂",
     "img": "tarots/tarot_16_aa1.png",
     "cards": [
       "images/na_16_yatsuha_o_n_1_s5.png",
@@ -625,6 +662,7 @@
   {
     "name": "hatsumi",
     "img": "tarots/tarot_17.png",
+    "weapon":"櫂",
     "cards": [
       "images/na_17_hatsumi_o_n_1.png",
       "images/na_17_hatsumi_o_n_2.png",
@@ -641,6 +679,7 @@
   },
   {
     "name": "hatsumi_a1",
+    "weapon":"信",
     "img": "tarots/tarot_17_a1.png",
     "cards": [
       "images/na_17_hatsumi_o_n_1.png",
@@ -658,6 +697,7 @@
   },
   {
     "name": "mizuki",
+    "weapon":"兜",
     "img": "tarots/tarot_18.png",
     "cards": [
       "images/na_18_mizuki_o_n_1.png",
@@ -675,6 +715,7 @@
   },
   {
     "name": "megumi",
+    "weapon":"棹",
     "img": "tarots/tarot_19.png",
     "cards": [
       "images/na_19_megumi_o_n_1.png",
@@ -692,6 +733,7 @@
   },
   {
     "name": "kanawe",
+    "weapon":"面",
     "img": "tarots/tarot_20.png",
     "cards": [
       "images/na_20_kanawe_o_n_1.png",
@@ -709,6 +751,7 @@
   },
   {
     "name": "kamuwi",
+    "weapon":"剣",
     "img": "tarots/tarot_21.png",
     "cards": [
       "images/na_21_kamuwi_o_n_1.png",
@@ -726,6 +769,7 @@
   },
   {
     "name": "renri",
+    "weapon":"衣",
     "img": "tarots/tarot_22.png",
     "cards": [
       "images/na_22_renri_o_n_1.png",
@@ -743,6 +787,7 @@
   },
   {
     "name": "renri_a1",
+    "weapon":"遺",
     "img": "tarots/tarot_22_a1.png",
     "cards": [
       "images/na_22_renri_o_n_1.png",
@@ -760,6 +805,7 @@
   },
   {
     "name": "akina",
+    "weapon":"算",
     "img": "tarots/tarot_23.png",
     "cards": [
       "images/na_23_akina_o_n_1.png",
@@ -777,6 +823,7 @@
   },
   {
     "name": "shisui",
+    "weapon":"鋸",
     "img": "tarots/tarot_24.png",
     "cards": [
       "images/na_24_shisui_o_n_1.png",
@@ -794,6 +841,7 @@
   },
   {
     "name": "misora",
+    "weapon":"弓",
     "img": "tarots/tarot_25.png",
     "cards": [
       "images/na_25_misora_o_n_1.png",
@@ -811,6 +859,7 @@
   },
   {
     "name": "innealra_nornir_1",
+    "weapon":"過",
     "img": "tarots/tarot_26_o1.png",
     "cards": [
       "images/na_26_innealra_o_n_1.png",
@@ -828,6 +877,7 @@
   },
   {
     "name": "innealra_nornir_2",
+    "weapon":"現",
     "img": "tarots/tarot_26_o2.png",
     "cards": [
       "images/na_26_innealra_o_n_1.png",
@@ -845,6 +895,7 @@
   },
   {
     "name": "innealra_nornir_3",
+    "weapon":"未",
     "img": "tarots/tarot_26_o3.png",
     "cards": [
       "images/na_26_innealra_o_n_1.png",
