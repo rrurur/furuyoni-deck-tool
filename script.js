@@ -1,264 +1,1036 @@
+<<<<<<< HEAD
 /* script.js - 修正版（入れ替え・プレビュー・桜色出力） */
 const baseFolder = "S10-1";
+=======
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInAnonymously,
+  GoogleAuthProvider,
+  signInWithPopup,
+  linkWithPopup
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  addDoc,
+  updateDoc,
+  collection,
+  getDocs,
+  query,
+  where,
+  serverTimestamp,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+>>>>>>> f7b222e (UI fix and history chart update)
 
+import { firebaseConfig } from "./firebaseConfig.js";
+
+/* =========================================================
+   シーズン（ここだけ手動で更新しやすい）
+   - 現在：10-2（デフォルト）
+   - 過去：10-1, 10-0
+   - 10-3が来たら：CURRENT_SEASON="10-3" にして、PAST_SEASONSに"10-2"を追加するだけ
+========================================================= */
+const CURRENT_SEASON = "10-2";
+const PAST_SEASONS = ["10-1", "10-0"];
+
+/* ---------------- Firebase ---------------- */
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* ---------------- 永続化（ローカル） ---------------- */
+const LS_KEY = "decktool_prefs_v8";
+const DEFAULT_PREFS = {
+  handle: "",
+  matchType: "origin",
+  myPicksByMode: { origin: [], complete: [], paradox: [] }
+};
+
+function loadLocalPrefs(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return structuredClone(DEFAULT_PREFS);
+    const obj = JSON.parse(raw);
+    return {
+      handle: typeof obj.handle === "string" ? obj.handle : "",
+      matchType: ["origin","complete","paradox"].includes(obj.matchType) ? obj.matchType : "origin",
+      myPicksByMode: {
+        origin: Array.isArray(obj?.myPicksByMode?.origin) ? obj.myPicksByMode.origin : [],
+        complete: Array.isArray(obj?.myPicksByMode?.complete) ? obj.myPicksByMode.complete : [],
+        paradox: Array.isArray(obj?.myPicksByMode?.paradox) ? obj.myPicksByMode.paradox : []
+      }
+    };
+  }catch{
+    return structuredClone(DEFAULT_PREFS);
+  }
+}
+function saveLocalPrefs(p){
+  localStorage.setItem(LS_KEY, JSON.stringify(p));
+}
+let prefs = loadLocalPrefs();
+
+/* ---------------- 状態 ---------------- */
 let tarotData = [];
-let selectedTarots = [];
-let deckCards = new Set(); // デッキに入っているカードのパス集合
+let tarotIndexByName = new Map();
+let cardIdByPath = new Map();
+let cardPathById = [];
 
-// ---------------- JSON読み込み ----------------
-fetch("characters_tarot.json")
-  .then(res => res.json())
-  .then(data => {
-    tarotData = data;
-    renderTarots();
-    setupDeck();
-    // 注意: renderCards は選択時に呼ばれます
-  })
-  .catch(err => console.error("JSON読み込みエラー:", err));
+let matchType = prefs.matchType || "origin";
+const MAX_PICK = 3;
 
-// ---------------- タロット表示 ----------------
-function renderTarots() {
-  const container = document.getElementById("tarotContainer");
-  container.innerHTML = "";
+let mySelected = [];
+let oppSelected = [];
 
-  tarotData.forEach(tarot => {
-    const tarotImg = document.createElement("img");
-    tarotImg.src = tarot.img; // JSONのimgを使用（元の仕様を保持）
-    tarotImg.dataset.name = tarot.name;
-    tarotImg.alt = tarot.name;
-    tarotImg.style.cursor = "pointer";
+const deckSlots = Array(10).fill(null);
 
-    tarotImg.addEventListener("click", () => handleTarotClick(tarot, tarotImg));
-    container.appendChild(tarotImg);
+let recordKind = "win"; // win / loss / other
+let userPlays = []; // {id, createdAtMs, matchTypeNum, resultTypeNum, season, myTarotIdx, oppTarotIdx, deckName, memo, cardIds}
+
+// ---- 追加：履歴ホバー/編集 ----
+let editingPlayId = null;  // nullなら通常、セットされている間は「保存」で上書き
+let hoverSnapshot = null;  // ホバー前の左デッキ状態退避
+
+/* ---------------- DOM ---------------- */
+const elMatchToggle = document.getElementById("matchToggle");
+
+const elRuleStatsLine = document.getElementById("ruleStatsLine");
+
+const elMyTarotList = document.getElementById("myTarotList");
+const elMySelectedSlots = document.getElementById("mySelectedSlots");
+const elPairStatLine = document.getElementById("pairStatLine");
+
+const elOppTarotList = document.getElementById("oppTarotList");
+const elOppSelectedSlots = document.getElementById("oppSelectedSlots");
+
+const elCardContainer = document.getElementById("cardContainer");
+const elCardPreview = document.getElementById("preview-image");
+
+const elDeck = document.getElementById("deck");
+const elDeckName = document.getElementById("deckName");
+const elMemo = document.getElementById("deckMemo");
+const elAnonName = document.getElementById("anonName");
+
+const elAuthIdText = document.getElementById("authIdText");
+const elLoginBtn = document.getElementById("loginBtn");
+const elSaveBtn = document.getElementById("saveBtn");
+const elResetBtn = document.getElementById("resetBtn");
+const elRearrangeBtn = document.getElementById("rearrangeBtn");
+
+const elResultToggle = document.getElementById("resultToggle");
+
+const elFilterPeriod = document.getElementById("filterPeriod");
+const elFilterMatchType = document.getElementById("filterMatchType");
+const elFilterSeason = document.getElementById("filterSeason");
+
+const elHistoryCanvas = document.getElementById("historyCanvas");
+const elHistoryList = document.getElementById("historyList");
+
+/* ---------------- ユーティリティ ---------------- */
+function pct(n, d, fallback=0){
+  if (!d || d <= 0) return fallback;
+  return Math.round((n / d) * 100);
+}
+
+function getTarotNo(tarot){
+  const m = String(tarot?.img || "").match(/tarot_(\d+)/);
+  return m ? parseInt(m[1], 10) : 999;
+}
+
+function displayName(tarot){
+  return String(tarot?.weapon || tarot?.name || "");
+}
+function displayNameByIdx(idx){
+  const t = tarotData[idx];
+  return displayName(t) || String(idx);
+}
+
+function matchTypeToRange(type){
+  if (type === "origin") return [1, 12];
+  if (type === "paradox") return [13, 26];
+  return [1, 26];
+}
+function filteredTarots(){
+  const [lo, hi] = matchTypeToRange(matchType);
+  return tarotData.filter(t => {
+    const n = getTarotNo(t);
+    return n >= lo && n <= hi;
+  });
+}
+function findIndexByName(arr, name){
+  return arr.findIndex(t => t && t.name === name);
+}
+function compact(arr){
+  return arr.filter(Boolean);
+}
+function updateMatchUI(){
+  [...elMatchToggle.querySelectorAll(".pill")].forEach(p => {
+    p.classList.toggle("active", p.dataset.type === matchType);
   });
 }
 
-// ---------------- タロットクリック（2つまで選択） ----------------
-function handleTarotClick(tarot, tarotImg) {
-  const allImgs = document.querySelectorAll("#tarotContainer img");
-
-  if (selectedTarots.includes(tarot)) {
-    selectedTarots = selectedTarots.filter(t => t !== tarot);
-    tarotImg.classList.remove("selected");
+/* ---------------- ログインID表示 ---------------- */
+function updateAuthBar(user){
+  if (!elAuthIdText) return;
+  if (!user){
+    elAuthIdText.textContent = "";
+    return;
+  }
+  if (user.isAnonymous){
+    elAuthIdText.textContent = `匿名ID:${user.uid}`;
   } else {
-    if (selectedTarots.length >= 2) {
-      const removed = selectedTarots.shift();
-      allImgs.forEach(img => {
-        if (img.dataset.name === removed.name) img.classList.remove("selected");
-      });
-    }
-    selectedTarots.push(tarot);
-    tarotImg.classList.add("selected");
+    elAnonName.value = prefs.handle || "";
+    elAuthIdText.textContent = `ID:${label}`;
   }
-
-  renderCards();
 }
 
-// ---------------- カード一覧表示（キャラごとに1行、カード間の余白なし） ----------------
-function renderCards() {
-  const container = document.getElementById("cardContainer");
-  container.innerHTML = "";
+/* ---------------- 実行状態のリセット（ログイン時にリセットするもの） ---------------- */
+function resetRunState(){
+  elDeckName.value = "";
+  elMemo.value = "";
+  oppSelected = [];
+  deckSlots.fill(null);
 
-  selectedTarots.forEach(tarot => {
-    const row = document.createElement("div");
-    row.className = "card-row";
-    row.style.display = "flex";
-    row.style.flexWrap = "wrap";
-    row.style.gap = "0"; // カード間の余白はゼロ
+  elCardPreview.src = "";
+  elCardPreview.alt = "";
+  elCardPreview.style.background = "transparent";
 
-    // 先に通常カード（_s_ を含まない）
-    tarot.cards.filter(c => !c.includes("_s_")).forEach(cardPath => {
-      const cardImg = createCardImg(cardPath);
-      cardImg.style.margin = "0"; // 余白を消す
-      row.appendChild(cardImg);
-    });
-
-    // 次に切り札（_s_ を含む）
-    tarot.cards.filter(c => c.includes("_s_")).forEach(cardPath => {
-      const cardImg = createCardImg(cardPath);
-      cardImg.style.margin = "0";
-      row.appendChild(cardImg);
-    });
-
-    // キャラ毎に改行（rowを縦に並べる）
-    container.appendChild(row);
-  });
+  editingPlayId = null;
+  hoverSnapshot = null;
 }
 
-// ---------------- カード要素生成（クリックでデッキ追加/削除・クリックでプレビュー更新） ----------------
-function createCardImg(cardPath) {
-  const img = document.createElement("img");
-  img.src = cardPath;
-  img.alt = "カード";
-  img.style.width = "80px"; // 適当なサムネイルサイズ（必要ならCSSで調整）
-  img.style.height = "auto";
-  img.style.cursor = "pointer";
-  img.dataset.cardPath = cardPath;
-
-  img.addEventListener("click", (e) => {
-    // まずプレビュー更新（クリックでプレビューが更新される仕様）
-  const preview = document.getElementById("preview-image");
-  if (preview) {
-    preview.src = cardPath || "";
-    preview.alt = cardPath || "";
-    preview.style.background = cardPath ? "#fff" : "transparent"; // カード未選択時は透明
+/* ---------------- Firebase: ユーザードック（失敗しても継続） ---------------- */
+async function safeGetUserDoc(uid){
+  try{
+    const ref = doc(db, "users", uid);
+    const snap = await getDoc(ref);
+    return snap.exists() ? snap.data() : null;
+  }catch(e){
+    console.warn("user doc read skipped:", e?.code || e);
+    return null;
   }
+}
+async function safeSetUserDoc(uid, data){
+  try{
+    const ref = doc(db, "users", uid);
+    await setDoc(ref, data, { merge: true });
+  }catch(e){
+    console.warn("user doc write skipped:", e?.code || e);
+  }
+}
 
+/* ---------------- 永続化（ローカル＋可能ならFirestore） ---------------- */
+function persistHandle(){
+  prefs.handle = (elAnonName.value || "").trim();
+  saveLocalPrefs(prefs);
+  const u = auth.currentUser;
+  if (u) safeSetUserDoc(u.uid, { handle: prefs.handle });
+}
+function persistMatchAndMyPicks(){
+  prefs.matchType = matchType;
+  prefs.myPicksByMode[matchType] = mySelected.map(t => t.name).slice(0, MAX_PICK);
+  saveLocalPrefs(prefs);
 
-    // デッキへの追加/削除処理（元の挙動を保持）
-    const deck = document.getElementById("deck");
-    const isTrump = cardPath.includes("_s_");
-    const slots = deck.querySelectorAll(".slot");
-    let targetSlot = null;
+  const u = auth.currentUser;
+  if (u) {
+    safeSetUserDoc(u.uid, {
+      handle: prefs.handle,
+      prefs: { matchType: prefs.matchType, myPicksByMode: prefs.myPicksByMode },
+      updatedAt: serverTimestamp()
+    });
+  }
+}
+function clampMyPickToMode(){
+  const ok = new Set(filteredTarots().map(t => t.name));
+  mySelected = mySelected.filter(t => ok.has(t.name));
+}
+function clampOppPickToMode(){
+  const ok = new Set(filteredTarots().map(t => t.name));
+  oppSelected = oppSelected.filter(t => ok.has(t.name));
+}
 
-    // 既にデッキにあるなら削除
-    if (deckCards.has(cardPath)) {
-      deckCards.delete(cardPath);
-      // 対応するslotの画像を削除（srcが末尾にcardPathと一致するもの）
-      slots.forEach(slot => {
-        const slotImg = slot.querySelector("img");
-        if (slotImg && slotImg.src.endsWith(cardPath)) slot.innerHTML = "";
-      });
-      img.classList.remove("in-deck");
+/* ---------------- 認証 ---------------- */
+async function initAuth(){
+  onAuthStateChanged(auth, async (user) => {
+    updateAuthBar(user);
+
+    if (!user) {
+      try { await signInAnonymously(auth); } catch(e){ console.error(e); }
       return;
     }
 
-    // 空きスロットを探す（トランプは右下3、通常は0..6）
-    if (isTrump) {
-      targetSlot = slots[7].innerHTML === "" ? slots[7]
-                  : slots[8].innerHTML === "" ? slots[8]
-                  : slots[9].innerHTML === "" ? slots[9]
-                  : null;
-    } else {
-      for (let i = 0; i < 7; i++) {
-        if (slots[i].innerHTML === "") {
-          targetSlot = slots[i];
-          break;
-        }
-      }
+    const data = await safeGetUserDoc(user.uid);
+    if (data?.prefs?.matchType && data?.prefs?.myPicksByMode) {
+      const mt = data.prefs.matchType;
+      if (["origin","complete","paradox"].includes(mt)) prefs.matchType = mt;
+      const mp = data.prefs.myPicksByMode;
+      prefs.myPicksByMode = {
+        origin: Array.isArray(mp.origin) ? mp.origin : [],
+        complete: Array.isArray(mp.complete) ? mp.complete : [],
+        paradox: Array.isArray(mp.paradox) ? mp.paradox : []
+      };
+    }
+    if (typeof data?.handle === "string" && data.handle) prefs.handle = data.handle;
+
+    elAnonName.value = prefs.handle || "";
+    // Gmailなどは表示名に使わない。未設定ならユーザーに決めさせる
+    if (!prefs.handle) {
+  // ここではログイン自体は通す。表示名が未設定なので入力を促すだけ。
+    alert("表示名(@)を入力してください（Gmailアドレスは表示に使いません）");
+    elAnonName.focus();
     }
 
-    if (!targetSlot) return; // 上限超えたら無視
+    matchType = prefs.matchType || "origin";
+    updateMatchUI();
 
-    deckCards.add(cardPath);
+    const names = prefs.myPicksByMode[matchType] || [];
+    mySelected = names.map(n => tarotData.find(t => t.name === n)).filter(Boolean).slice(0, MAX_PICK);
+    clampMyPickToMode();
 
-    const deckImg = document.createElement("img");
-    deckImg.src = cardPath;
-    deckImg.alt = "デッキカード";
-    deckImg.style.width = "100%";
-    deckImg.style.height = "auto";
-    deckImg.draggable = true;
-    deckImg.dataset.type = isTrump ? "trump" : "normal";
+    resetRunState();
 
-    // クリックでスロットから取り外す
-    deckImg.addEventListener("click", () => {
-      deckCards.delete(cardPath);
-      // slotを空にする（このdeckImgが属する親slotを空に）
-      const parentSlot = deckImg.parentElement;
-      if (parentSlot) parentSlot.innerHTML = "";
-      // 元の一覧のサムネイルから in-deck を削除（もしあれば）
-      const matchThumbs = document.querySelectorAll(`#cardContainer img`);
-      matchThumbs.forEach(t => {
-        if (t.dataset.cardPath === cardPath) t.classList.remove("in-deck");
-      });
-    });
+    await refreshUserPlays();
 
-    // ドラッグ開始：デッキ内順序入れ替え用
-    deckImg.addEventListener("dragstart", (ev) => {
-      // fromIndex を保存
-      const parent = deckImg.parentElement;
-      const idx = [...document.getElementById("deck").children].indexOf(parent);
-      ev.dataTransfer.setData("fromIndex", String(idx));
-      ev.dataTransfer.effectAllowed = "move";
-    });
-
-    // slotに追加
-    targetSlot.innerHTML = "";
-    targetSlot.appendChild(deckImg);
-
-    // 元一覧のサムネに in-deck クラスをつける
-    img.classList.add("in-deck");
+    renderAll();
+    persistHandle();
+    persistMatchAndMyPicks();
   });
-
-  return img;
 }
 
-// ---------------- デッキ枠作成（10スロット） ----------------
-function setupDeck() {
-  const deck = document.getElementById("deck");
-  deck.innerHTML = "";
-  for (let i = 0; i < 10; i++) {
-    const slot = document.createElement("div");
-    slot.className = "slot";
-    slot.dataset.index = i;
-    slot.style.width = "80px";
-    slot.style.height = "120px";
-    slot.style.border = "1px dashed #ccc";
-    slot.style.display = "inline-block";
-    slot.style.verticalAlign = "top";
-    slot.style.marginRight = "2px";
-    slot.style.boxSizing = "border-box";
-    slot.style.overflow = "hidden";
-    slot.style.padding = "0";
+async function doLogin(){
+  const user = auth.currentUser;
+  const provider = new GoogleAuthProvider();
+  try{
+    if (!user) {
+      await signInWithPopup(auth, provider);
+    } else if (user.isAnonymous) {
+      await linkWithPopup(user, provider);
+    } else {
+      await signInWithPopup(auth, provider);
+    }
 
-    // ドラッグオーバー許可
-    slot.addEventListener("dragover", (e) => {
-      e.preventDefault();
-    });
+    updateAuthBar(auth.currentUser);
 
-    // ドロップ：スロット間での入れ替え（切り札と通常のゾーン違いは拒否）
-    slot.addEventListener("drop", (e) => {
-      e.preventDefault();
-      const fromIndexStr = e.dataTransfer.getData("fromIndex");
-      if (!fromIndexStr) return;
-      const fromIndex = parseInt(fromIndexStr, 10);
-      const toIndex = parseInt(slot.dataset.index, 10);
-      if (isNaN(fromIndex) || isNaN(toIndex)) return;
+    resetRunState();
+    await refreshUserPlays();
+    renderAll();
 
-      const fromIsTrumpZone = fromIndex >= 7;
-      const toIsTrumpZone = toIndex >= 7;
-      if (fromIsTrumpZone !== toIsTrumpZone) return; // ゾーン違いは無効
-
-      const deckEl = document.getElementById("deck");
-      const fromSlot = deckEl.children[fromIndex];
-      const toSlot = deckEl.children[toIndex];
-
-      // 入れ替え（HTMLごと）
-      const tmp = toSlot.innerHTML;
-      toSlot.innerHTML = fromSlot.innerHTML;
-      fromSlot.innerHTML = tmp;
-    });
-
-    deck.appendChild(slot);
+    persistHandle();
+    persistMatchAndMyPicks();
+  }catch(e){
+    console.error(e);
   }
 }
 
-// ---------------- デッキ画像出力（背景桜色 #f7edf1 を反映） ----------------
-document.getElementById("exportDeck").addEventListener("click", () => {
-  const deck = document.getElementById("deck");
-  const deckNameInput = document.getElementById("deckName") ? document.getElementById("deckName").value.trim() : "";
-  const memoInput = document.getElementById("deckMemo") ? document.getElementById("deckMemo").value.trim() : "";
-  const filename = deckNameInput ? `${deckNameInput}.png` : "deck.png";
+/* ---------------- 対戦形式 ---------------- */
+function setMatchType(type){
+  if (!["origin","complete","paradox"].includes(type)) return;
+  if (type === matchType) return;
 
-  const canvas = document.getElementById("deckCanvas");
+  persistMatchAndMyPicks();
+
+  matchType = type;
+  updateMatchUI();
+
+  const names = prefs.myPicksByMode[matchType] || [];
+  mySelected = names.map(n => tarotData.find(t => t.name === n)).filter(Boolean).slice(0, MAX_PICK);
+  clampMyPickToMode();
+
+  resetRunState();
+  persistMatchAndMyPicks();
+
+  renderAll();
+}
+
+/* ---------------- タロット一覧（左） ---------------- */
+function renderTarotList(container, selectedArr, onToggle){
+  container.innerHTML = "";
+  filteredTarots().forEach(t => {
+    const img = document.createElement("img");
+    img.src = t.img;
+    img.alt = displayName(t);
+    if (findIndexByName(selectedArr, t.name) >= 0) img.classList.add("selected");
+    img.addEventListener("click", () => onToggle(t));
+    container.appendChild(img);
+  });
+}
+
+/* ---------------- 選択枠（右） ---------------- */
+function renderSelectedSlots(container, selectedArr, onRemoveAt, onSwapOrMove){
+  container.innerHTML = "";
+
+  const count = selectedArr.length;
+  container.classList.toggle("has-selection", count > 0);
+  if (count === 0) return;
+
+  const inner = document.createElement("div");
+  inner.className = "selected-slots-inner";
+
+  for (let i = 0; i < count; i++) {
+    const slot = document.createElement("div");
+    slot.className = "sel-slot";
+    slot.dataset.index = String(i);
+
+    if (count === 3 && i === 2) slot.classList.add("disabled");
+
+    const tarot = selectedArr[i];
+    const img = document.createElement("img");
+
+    // 同じ画像を改めて読み込み（拡大用）
+    img.src = tarot.img;
+    img.alt = displayName(tarot);
+
+    img.draggable = true;
+
+    // 右側の再選択 → 解除
+    img.addEventListener("click", () => onRemoveAt(i));
+
+    img.addEventListener("dragstart", (ev) => {
+      ev.dataTransfer.setData("fromIndex", String(i));
+      ev.dataTransfer.effectAllowed = "move";
+    });
+
+    slot.appendChild(img);
+
+    slot.addEventListener("dragover", (e) => e.preventDefault());
+    slot.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const fromStr = e.dataTransfer.getData("fromIndex");
+      if (!fromStr) return;
+      const from = parseInt(fromStr, 10);
+      const to = i;
+      if (Number.isNaN(from) || Number.isNaN(to)) return;
+      onSwapOrMove(from, to);
+    });
+
+    inner.appendChild(slot);
+  }
+
+  container.appendChild(inner);
+}
+
+/* ---------------- 選択ロジック ---------------- */
+function togglePick(arr, tarot){
+  const idx = findIndexByName(arr, tarot.name);
+  if (idx >= 0) {
+    arr.splice(idx, 1);
+    return compact(arr);
+  }
+  if (arr.length >= MAX_PICK) return arr;
+  arr.push(tarot);
+  return arr;
+}
+function removeAt(arr, idx){
+  arr.splice(idx, 1);
+  return compact(arr);
+}
+function swapOrMove(arr, from, to){
+  if (from === to) return arr;
+  const a = arr[from] || null;
+  const b = arr[to] || null;
+  if (!a) return arr;
+  arr[to] = a;
+  arr[from] = b;
+  return arr;
+}
+
+/* ---------------- カード一覧（自分の左2人だけ、各キャラは横一列） ---------------- */
+function renderCards(){
+  elCardContainer.innerHTML = "";
+
+  const targets = mySelected.slice(0, 2);
+  targets.forEach(tarot => {
+    const row = document.createElement("div");
+    row.className = "card-row";
+
+    const normals = (tarot.cards || []).filter(p => !p.includes("_s_"));
+    const trumps  = (tarot.cards || []).filter(p =>  p.includes("_s_"));
+
+    [...normals, ...trumps].forEach(cardPath => {
+      const img = document.createElement("img");
+      img.src = cardPath;
+      img.alt = cardPath;
+
+      if (deckSlots.includes(cardPath)) img.classList.add("in-deck");
+
+      img.addEventListener("click", () => {
+        elCardPreview.src = cardPath;
+        elCardPreview.alt = cardPath;
+        elCardPreview.style.background = "#fff";
+
+        // クリック直後にデッキへ反映
+        if (deckSlots.includes(cardPath)) removeCardFromDeck(cardPath);
+        else addCardToDeck(cardPath);
+
+        renderDeck();
+        renderCards();
+      });
+
+      row.appendChild(img);
+    });
+
+    elCardContainer.appendChild(row);
+  });
+}
+
+/* ---------------- デッキ ---------------- */
+function setupDeck(){
+  elDeck.innerHTML = "";
+  for (let i = 0; i < 10; i++) {
+    const slot = document.createElement("div");
+    slot.className = "deck-slot";
+    slot.dataset.index = String(i);
+
+    slot.addEventListener("dragover", (e) => e.preventDefault());
+    slot.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const fromStr = e.dataTransfer.getData("fromIndex");
+      if (!fromStr) return;
+      const from = parseInt(fromStr, 10);
+      const to = i;
+      if (Number.isNaN(from) || Number.isNaN(to)) return;
+
+      const fromIsTrump = from >= 7;
+      const toIsTrump = to >= 7;
+      if (fromIsTrump !== toIsTrump) return;
+
+      const tmp = deckSlots[to];
+      deckSlots[to] = deckSlots[from];
+      deckSlots[from] = tmp;
+
+      renderDeck();
+      renderCards();
+    });
+
+    elDeck.appendChild(slot);
+  }
+  renderDeck();
+}
+function renderDeck(){
+  const slots = elDeck.querySelectorAll(".deck-slot");
+  slots.forEach((slotEl, i) => {
+    slotEl.innerHTML = "";
+    const cardPath = deckSlots[i];
+    if (!cardPath) return;
+
+    const img = document.createElement("img");
+    img.src = cardPath;
+    img.alt = cardPath;
+    img.draggable = true;
+
+    img.addEventListener("click", () => {
+      removeCardFromDeck(cardPath);
+      renderDeck();
+      renderCards();
+    });
+
+    img.addEventListener("dragstart", (ev) => {
+      ev.dataTransfer.setData("fromIndex", String(i));
+      ev.dataTransfer.effectAllowed = "move";
+    });
+
+    slotEl.appendChild(img);
+  });
+}
+function isTrumpCard(cardPath){
+  return String(cardPath).includes("_s_");
+}
+function addCardToDeck(cardPath){
+  if (deckSlots.includes(cardPath)) return;
+
+  const trump = isTrumpCard(cardPath);
+  if (trump) {
+    for (let i = 7; i <= 9; i++) {
+      if (!deckSlots[i]) { deckSlots[i] = cardPath; return; }
+    }
+  } else {
+    for (let i = 0; i <= 6; i++) {
+      if (!deckSlots[i]) { deckSlots[i] = cardPath; return; }
+    }
+  }
+}
+function removeCardFromDeck(cardPath){
+  for (let i = 0; i < deckSlots.length; i++) {
+    if (deckSlots[i] === cardPath) { deckSlots[i] = null; break; }
+  }
+}
+
+/* 再配置 */
+function parseCardKey(cardPath){
+  const s = String(cardPath);
+  const mChar = s.match(/na_(\d+)_/);
+  const charNo = mChar ? parseInt(mChar[1], 10) : 999;
+
+  const mType = s.match(/_(n|s)_([0-9]+)/);
+  const type = mType ? mType[1] : "n";
+  const num = mType ? parseInt(mType[2], 10) : 999;
+
+  const typeOrder = (type === "n") ? 0 : 1;
+  return [charNo, typeOrder, num];
+}
+function deckRearrange(){
+  const normals = [];
+  const trumps = [];
+  for (let i = 0; i < 10; i++) {
+    const p = deckSlots[i];
+    if (!p) continue;
+    (isTrumpCard(p) ? trumps : normals).push(p);
+  }
+  normals.sort((a,b)=>{
+    const ka=parseCardKey(a), kb=parseCardKey(b);
+    for (let i=0;i<3;i++){ if (ka[i]!==kb[i]) return ka[i]-kb[i]; }
+    return 0;
+  });
+  trumps.sort((a,b)=>{
+    const ka=parseCardKey(a), kb=parseCardKey(b);
+    for (let i=0;i<3;i++){ if (ka[i]!==kb[i]) return ka[i]-kb[i]; }
+    return 0;
+  });
+
+  deckSlots.fill(null);
+  for (let i = 0; i < 7; i++) deckSlots[i] = normals[i] || null;
+  for (let i = 0; i < 3; i++) deckSlots[7+i] = trumps[i] || null;
+
+  renderDeck();
+  renderCards();
+}
+function deckReset(){
+  deckSlots.fill(null);
+  renderDeck();
+  renderCards();
+}
+
+/* ---------------- IDマップ ---------------- */
+function buildIdMaps(){
+  tarotIndexByName = new Map();
+  tarotData.forEach((t, idx) => tarotIndexByName.set(t.name, idx));
+
+  const all = [];
+  tarotData.forEach(t => (t.cards || []).forEach(p => all.push(p)));
+
+  const uniq = [];
+  const seen = new Set();
+  for (const p of all) {
+    if (seen.has(p)) continue;
+    seen.add(p);
+    uniq.push(p);
+  }
+
+  cardIdByPath = new Map();
+  cardPathById = uniq.slice();
+  uniq.forEach((p, i) => cardIdByPath.set(p, i));
+}
+
+/* ---------------- 勝敗他トグル ---------------- */
+function setRecordKind(kind){
+  recordKind = kind;
+  const btns = [...elResultToggle.querySelectorAll("button[data-result]")];
+  btns.forEach(b => b.classList.toggle("active", b.dataset.result === kind));
+}
+
+/* ---------------- 保存（履歴にも使う） ---------------- */
+function matchTypeId(type){
+  if (type === "origin") return 0;
+  if (type === "complete") return 1;
+  return 2;
+}
+function matchTypeFromId(num){
+  if (num === 0) return "origin";
+  if (num === 1) return "complete";
+  return "paradox";
+}
+function resultTypeId(kind){
+  if (kind === "win") return 0;
+  if (kind === "loss") return 1;
+  return 2;
+}
+function resultKindFromId(num){
+  if (num === 0) return "win";
+  if (num === 1) return "loss";
+  return "other";
+}
+function resultLabel(num){
+  if (num === 0) return "勝";
+  if (num === 1) return "敗";
+  return "他";
+}
+
+/* ---------------- 履歴ホバー/編集：適用 ---------------- */
+function snapshotLeft(){
+  return {
+    deckName: elDeckName.value,
+    memo: elMemo.value,
+    deckSlots: deckSlots.slice(),
+    previewSrc: elCardPreview.src,
+    previewAlt: elCardPreview.alt,
+    previewBg: elCardPreview.style.background
+  };
+}
+function restoreLeft(s){
+  if (!s) return;
+  elDeckName.value = s.deckName || "";
+  elMemo.value = s.memo || "";
+  for (let i=0;i<10;i++) deckSlots[i] = s.deckSlots[i] || null;
+  elCardPreview.src = s.previewSrc || "";
+  elCardPreview.alt = s.previewAlt || "";
+  elCardPreview.style.background = s.previewBg || "transparent";
+}
+function applyDeckFromCardIds(cardIds){
+  deckSlots.fill(null);
+  const arr = Array.isArray(cardIds) ? cardIds : [];
+  for (let i=0;i<10;i++){
+    const id = arr[i];
+    if (typeof id !== "number" || id < 0) { deckSlots[i] = null; continue; }
+    deckSlots[i] = cardPathById[id] || null;
+  }
+}
+function startHover(play){
+  if (editingPlayId) return;
+  if (!play) return;
+  if (!hoverSnapshot) hoverSnapshot = snapshotLeft();
+
+  elDeckName.value = play.deckName || "";
+  elMemo.value = play.memo || "";
+  applyDeckFromCardIds(play.cardIds);
+
+  renderDeck();
+  renderCards();
+}
+function endHover(){
+  if (editingPlayId) return;
+  if (!hoverSnapshot) return;
+
+  restoreLeft(hoverSnapshot);
+  hoverSnapshot = null;
+
+  renderDeck();
+  renderCards();
+}
+function beginEdit(play){
+  if (!play) return;
+  hoverSnapshot = null;
+  editingPlayId = play.id;
+
+  // ここは「その履歴の状態で編集」になるように反映
+  matchType = matchTypeFromId(play.matchTypeNum);
+  updateMatchUI();
+
+  setRecordKind(resultKindFromId(play.resultTypeNum));
+
+  mySelected = (Array.isArray(play.myTarotIdx)? play.myTarotIdx: [])
+    .map(i => tarotData[i]).filter(Boolean).slice(0, MAX_PICK);
+  oppSelected = (Array.isArray(play.oppTarotIdx)? play.oppTarotIdx: [])
+    .map(i => tarotData[i]).filter(Boolean).slice(0, MAX_PICK);
+
+  clampMyPickToMode();
+  clampOppPickToMode();
+
+  elDeckName.value = play.deckName || "";
+  elMemo.value = play.memo || "";
+  applyDeckFromCardIds(play.cardIds);
+
+  // プレビューは一旦クリア
+  elCardPreview.src = "";
+  elCardPreview.alt = "";
+  elCardPreview.style.background = "transparent";
+
+  // prefsも合わせる（後から再起動した時に自然）
+  persistMatchAndMyPicks();
+
+  renderAll();
+}
+
+/* ---------------- Firestore 書き込み ---------------- */
+async function saveDeck(){
+  const user = auth.currentUser;
+  if (!user) {
+    try { await signInAnonymously(auth); } catch(e) { console.error(e); return; }
+  }
+
+  const deckName = (elDeckName.value || "").trim();
+  const memo = (elMemo.value || "").trim();
+  const season = CURRENT_SEASON;
+
+  const cardIds = deckSlots.map(p => {
+    if (!p) return -1;
+    const id = cardIdByPath.get(p);
+    return (typeof id === "number") ? id : -1;
+  });
+
+  const myTarotIdx = mySelected.map(t => tarotIndexByName.get(t.name)).filter(n => typeof n === "number");
+  const oppTarotIdx = oppSelected.map(t => tarotIndexByName.get(t.name)).filter(n => typeof n === "number");
+
+  const basePayload = {
+    matchType: matchTypeId(matchType),
+    resultType: resultTypeId(recordKind),
+    season,
+    deckName,
+    memo,
+    myTarotIdx,
+    oppTarotIdx,
+    cardIds,
+    updatedAt: serverTimestamp(),
+    updatedAtMs: Date.now()
+  };
+
+  try {
+    if (editingPlayId) {
+      // 既存履歴を上書き
+      await updateDoc(doc(db, "decks", editingPlayId), basePayload);
+      editingPlayId = null;
+    } else {
+      // 新規追加
+      await addDoc(collection(db, "decks"), {
+        ownerUid: auth.currentUser.uid,
+        createdAt: serverTimestamp(),
+        createdAtMs: Date.now(),
+        ...basePayload
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    return;
+  }
+
+  await refreshUserPlays();
+  renderRightStatsAndHistory();
+}
+
+/* ---------------- 履歴の取得（doc id も保持 / deck+memo+cardIdsも持つ） ---------------- */
+async function refreshUserPlays(){
+  userPlays = [];
+  const u = auth.currentUser;
+  if (!u) return;
+
+  try{
+    const qy = query(collection(db, "decks"), where("ownerUid", "==", u.uid));
+    const snap = await getDocs(qy);
+
+    const rows = [];
+    snap.forEach(docSnap => {
+      const d = docSnap.data();
+
+      const mt = typeof d.matchType === "number" ? d.matchType : null;
+      const rt = typeof d.resultType === "number" ? d.resultType : null;
+      const season = typeof d.season === "string" ? d.season : "";
+
+      let ms = 0;
+      if (typeof d.createdAtMs === "number") ms = d.createdAtMs;
+      else if (d.createdAt && typeof d.createdAt.toMillis === "function") ms = d.createdAt.toMillis();
+
+      rows.push({
+        id: docSnap.id,
+        createdAtMs: ms,
+        matchTypeNum: mt,
+        resultTypeNum: rt,
+        season,
+        myTarotIdx: Array.isArray(d.myTarotIdx) ? d.myTarotIdx : [],
+        oppTarotIdx: Array.isArray(d.oppTarotIdx) ? d.oppTarotIdx : [],
+        deckName: typeof d.deckName === "string" ? d.deckName : "",
+        memo: typeof d.memo === "string" ? d.memo : "",
+        cardIds: Array.isArray(d.cardIds) ? d.cardIds.map(n => (typeof n==="number"? n : -1)) : Array(10).fill(-1)
+      });
+    });
+
+    rows.sort((a,b) => (b.createdAtMs||0) - (a.createdAtMs||0));
+    userPlays = rows;
+
+  }catch(e){
+    console.warn("history read skipped:", e?.code || e);
+    userPlays = [];
+  }
+}
+
+async function deletePlay(playId){
+  if (!playId) return;
+  try{
+    await deleteDoc(doc(db, "decks", playId));
+  }catch(e){
+    console.error("delete failed:", e);
+    return;
+  }
+  if (editingPlayId === playId) editingPlayId = null;
+  userPlays = userPlays.filter(p => p.id !== playId);
+  renderRightStatsAndHistory();
+}
+
+/* ---------------- フィルタ（期間/方式/シーズン） ---------------- */
+function periodToMs(v){
+  const day = 24*60*60*1000;
+  if (v === "1d") return 1*day;
+  if (v === "1w") return 7*day;
+  if (v === "1m") return 30*day;
+  if (v === "3m") return 90*day;
+  if (v === "1y") return 365*day;
+  return null;
+}
+
+function filterBaseByPeriodAndSeason(){
+  const now = Date.now();
+  const dur = periodToMs(elFilterPeriod.value);
+  const seasonSel = elFilterSeason.value || "all";
+
+  return userPlays.filter(p => {
+    if (seasonSel !== "all") {
+      if (!p.season || p.season !== seasonSel) return false;
+    }
+    if (dur) {
+      if (!p.createdAtMs) return false;
+      if (p.createdAtMs < (now - dur)) return false;
+    }
+    return true;
+  });
+}
+
+function filterForRuleStats(){
+  return filterBaseByPeriodAndSeason().filter(p => p.resultTypeNum === 0 || p.resultTypeNum === 1);
+}
+
+function filterForPairStat(){
+  const mtNum = matchTypeId(matchType);
+  return filterBaseByPeriodAndSeason().filter(p =>
+    (p.resultTypeNum === 0 || p.resultTypeNum === 1) && p.matchTypeNum === mtNum
+  );
+}
+
+function filterForChart(){
+  const base = filterBaseByPeriodAndSeason();
+  const mt = elFilterMatchType.value;
+  const mtNum = (mt === "origin") ? 0 : (mt === "complete") ? 1 : (mt === "paradox") ? 2 : null;
+
+  return base.filter(p => {
+    if (p.resultTypeNum !== 0 && p.resultTypeNum !== 1) return false;
+    if (mtNum === null) return true;
+    return p.matchTypeNum === mtNum;
+  });
+}
+
+/* ---------------- 右上：ルール統計（"選択率"という文字は出さない） ---------------- */
+function updateRuleStatsLine(){
+  const plays = filterForRuleStats();
+  const total = plays.length;
+
+  const by = {
+    0: {w:0,l:0,t:0},
+    1: {w:0,l:0,t:0},
+    2: {w:0,l:0,t:0}
+  };
+
+  for (const p of plays) {
+    const k = (p.matchTypeNum === 0 || p.matchTypeNum === 1 || p.matchTypeNum === 2) ? p.matchTypeNum : null;
+    if (k === null) continue;
+    by[k].t++;
+    if (p.resultTypeNum === 0) by[k].w++;
+    if (p.resultTypeNum === 1) by[k].l++;
+  }
+
+  const sel0 = pct(by[0].t, total, 0);
+  const sel1 = pct(by[1].t, total, 0);
+  const sel2 = pct(by[2].t, total, 0);
+
+  // 初期50%
+  const wr0 = pct(by[0].w, by[0].w + by[0].l, 50);
+  const wr1 = pct(by[1].w, by[1].w + by[1].l, 50);
+  const wr2 = pct(by[2].w, by[2].w + by[2].l, 50);
+
+  elRuleStatsLine.textContent = "";
+
+  const mk = (label, sel, wr) => {
+    const s = document.createElement("span");
+    s.textContent = `${label} ${sel}% 勝率${wr}%`;
+    return s;
+  };
+
+  elRuleStatsLine.appendChild(mk("起源戦", sel0, wr0));
+  elRuleStatsLine.appendChild(mk("完全戦", sel1, wr1));
+  elRuleStatsLine.appendChild(mk("逆理戦", sel2, wr2));
+}
+
+/* ---------------- 右：AB/BC/AC 3通りを縦表示（キャラ番号順のABCから） ---------------- */
+function updatePairStatLine(){
+  elPairStatLine.innerHTML = "";
+
+  const idxs = mySelected
+    .map(t => tarotIndexByName.get(t.name))
+    .filter(n => typeof n === "number");
+
+  if (idxs.length < 2) return;
+
+  idxs.sort((i1, i2) => getTarotNo(tarotData[i1]) - getTarotNo(tarotData[i2]));
+
+  const plays = filterForPairStat();
+  const total = plays.length;
+
+  const pairs = [];
+  if (idxs.length >= 3) {
+    const A = idxs[0], B = idxs[1], C = idxs[2];
+    pairs.push([A,B], [B,C], [A,C]);
+  } else {
+    pairs.push([idxs[0], idxs[1]]);
+  }
+
+  for (const [A, B] of pairs) {
+    let t=0, w=0, l=0;
+    for (const p of plays) {
+      const s = new Set(p.myTarotIdx || []);
+      if (s.has(A) && s.has(B)) {
+        t++;
+        if (p.resultTypeNum === 0) w++;
+        if (p.resultTypeNum === 1) l++;
+      }
+    }
+
+    const use = pct(t, total, 0);
+    const wr  = pct(w, w + l, 0);
+
+    const nameA = displayNameByIdx(A);
+    const nameB = displayNameByIdx(B);
+
+    const div = document.createElement("div");
+    div.className = "pair-row";
+    div.textContent = `${nameA}${nameB} 使用率${use}% 勝率${wr}%`;
+    elPairStatLine.appendChild(div);
+  }
+}
+
+/* ---------------- 右：履歴グラフ ---------------- */
+function drawHistoryChart(){
+  const playsRaw = filterForChart();
+  const canvas = elHistoryCanvas;
+  const wrap = canvas.parentElement;
+
+  const cssW = Math.max(200, wrap.clientWidth);
+  const cssH = Math.max(180, wrap.clientHeight);
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.width = Math.floor(cssW * dpr);
+  canvas.height = Math.floor(cssH * dpr);
+
   const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,cssW,cssH);
 
-  const slots = deck.querySelectorAll(".slot");
-  const cols = 5;
-  const rows = 2;
-  if (slots.length === 0) return;
+  const padL = 38, padR = 12, padT = 12, padB = 28;
+  const w = cssW - padL - padR;
+  const h = cssH - padT - padB;
 
-  const slotWidth = slots[0].offsetWidth || 80;
-  const slotHeight = slots[0].offsetHeight || 120;
+  // 枠
+  ctx.strokeStyle = "rgba(0,0,0,0.18)";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(padL, padT, w, h);
 
-  const deckNameHeight = deckNameInput ? 40 : 0;
-  const memoHeight = memoInput ? 50 : 0;
+  // y軸ラベル
+  ctx.fillStyle = "rgba(0,0,0,0.75)";
+  ctx.font = "12px system-ui";
+  ctx.fillText("勝率(%)", 4, padT + 12);
 
-  const leftMargin = 1;
-  const rightMargin = 2;
-  const hGap = 1;
-  const scale = 3; // 高解像度
+  const period = elFilterPeriod.value;
 
+<<<<<<< HEAD
   canvas.width = (slotWidth * cols + leftMargin + rightMargin) * scale;
   canvas.height = (deckNameHeight + slotHeight * rows + memoHeight + hGap * 2) * scale;
 
@@ -281,66 +1053,118 @@ document.getElementById("exportDeck").addEventListener("click", () => {
 
     // 下線
     ctx.lineWidth = 2 * scale;
+=======
+  // y目盛（0/50/100）
+  const ticksY = [0,50,100];
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.font = "11px system-ui";
+  for (const t of ticksY) {
+    const y = padT + (1 - t/100) * h;
+    ctx.strokeStyle = "rgba(0,0,0,0.08)";
+>>>>>>> f7b222e (UI fix and history chart update)
     ctx.beginPath();
-    ctx.moveTo(0, deckNameHeight * scale);
-    ctx.lineTo(canvas.width, deckNameHeight * scale);
+    ctx.moveTo(padL, y);
+    ctx.lineTo(padL + w, y);
     ctx.stroke();
+    ctx.fillText(String(t), 10, y + 4);
   }
 
-  // カード描画（slotの順番どおりに）
-  const promises = [];
-  slots.forEach((slot, i) => {
-    const imgEl = slot.querySelector("img");
-    if (imgEl) {
-      promises.push(new Promise(resolve => {
-        const tmp = new Image();
-        tmp.src = imgEl.src;
-        tmp.onload = () => {
-          const x = (i % cols) * slotWidth * scale + leftMargin * scale;
-          const y = Math.floor(i / cols) * slotHeight * scale + deckNameHeight * scale + hGap * scale;
-          ctx.drawImage(tmp, x, y, slotWidth * scale, slotHeight * scale);
-          resolve();
-        };
-        tmp.onerror = () => resolve(); // 画像失敗でも続行
-      }));
+  // 期間=1日 のときだけ「今日の対戦回数」を横軸にする
+  if (period === "1d") {
+    // 今日(00:00〜)だけに限定
+    const startToday = new Date();
+    startToday.setHours(0,0,0,0);
+    const startT = startToday.getTime();
+    const endT = Date.now();
+
+    const plays = playsRaw
+      .filter(p => (p.createdAtMs || 0) >= startT && (p.createdAtMs || 0) <= endT)
+      .slice()
+      .sort((a,b) => (a.createdAtMs||0) - (b.createdAtMs||0));
+
+    // x軸ラベル
+    ctx.fillStyle = "rgba(0,0,0,0.75)";
+    ctx.font = "12px system-ui";
+    ctx.fillText("対戦回数(今日)", padL + w - 78, cssH - 8);
+
+    // データ無し
+    if (plays.length === 0) {
+      const y50 = padT + (1 - 0.5) * h;
+      ctx.strokeStyle = "rgba(0,119,204,0.35)";
+      ctx.beginPath();
+      ctx.moveTo(padL, y50);
+      ctx.lineTo(padL + w, y50);
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(0,0,0,0.65)";
+      ctx.font = "12px system-ui";
+      ctx.fillText("対戦回数: 0", padL + 8, padT + 18);
+      ctx.fillText("勝率: 50%", padL + 8, padT + 34);
+      return;
     }
-  });
 
-  // メモ描画（画像出力時のみ折返し）
-  if (memoInput) {
-    const memoX = leftMargin * scale;
-    const memoY = (deckNameHeight + slotHeight * rows + hGap) * scale;
-    const memoWidth = slotWidth * cols * scale;
-    const memoHeightInner = memoHeight * scale;
+    // x目盛（回数）
+    const maxX = plays.length;
+    ctx.strokeStyle = "rgba(0,0,0,0.08)";
+    ctx.fillStyle = "rgba(0,0,0,0.6)";
+    ctx.font = "11px system-ui";
 
-    ctx.strokeStyle = "#000000";
-    ctx.lineWidth = 2 * scale;
-    ctx.strokeRect(memoX, memoY, memoWidth, memoHeightInner);
+    const nx = Math.min(5, maxX);
+    for (let i=0;i<nx;i++){
+      const xCount = (nx === 1) ? 1 : Math.round(1 + (maxX - 1) * (i/(nx-1)));
+      const x = padL + ((xCount - 1) / Math.max(1, (maxX - 1))) * w;
 
-    ctx.fillStyle = "#000000";
-    ctx.font = `${7 * scale}px 'HGMaruGothicMPRO', sans-serif`;
-    ctx.textAlign = "left";
-    ctx.textBaseline = "top";
+      ctx.beginPath();
+      ctx.moveTo(x, padT);
+      ctx.lineTo(x, padT + h);
+      ctx.stroke();
 
-    const chars = memoInput.split("");
-    let line = "";
-    let yOffset = 5 * scale;
-    for (let i = 0; i < chars.length; i++) {
-      const testLine = line + chars[i];
-      const metrics = ctx.measureText(testLine);
-      if (metrics.width > memoWidth - 10 * scale) {
-        ctx.fillText(line, memoX + 5 * scale, memoY + yOffset);
-        line = chars[i];
-        yOffset += 9 * scale;
-      } else {
-        line = testLine;
-      }
-      if (i === chars.length - 1) {
-        ctx.fillText(line, memoX + 5 * scale, memoY + yOffset);
-      }
+      ctx.fillText(String(xCount), x - 4, padT + h + 18);
     }
+
+    function xToPxCount(xCount){
+      if (maxX <= 1) return padL;
+      return padL + ((xCount - 1) / (maxX - 1)) * w;
+    }
+    function yToPx(y){
+      return padT + (1 - y/100) * h;
+    }
+
+    // 累積勝率（点=1戦ごと）
+    let wins = 0, losses = 0;
+    const pts = [];
+    for (let i=0; i<plays.length; i++){
+      const p = plays[i];
+      if (p.resultTypeNum === 0) wins++;
+      if (p.resultTypeNum === 1) losses++;
+      const n = wins + losses;
+      const wr = n > 0 ? (wins / n) * 100 : 50;
+      pts.push({ x: i+1, y: wr });
+    }
+
+    ctx.strokeStyle = "rgba(0,119,204,0.9)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i=0; i<pts.length; i++){
+      const px = xToPxCount(pts[i].x);
+      const py = yToPx(pts[i].y);
+      if (i===0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(0,119,204,0.9)";
+    for (const p of pts){
+      const px = xToPxCount(p.x);
+      const py = yToPx(p.y);
+      ctx.beginPath();
+      ctx.arc(px, py, 2.5, 0, Math.PI*2);
+      ctx.fill();
+    }
+    return;
   }
 
+<<<<<<< HEAD
 Promise.all(promises).then(async () => {
     const link = document.createElement("a");
     link.download = filename;
@@ -443,3 +1267,340 @@ const thumbUrl = await thumbRef.getDownloadURL();  // ← これで %2F が回�
   
 
 
+=======
+  // ---- 1日以外：時間/日/月の時間軸（前回の仕様のまま） ----
+  const xMode =
+    (period === "1w" || period === "1m") ? "day" :
+    "month";
+
+  const xLabel = (xMode === "day") ? "日" : "月";
+  ctx.fillStyle = "rgba(0,0,0,0.75)";
+  ctx.font = "12px system-ui";
+  ctx.fillText(xLabel, padL + w - 18, cssH - 8);
+
+  const now = Date.now();
+  const dur = periodToMs(period);
+
+  const plays = playsRaw
+    .filter(p => (p.createdAtMs || 0) > 0)
+    .slice()
+    .sort((a,b) => (a.createdAtMs||0) - (b.createdAtMs||0));
+
+  const endT = now;
+  const startT = dur ? (now - dur) : (plays.length ? plays[0].createdAtMs : now);
+  const span = Math.max(1, endT - startT);
+
+  function tToPx(t){
+    return padL + ((t - startT) / span) * w;
+  }
+  function yToPx(y){
+    return padT + (1 - y/100) * h;
+  }
+
+  // x目盛（等間隔に5本）
+  ctx.strokeStyle = "rgba(0,0,0,0.08)";
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.font = "11px system-ui";
+
+  const nx = 5;
+  for (let i=0;i<nx;i++){
+    const t = startT + span * (i/(nx-1));
+    const x = tToPx(t);
+
+    ctx.beginPath();
+    ctx.moveTo(x, padT);
+    ctx.lineTo(x, padT + h);
+    ctx.stroke();
+
+    const d = new Date(t);
+    const label =
+      (xMode === "day") ? `${d.getMonth()+1}/${d.getDate()}` :
+      `${d.getFullYear()}/${d.getMonth()+1}`;
+
+    ctx.fillText(label, x - 10, padT + h + 18);
+  }
+
+  // データ無し
+  if (plays.length === 0) {
+    const y50 = yToPx(50);
+    ctx.strokeStyle = "rgba(0,119,204,0.35)";
+    ctx.beginPath();
+    ctx.moveTo(padL, y50);
+    ctx.lineTo(padL + w, y50);
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(0,0,0,0.65)";
+    ctx.font = "12px system-ui";
+    ctx.fillText("対戦回数: 0", padL + 8, padT + 18);
+    ctx.fillText("勝率: 50%", padL + 8, padT + 34);
+    return;
+  }
+
+  // 時間軸で累積勝率
+  let wins = 0, losses = 0;
+  const pts = [];
+  for (const p of plays) {
+    const t = p.createdAtMs || 0;
+    if (t < startT || t > endT) continue;
+
+    if (p.resultTypeNum === 0) wins++;
+    if (p.resultTypeNum === 1) losses++;
+    const n = wins + losses;
+    const wr = n > 0 ? (wins / n) * 100 : 50;
+    pts.push({ t, wr });
+  }
+
+  if (pts.length === 0) {
+    const y50 = yToPx(50);
+    ctx.strokeStyle = "rgba(0,119,204,0.35)";
+    ctx.beginPath();
+    ctx.moveTo(padL, y50);
+    ctx.lineTo(padL + w, y50);
+    ctx.stroke();
+    return;
+  }
+
+  ctx.strokeStyle = "rgba(0,119,204,0.9)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i=0; i<pts.length; i++){
+    const x = tToPx(pts[i].t);
+    const y = yToPx(pts[i].wr);
+    if (i===0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  ctx.fillStyle = "rgba(0,119,204,0.9)";
+  for (const p of pts){
+    const x = tToPx(p.t);
+    const y = yToPx(p.wr);
+    ctx.beginPath();
+    ctx.arc(x, y, 2.5, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function fmtDateTime(ms){
+  const d = new Date(ms || Date.now());
+  return d.toLocaleString("ja-JP", {
+    year:"numeric", month:"2-digit", day:"2-digit",
+    hour:"2-digit", minute:"2-digit"
+  });
+}
+
+/* ---------------- 右：対戦履歴（勝は赤、削除は青、編集追加、ホバーで左にプレビュー） ---------------- */
+function makeNamesSpanNoSpace(idxs){
+  const wrap = document.createElement("span");
+  wrap.className = "names";
+
+  const arr = (Array.isArray(idxs) ? idxs : []).slice(0,3);
+  for (let i=0;i<arr.length;i++){
+    const s = document.createElement("span");
+    s.textContent = displayNameByIdx(arr[i]);
+    if (i === 2) s.classList.add("dim");
+    wrap.appendChild(s);
+  }
+  return wrap;
+}
+
+function renderHistoryList(){
+  const base = filterBaseByPeriodAndSeason();
+  elHistoryList.innerHTML = "";
+  if (base.length === 0) return;
+
+  for (const p of base) {
+    const row = document.createElement("div");
+    row.className = "hrow";
+
+    // ホバーでプレビュー（デッキ＋メモ）
+    row.addEventListener("mouseenter", () => startHover(p));
+    row.addEventListener("mouseleave", () => endHover());
+
+    const left = document.createElement("div");
+    left.className = "hleft";
+
+    left.appendChild(makeNamesSpanNoSpace(p.myTarotIdx));
+    const hy = document.createElement("span");
+    hy.textContent = " - ";
+    left.appendChild(hy);
+    left.appendChild(makeNamesSpanNoSpace(p.oppTarotIdx));
+
+    const right = document.createElement("div");
+    right.className = "hright";
+
+    const r = document.createElement("span");
+    r.textContent = resultLabel(p.resultTypeNum);
+    if (p.resultTypeNum === 0) r.classList.add("res-win");
+    right.appendChild(r);
+
+    // 編集（削除の左）
+    const edit = document.createElement("button");
+    edit.className = "editbtn";
+    edit.type = "button";
+    edit.textContent = "編集";
+    edit.addEventListener("click", (e) => {
+      e.stopPropagation();
+      beginEdit(p);
+    });
+    right.appendChild(edit);
+
+    const del = document.createElement("button");
+    del.className = "delbtn";
+    del.type = "button";
+    del.textContent = "削除";
+    del.addEventListener("click", (e) => {
+      e.stopPropagation();
+      deletePlay(p.id);
+    });
+    right.appendChild(del);
+
+    row.appendChild(left);
+        // ★ 追加：対戦日時（キャラの右／勝敗の左）
+    const date = document.createElement("div");
+    date.className = "hdate";
+    date.textContent = fmtDateTime(p.createdAtMs);
+    row.appendChild(date);
+    row.appendChild(right);
+    elHistoryList.appendChild(row);
+  }
+}
+
+/* ---------------- 右側まとめ更新 ---------------- */
+function renderRightStatsAndHistory(){
+  updateRuleStatsLine();
+  updatePairStatLine();
+  drawHistoryChart();
+  renderHistoryList();
+}
+
+/* ---------------- 全体描画 ---------------- */
+function renderAll(){
+  updateMatchUI();
+
+  renderTarotList(elMyTarotList, mySelected, (tarot) => {
+    mySelected = togglePick(mySelected, tarot);
+    clampMyPickToMode();
+    persistMatchAndMyPicks();
+    renderAll();
+  });
+
+  renderTarotList(elOppTarotList, oppSelected, (tarot) => {
+    oppSelected = togglePick(oppSelected, tarot);
+    clampOppPickToMode();
+    renderAll();
+  });
+
+  renderSelectedSlots(
+    elMySelectedSlots,
+    mySelected,
+    (idx) => {
+      mySelected = removeAt(mySelected, idx);
+      clampMyPickToMode();
+      persistMatchAndMyPicks();
+      renderAll();
+    },
+    (from,to) => {
+      mySelected = swapOrMove(mySelected, from, to);
+      clampMyPickToMode();
+      persistMatchAndMyPicks();
+      renderAll();
+    }
+  );
+
+  renderSelectedSlots(
+    elOppSelectedSlots,
+    oppSelected,
+    (idx) => { oppSelected = removeAt(oppSelected, idx); clampOppPickToMode(); renderAll(); },
+    (from,to) => { oppSelected = swapOrMove(oppSelected, from, to); clampOppPickToMode(); renderAll(); }
+  );
+
+  renderCards();
+  renderDeck();
+
+  renderRightStatsAndHistory();
+}
+
+/* ---------------- シーズンSelect ---------------- */
+function setupSeasonSelect(){
+  elFilterSeason.innerHTML = "";
+
+  const optAll = document.createElement("option");
+  optAll.value = "all";
+  optAll.textContent = "すべて";
+  elFilterSeason.appendChild(optAll);
+
+  const cur = document.createElement("option");
+  cur.value = CURRENT_SEASON;
+  cur.textContent = CURRENT_SEASON;
+  elFilterSeason.appendChild(cur);
+
+  for (const v of PAST_SEASONS) {
+    const o = document.createElement("option");
+    o.value = v;
+    o.textContent = v;
+    elFilterSeason.appendChild(o);
+  }
+
+  elFilterSeason.value = CURRENT_SEASON;
+}
+
+/* ---------------- 初期化 ---------------- */
+async function main(){
+  elAnonName.value = prefs.handle || "";
+  elAnonName.addEventListener("input", persistHandle);
+
+  setupSeasonSelect();
+
+  elMatchToggle.addEventListener("click", (e) => {
+    const pill = e.target.closest(".pill");
+    if (!pill) return;
+    setMatchType(pill.dataset.type);
+  });
+
+  elLoginBtn.addEventListener("click", doLogin);
+  elSaveBtn.addEventListener("click", saveDeck);
+
+  elResetBtn.addEventListener("click", deckReset);
+  elRearrangeBtn.addEventListener("click", deckRearrange);
+
+  elResultToggle.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-result]");
+    if (!btn) return;
+    setRecordKind(btn.dataset.result);
+  });
+
+  [elFilterPeriod, elFilterMatchType, elFilterSeason].forEach(el => {
+    el.addEventListener("change", () => renderRightStatsAndHistory());
+  });
+
+  try {
+    const res = await fetch("./characters_tarot.json", { cache: "no-store" });
+    tarotData = await res.json();
+  } catch (e) {
+    console.error("JSON読み込みエラー:", e);
+    return;
+  }
+
+  buildIdMaps();
+  setupDeck();
+
+  matchType = prefs.matchType || "origin";
+  updateMatchUI();
+
+  const names = prefs.myPicksByMode[matchType] || [];
+  mySelected = names.map(n => tarotData.find(t => t.name === n)).filter(Boolean).slice(0, MAX_PICK);
+  clampMyPickToMode();
+
+  resetRunState();
+  setRecordKind("win");
+
+  renderAll();
+
+  await initAuth();
+
+  window.addEventListener("resize", () => drawHistoryChart());
+}
+
+main();
+>>>>>>> f7b222e (UI fix and history chart update)
