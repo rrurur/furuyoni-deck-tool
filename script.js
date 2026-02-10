@@ -30,8 +30,51 @@ const baseFolder = "S10-1";
 /* =========================================================
    シーズン（ここだけ手動で更新しやすい）
 ========================================================= */
-const CURRENT_SEASON = "10-2";
-const PAST_SEASONS = ["10-1", "10-0"];
+const CURRENT_SEASON = "再演";
+const LEGACY_SEASON = "10-2";
+const PAST_SEASONS = [LEGACY_SEASON, "10-1", "10-0"];
+const LEGACY_IMAGE_FOLDER = "images_10-2";
+const REPLAY_TAROT_NAMES = [
+  "chikage",
+  "chikage_a1",
+  "hagane",
+  "hagane_a1",
+  "himika",
+  "himika_a1",
+  "korunu",
+  "korunu_a1",
+  "kururu",
+  "kururu_a1",
+  "kururu_a2",
+  "megumi",
+  "megumi_a1",
+  "oboro",
+  "oboro_a1",
+  "oboro_a2",
+  "raira",
+  "raira_a1",
+  "saine",
+  "saine_a1",
+  "saine_a2",
+  "shinra",
+  "shinra_a1",
+  "thallya",
+  "thallya_a1",
+  "tokoyo",
+  "tokoyo_a1",
+  "tokoyo_a2",
+  "yukihi_a",
+  "yukihi_a1",
+  "yurina",
+  "yurina_a1",
+  "yurina_a2"
+];
+const MATCH_TYPES = ["complete", "origin", "classic"];
+const MATCH_TYPE_LABELS = {
+  complete: "完全戦",
+  origin: "起源戦",
+  classic: "古典戦"
+};
 
 /* ---------------- Firebase ---------------- */
 const app = initializeApp(firebaseConfig);
@@ -39,11 +82,11 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 /* ---------------- 永続化（ローカル） ---------------- */
-const LS_KEY = "decktool_prefs_v8";
+const LS_KEY = "decktool_prefs_v9";
 const DEFAULT_PREFS = {
   handle: "",
-  matchType: "origin",
-  myPicksByMode: { origin: [], complete: [], paradox: [] }
+  matchType: "complete",
+  myPicksByMode: { complete: [], origin: [], classic: [] }
 };
 
 function loadLocalPrefs(){
@@ -53,12 +96,8 @@ function loadLocalPrefs(){
     const obj = JSON.parse(raw);
     return {
       handle: typeof obj.handle === "string" ? obj.handle : "",
-      matchType: ["origin","complete","paradox"].includes(obj.matchType) ? obj.matchType : "origin",
-      myPicksByMode: {
-        origin: Array.isArray(obj?.myPicksByMode?.origin) ? obj.myPicksByMode.origin : [],
-        complete: Array.isArray(obj?.myPicksByMode?.complete) ? obj.myPicksByMode.complete : [],
-        paradox: Array.isArray(obj?.myPicksByMode?.paradox) ? obj.myPicksByMode.paradox : []
-      }
+      matchType: normalizeMatchType(obj.matchType),
+      myPicksByMode: normalizePicksByMode(obj?.myPicksByMode)
     };
   }catch{
     return structuredClone(DEFAULT_PREFS);
@@ -99,8 +138,9 @@ let tarotData = [];
 let tarotIndexByName = new Map();
 let cardIdByPath = new Map();
 let cardPathById = [];
+let deckDisplaySeason = CURRENT_SEASON;
 
-let matchType = prefs.matchType || "origin";
+let matchType = normalizeMatchType(prefs.matchType);
 const MAX_PICK = 3;
 
 let mySelected = [];
@@ -113,6 +153,7 @@ let userPlays = []; // {id, createdAtMs, matchTypeNum, resultTypeNum, season, my
 
 // ---- 履歴ホバー/編集 ----
 let editingPlayId = null;  // nullなら通常、セットされている間は「保存」で上書き
+let editingPlaySeason = null;
 let hoverSnapshot = null;  // ホバー前の左デッキ状態退避
 let handlePrompted = false;
 
@@ -174,23 +215,75 @@ function displayNameByIdx(idx){
   return displayName(t) || String(idx);
 }
 
-function matchTypeToRange(type){
-  if (type === "origin") return [1, 12];
-  if (type === "paradox") return [13, 26];
-  return [1, 26];
+const replayTarotNameSet = new Set(REPLAY_TAROT_NAMES);
+
+function normalizeMatchType(type){
+  if (type === "paradox") return "classic";
+  return MATCH_TYPES.includes(type) ? type : "complete";
+}
+function normalizePicksByMode(obj){
+  return {
+    complete: Array.isArray(obj?.complete) ? obj.complete : [],
+    origin: Array.isArray(obj?.origin) ? obj.origin : [],
+    classic: Array.isArray(obj?.classic) ? obj.classic : (Array.isArray(obj?.paradox) ? obj.paradox : [])
+  };
+}
+function isReplayTarot(tarot){
+  return replayTarotNameSet.has(String(tarot?.name || ""));
+}
+function isReplayOriginTarot(tarot){
+  return isReplayTarot(tarot) && !String(tarot?.name || "").match(/_a[12]$/);
+}
+function tarotVariantOrder(name){
+  const s = String(name || "");
+  if (!s.includes("_")) return 0;
+  if (s.endsWith("_a1")) return 1;
+  if (s.endsWith("_a2")) return 2;
+  return 3;
+}
+function compareTarots(a, b){
+  const no = getTarotNo(a) - getTarotNo(b);
+  if (no) return no;
+  const vo = tarotVariantOrder(a?.name) - tarotVariantOrder(b?.name);
+  if (vo) return vo;
+  return String(a?.name || "").localeCompare(String(b?.name || ""));
 }
 function filteredTarots(){
-  const [lo, hi] = matchTypeToRange(matchType);
-  return tarotData.filter(t => {
-    const n = getTarotNo(t);
-    return n >= lo && n <= hi;
-  });
+  let arr;
+  if (matchType === "complete") arr = tarotData.filter(isReplayTarot);
+  else if (matchType === "origin") arr = tarotData.filter(isReplayOriginTarot);
+  else arr = tarotData.slice();
+  return arr.slice().sort(compareTarots);
 }
 function findIndexByName(arr, name){
   return arr.findIndex(t => t && t.name === name);
 }
 function compact(arr){
   return arr.filter(Boolean);
+}
+function normalizeSeason(value){
+  const s = (typeof value === "string") ? value.trim() : "";
+  return s || LEGACY_SEASON;
+}
+function usesLegacyImages(season){
+  return normalizeSeason(season) !== CURRENT_SEASON;
+}
+function resolveCardImagePath(cardPath, season=CURRENT_SEASON){
+  const p = String(cardPath || "");
+  if (!p) return "";
+  if (usesLegacyImages(season) && p.startsWith("images/")) {
+    return p.replace(/^images\//, `${LEGACY_IMAGE_FOLDER}/`);
+  }
+  return p;
+}
+function normalizeStoredPlay(play){
+  if (!play || typeof play !== "object") return null;
+  return { ...play, season: normalizeSeason(play.season) };
+}
+function clearEditingState(){
+  editingPlayId = null;
+  editingPlaySeason = null;
+  deckDisplaySeason = CURRENT_SEASON;
 }
 function updateMatchUI(){
   if (!elMatchToggle) return;
@@ -235,7 +328,7 @@ function resetRunState(){
     elCardPreview.style.background = "transparent";
   }
 
-  editingPlayId = null;
+  clearEditingState();
   hoverSnapshot = null;
 }
 
@@ -344,7 +437,7 @@ async function initAuth(){
     if (!isCloudUser(user)){
       syncHandleToInput();
 
-      matchType = prefs.matchType || "origin";
+      matchType = normalizeMatchType(prefs.matchType);
       updateMatchUI();
 
       const names = prefs.myPicksByMode[matchType] || [];
@@ -352,7 +445,7 @@ async function initAuth(){
       clampMyPickToMode();
 
       resetRunState();
-      userPlays = loadLocalPlays().slice().sort((a,b)=>(b.createdAtMs||0)-(a.createdAtMs||0));
+      userPlays = loadLocalPlays().map(normalizeStoredPlay).filter(Boolean).slice().sort((a,b)=>(b.createdAtMs||0)-(a.createdAtMs||0));
       renderAll();
       return;
     }
@@ -364,14 +457,10 @@ async function initAuth(){
     // prefs の反映（prefsがdocにあれば優先）
     if (data?.prefs?.matchType && data?.prefs?.myPicksByMode) {
       const mt = data.prefs.matchType;
-      if (["origin","complete","paradox"].includes(mt)) prefs.matchType = mt;
+      prefs.matchType = normalizeMatchType(mt);
 
       const mp = data.prefs.myPicksByMode;
-      prefs.myPicksByMode = {
-        origin: Array.isArray(mp.origin) ? mp.origin : [],
-        complete: Array.isArray(mp.complete) ? mp.complete : [],
-        paradox: Array.isArray(mp.paradox) ? mp.paradox : []
-      };
+      prefs.myPicksByMode = normalizePicksByMode(mp);
     }
 
     // handleはFirestore優先（ensureHandleで入ってる可能性もある）
@@ -382,7 +471,7 @@ async function initAuth(){
     syncHandleToInput();
     updateAuthBar(user);
 
-    matchType = prefs.matchType || "origin";
+    matchType = normalizeMatchType(prefs.matchType);
     updateMatchUI();
 
     const names = prefs.myPicksByMode[matchType] || [];
@@ -409,7 +498,7 @@ async function doLogin(){
 
 /* ---------------- 対戦形式 ---------------- */
 function setMatchType(type){
-  if (!["origin","complete","paradox"].includes(type)) return;
+  type = normalizeMatchType(type);
   if (type === matchType) return;
 
   persistMatchAndMyPicks();
@@ -534,14 +623,14 @@ function renderCards(){
 
     [...normals, ...trumps].forEach(cardPath => {
       const img = document.createElement("img");
-      img.src = cardPath;
+      img.src = resolveCardImagePath(cardPath, CURRENT_SEASON);
       img.alt = cardPath;
 
       if (deckSlots.includes(cardPath)) img.classList.add("in-deck");
 
       img.addEventListener("click", () => {
         if (elCardPreview){
-          elCardPreview.src = cardPath;
+          elCardPreview.src = resolveCardImagePath(cardPath, CURRENT_SEASON);
           elCardPreview.alt = cardPath;
           elCardPreview.style.background = "#fff";
         }
@@ -603,7 +692,7 @@ function renderDeck(){
     if (!cardPath) return;
 
     const img = document.createElement("img");
-    img.src = cardPath;
+    img.src = resolveCardImagePath(cardPath, deckDisplaySeason);
     img.alt = cardPath;
     img.draggable = true;
 
@@ -740,7 +829,7 @@ async function exportDeckPng(){
     for (let i = 0; i < 10; i++){
       const p = deckSlots[i];
       if (!p) continue;
-      tasks.push(loadImg(p).then(img => ({ i, img })).catch(() => null));
+      tasks.push(loadImg(resolveCardImagePath(p, deckDisplaySeason)).then(img => ({ i, img })).catch(() => null));
     }
     const loaded = (await Promise.all(tasks)).filter(Boolean);
 
@@ -812,6 +901,7 @@ function setRecordKind(kind){
 
 /* ---------------- 保存（履歴にも使う） ---------------- */
 function matchTypeId(type){
+  type = normalizeMatchType(type);
   if (type === "origin") return 0;
   if (type === "complete") return 1;
   return 2;
@@ -819,7 +909,7 @@ function matchTypeId(type){
 function matchTypeFromId(num){
   if (num === 0) return "origin";
   if (num === 1) return "complete";
-  return "paradox";
+  return "classic";
 }
 function resultTypeId(kind){
   if (kind === "win") return 0;
@@ -843,6 +933,7 @@ function snapshotLeft(){
     deckName: elDeckName ? elDeckName.value : "",
     memo: elMemo ? elMemo.value : "",
     deckSlots: deckSlots.slice(),
+    deckDisplaySeason,
     previewSrc: elCardPreview ? elCardPreview.src : "",
     previewAlt: elCardPreview ? elCardPreview.alt : "",
     previewBg: elCardPreview ? elCardPreview.style.background : "transparent"
@@ -853,6 +944,7 @@ function restoreLeft(s){
   if (elDeckName) elDeckName.value = s.deckName || "";
   if (elMemo) elMemo.value = s.memo || "";
   for (let i=0;i<10;i++) deckSlots[i] = s.deckSlots[i] || null;
+  deckDisplaySeason = normalizeSeason(s.deckDisplaySeason || CURRENT_SEASON);
   if (elCardPreview){
     elCardPreview.src = s.previewSrc || "";
     elCardPreview.alt = s.previewAlt || "";
@@ -873,6 +965,7 @@ function startHover(play){
   if (!play) return;
   if (!hoverSnapshot) hoverSnapshot = snapshotLeft();
 
+  deckDisplaySeason = normalizeSeason(play.season);
   if (elDeckName) elDeckName.value = play.deckName || "";
   if (elMemo) elMemo.value = play.memo || "";
   applyDeckFromCardIds(play.cardIds);
@@ -894,6 +987,8 @@ function beginEdit(play){
   if (!play) return;
   hoverSnapshot = null;
   editingPlayId = play.id;
+  editingPlaySeason = normalizeSeason(play.season);
+  deckDisplaySeason = editingPlaySeason;
 
   matchType = matchTypeFromId(play.matchTypeNum);
   updateMatchUI();
@@ -926,7 +1021,7 @@ function beginEdit(play){
 async function saveDeck(){
   const deckName = (elDeckName ? elDeckName.value : "").trim();
   const memo = (elMemo ? elMemo.value : "").trim();
-  const season = CURRENT_SEASON;
+  const season = editingPlayId ? normalizeSeason(editingPlaySeason || CURRENT_SEASON) : CURRENT_SEASON;
 
   const cardIds = deckSlots.map(p => {
     if (!p) return -1;
@@ -959,7 +1054,9 @@ async function saveDeck(){
       if (i >= 0){
         userPlays[i] = { ...userPlays[i], ...basePayload };
       }
-      editingPlayId = null;
+      clearEditingState();
+      renderDeck();
+      renderCards();
     } else {
       userPlays.unshift({
         id: makeLocalId(),
@@ -996,7 +1093,9 @@ async function saveDeck(){
   try {
     if (editingPlayId) {
       await updateDoc(doc(db, "decks", editingPlayId), cloudPayload);
-      editingPlayId = null;
+      clearEditingState();
+      renderDeck();
+      renderCards();
     } else {
       await addDoc(collection(db, "decks"), {
         ...cloudPayload,
@@ -1135,7 +1234,7 @@ function filterForPairStat(){
 function filterForChart(){
   const base = filterBaseByPeriodAndSeason();
   const mt = elFilterMatchType ? elFilterMatchType.value : "all";
-  const mtNum = (mt === "origin") ? 0 : (mt === "complete") ? 1 : (mt === "paradox") ? 2 : null;
+  const mtNum = (mt === "all") ? null : matchTypeId(mt);
 
   return base.filter(p => {
     if (p.resultTypeNum !== 0 && p.resultTypeNum !== 1) return false;
@@ -1180,9 +1279,9 @@ function updateRuleStatsLine(){
     return s;
   };
 
-  elRuleStatsLine.appendChild(mk("起源戦", sel0, wr0));
-  elRuleStatsLine.appendChild(mk("完全戦", sel1, wr1));
-  elRuleStatsLine.appendChild(mk("逆理戦", sel2, wr2));
+  elRuleStatsLine.appendChild(mk(MATCH_TYPE_LABELS.complete, sel1, wr1));
+  elRuleStatsLine.appendChild(mk(MATCH_TYPE_LABELS.origin, sel0, wr0));
+  elRuleStatsLine.appendChild(mk(MATCH_TYPE_LABELS.classic, sel2, wr2));
 }
 
 /* ---------------- 右：ペア統計 ---------------- */
@@ -1703,7 +1802,7 @@ async function main(){
   buildIdMaps();
   setupDeck();
 
-  matchType = prefs.matchType || "origin";
+  matchType = normalizeMatchType(prefs.matchType);
   updateMatchUI();
 
   const names = prefs.myPicksByMode[matchType] || [];
