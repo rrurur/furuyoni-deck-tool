@@ -1,7 +1,7 @@
 
 /* script.js - 修正版（入れ替え・プレビュー・桜色出力） */
 const baseFolder = "S10-1";
-=======
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
   getAuth,
