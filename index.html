@@ -1,179 +1,605 @@
 <!DOCTYPE html>
 <html lang="ja">
-<link rel="icon" type="image/jpeg" href="twiicon_sa_49.jpg">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>デッキ編成ツール</title>
+
 <style>
-body {
-font-family: sans-serif;
-margin: 0;
-padding: 10px;
-background: #f0f0f0;
+  :root{
+    --ui-font: system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
+    --panel-bg: rgba(255,255,255,0.86);
+    --border: rgba(0,0,0,0.14);
+    --blue: #0077cc;
+
+    /* デッキ(左) と 履歴(右) を同じ固定高さにする */
+    --dh-height: 640px;
+  }
+
+  body{
+    font-family: var(--ui-font);
+    margin:0;
+    padding:10px;
+    background: url("./bg.png") repeat;
+    background-color:#f0f0f0;
+  }
+
+  /* 右上ログイン */
+  #authBar{
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    z-index: 9999;
+    background: rgba(255,255,255,0.86);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 10px;
+    backdrop-filter: blur(2px);
+  }
+  #authIdText{
+    font-size:12px;
+    color:#222;
+    white-space:nowrap;
+  }
+
+  /* 全体：左右2カラム */
+  .app-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:16px;
+    align-items:start;
+  }
+
+  .panel{
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius:12px;
+    padding:10px;
+    box-sizing:border-box;
+  }
+  .panel-plain{
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .section-title{
+    font-size:18px;
+    font-weight:700;
+    margin: 0 0 10px;
+  }
+
+  /* 左上：キャラ選択＋対戦ルール */
+  .top-left{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+
+  /* 対戦ルール（丸ボタン） */
+  .match-toggle{
+    display:inline-flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 10px;
+    border:1px solid #888;
+    border-radius:999px;
+    background: rgba(255,255,255,0.9);
+    cursor:pointer;
+    user-select:none;
+    line-height:1.15;
+    white-space:nowrap;
+    font-size:14px;
+  }
+  .pill .dot{
+    width:12px; height:12px;
+    border-radius:50%;
+    border:2px solid #666;
+    box-sizing:border-box;
+    background:transparent;
+  }
+  .pill.active .dot{ background:#666; }
+
+  /* 右上：ルール統計（枠なし） */
+  #ruleStatsLine{
+    display:flex;
+    gap:18px;
+    align-items:baseline;
+    flex-wrap:wrap;
+    font-size:12px;
+    line-height:1.2;
+    padding:0;
+    margin: 2px 0 0;
+  }
+
+  /* キャラ一覧（左） */
+  .tarot-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    justify-content:flex-start;
+    align-content:flex-start;
+  }
+  .tarot-list img{
+    max-height:150px;
+    height:auto;
+    cursor:pointer;
+    transition:filter 0.2s;
+    image-rendering:auto;
+  }
+  .tarot-list img.selected{
+    filter: grayscale(100%) brightness(0.7);
+  }
+
+  /* 選択中キャラ（右） */
+  .selected-slots{
+    min-height: 1px;
+    box-sizing:border-box;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+  .selected-slots.has-selection{
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius:12px;
+    padding:10px;
+  }
+  .selected-slots-inner{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    justify-content:flex-start;
+  }
+
+  .sel-slot{
+    width:130px;
+    height:300px;
+    background: rgba(255,255,255,0.9);
+    border:1px solid rgba(0,0,0,0.16);
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .sel-slot img{
+    max-height:300px;
+    height:auto;
+    cursor:pointer;
+    user-select:none;
+    image-rendering:auto;
+  }
+  .sel-slot.disabled{
+    background: rgba(0,0,0,0.18);
+    border-color: rgba(0,0,0,0.22);
+  }
+  .sel-slot.disabled img{
+    filter: grayscale(100%) brightness(0.6);
+  }
+
+  /* 選択中キャラの直下：AB/BC/AC 使用率・勝率（縦並び） */
+  #pairStatLine{
+    margin-top:8px;
+    font-size:12px;
+    line-height:1.2;
+  }
+  .pair-row{
+    margin:2px 0;
+    white-space:nowrap;
+  }
+
+  /* カード一覧（全幅） */
+  .card-area{
+    overflow: visible;
+    position: relative;
+    z-index: 5;
+    grid-column: 1 / 3;
+    justify-self: start;  /* 追加：左寄せで伸びない */
+    width: fit-content;   /* 追加：白背景を内容で閉じる */
+    max-width: 100%;      /* 追加：保険 */
+  }
+/* 置換：#cardListContainer（flexをやめてgridにする） */
+#cardListContainer{
+  display: grid;
+  grid-template-columns: auto auto; /* 左：カード一覧 / 右：拡大画像 */
+  column-gap: 24px;                 /* ★「少しスペースをあけた右側」 */
+  align-items: start;
 }
 
-.tarot-container {
-display: flex;
-flex-wrap: wrap;
-justify-content: center;
-gap: 6px;
-margin-bottom: 20px;
-}
-.tarot-container img {
-height: auto;
-max-height: 180px;
-cursor: pointer;
-transition: filter 0.2s;
-}
-.tarot-container img.selected {
-filter: grayscale(100%) brightness(0.7);
+/* 置換：#cardContainer（幅を勝手に伸ばさない） */
+#cardContainer{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin:0;
+  width: fit-content; /* ★カード一覧の幅に合わせる */
 }
 
-#cardContainer {
-display: flex;
-flex-direction: column;
-gap: 10px;
-margin-bottom: 20px;
+/* 任意：拡大側を左寄せ固定 */
+#card-preview{
+  justify-self: start;
 }
-.card-row {
-display: flex;
-gap: 4px 20px; /* 通常カードと切り札の間 */
-}
-.card-row img {
-max-height: 150px;
-cursor: pointer;
-transition: filter 0.2s;
-}
-.card-row img.in-deck {
-filter: grayscale(100%) brightness(0.7);
-}
+  .card-row{
+    display:flex;
+    flex-wrap:nowrap;
+    gap:0;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding-bottom:6px;
+  }
+  .card-row img{
+    width:80px;
+    height:auto;
+    cursor:pointer;
+    transition:filter 0.2s;
+    flex:0 0 auto;
+  }
+  .card-row img.in-deck{
+    filter: grayscale(100%) brightness(0.7);
+  }
 
-#deckWrapper {
-border: 2px solid #aaa;
-padding: 10px;
-margin-bottom: 20px;
-}
+  /* デッキ（左）と履歴（右）を同じ高さに固定 */
+  .fixed-panel{
+    height: var(--dh-height);
+    display:flex;
+    flex-direction:column;
+  }
 
-#deckName {
-width: 100%;
-padding: 4px 6px;
-font-size: 14px;
-margin-bottom: 4px;
-box-sizing: border-box;
-border: 1px solid #aaa;
-}
+  /* デッキ上部 */
+  #deckTopRow{
+    display:flex;
+    gap:6px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-bottom:8px;
+  }
+  #deckName{ width:10em; padding:4px 6px; font-size:14px; border:1px solid #aaa; box-sizing:border-box; }
+  #anonName{ width:6em;  padding:4px 6px; font-size:14px; border:1px solid #aaa; box-sizing:border-box; }
 
-#deckNameDivider {
-height: 1px;
-background: #aaa;
-margin-bottom: 10px;
-}
+  /* 勝敗他：3分割スイッチ */
+  .seg3{
+    display:inline-flex;
+    border:1px solid #888;
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .seg3 button{
+    padding:6px 10px;
+    font-size:13px;
+    background:#fff;
+    color:#111;
+    border:none;
+    cursor:pointer;
+    min-width:48px;
+  }
+  .seg3 button + button{ border-left:1px solid #888; }
+  .seg3 button.active{ background: var(--blue); color:#fff; }
 
-#deck {
-display: grid;
-grid-template-columns: repeat(5, auto);
-grid-template-rows: repeat(2, auto);
-gap: 0;
-justify-content: start; /* 左揃え */
-background: #ddd;
-padding: 10px;
-}
-#deck div {
-width: 100px;
-height: 140px;
-border: 1px dashed #aaa;
-display: flex;
-align-items: center;
-justify-content: center;
-background: white;
-}
-#deck img {
-max-width: 100%;
-max-height: 100%;
-cursor: pointer;
-}
+  button{
+    padding:8px 16px;
+    font-size:14px;
+    border:none;
+    border-radius:6px;
+    background: var(--blue);
+    color:#fff;
+    cursor:pointer;
+  }
+  button:hover{ background:#005fa3; }
 
-button {
-padding: 8px 16px;
-font-size: 14px;
-border: none;
-border-radius: 5px;
-background: #0077cc;
-color: #fff;
-cursor: pointer;
-}
-button:hover {
-background: #005fa3;
-}
+  #deckRow{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  #deck{
+    display:grid;
+    grid-template-columns:repeat(5, auto);
+    grid-template-rows:repeat(2, auto);
+    gap:0;
+    justify-content:start;
+    background:#ddd;
+    padding:10px;
+    border-radius:10px;
+  }
+  .deck-slot{
+    width:100px; height:140px;
+    border:1px dashed #aaa;
+    display:flex; align-items:center; justify-content:center;
+    background:white;
+    overflow:hidden;
+  }
+  .deck-slot img{ max-width:100%; max-height:100%; cursor:pointer; }
+
+  #deckTools{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .iconbtn{
+    width:40px; height:40px;
+    border:none; border-radius:8px;
+    background: var(--blue); color:#fff;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px;
+    padding:0;
+  }
+  .iconbtn:hover{ background:#005fa3; }
+
+  /* メモ：9行程度、スクロール */
+  #deckMemo{
+    width:100%;
+    height: 14.0em;
+    resize:none;
+    box-sizing:border-box;
+    font-family: var(--ui-font);
+    font-size:14px;
+    line-height:1.4;
+    padding:10px;
+    border-radius:12px;
+    border: 1px solid var(--border);
+    background: var(--panel-bg);
+    overflow:auto;
+  }
+
+  /* 履歴（右） */
+  .history-canvas-wrap{
+    width:100%;
+    height:260px;
+    border:1px solid rgba(0,0,0,0.12);
+    border-radius:10px;
+    background: rgba(255,255,255,0.75);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    margin-bottom:10px;
+    flex: 0 0 auto;
+  }
+  #historyCanvas{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+
+  .filters-row{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+    font-size:12px;
+    flex: 0 0 auto;
+  }
+  .filters-row label{
+    opacity:0.9;
+    white-space:nowrap;
+  }
+  .filters-row select{
+    padding:6px 8px;
+    border-radius:8px;
+    border:1px solid #aaa;
+    background:#fff;
+    font-size:13px;
+  }
+
+  /* 対戦履歴：残り高さを使い、スクロール */
+  .history-list{
+    border:1px solid rgba(0,0,0,0.12);
+    border-radius:10px;
+    background: rgba(255,255,255,0.75);
+    overflow:auto;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .hrow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 10px;
+    border-bottom:1px solid rgba(0,0,0,0.08);
+    font-size:13px;
+  }
+  .hrow:last-child{ border-bottom:none; }
+
+  .hleft{
+    display:flex;
+    align-items:center;
+    flex:1 1 auto;
+    min-width:0;
+  }
+
+  .names{
+    display:inline-flex;
+    align-items:center;
+    gap:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .names .dim{ opacity:0.45; }
+
+  .hright{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex:0 0 auto;
+    margin-left:auto;
+  }
+
+  .res-win{ color:#c00; font-weight:700; }
+
+  .editbtn{
+    padding:6px 10px;
+    font-size:12px;
+    border-radius:8px;
+    background: #fff;
+    color:#111;
+    border:1px solid rgba(0,0,0,0.25);
+    cursor:pointer;
+  }
+  .editbtn:hover{ background:#f3f3f3; }
+
+  .delbtn{
+    padding:6px 10px;
+    font-size:12px;
+    border-radius:8px;
+    background: var(--blue);
+    color:#fff;
+    border:none;
+    cursor:pointer;
+  }
+  .delbtn:hover{ background:#005fa3; }
+
+  .spacer{ min-height:1px; }
 </style>
 </head>
+
 <body>
 
-<h2>メガミ選択（最大2柱）</h2>
-<div id="tarotContainer" class="tarot-container"></div>
+<!-- 右上ログイン＋ID表示 -->
+<div id="authBar">
+  <span id="authIdText"></span>
+  <button id="loginBtn" type="button">ログイン</button>
+</div>
+<div id="userBadge" style="display:none;"></div>
+<div class="app-grid">
 
-<h2>カード一覧</h2>
-<!-- カード一覧とプレビューを横並びにするコンテナを追加 -->
-<div id="cardListContainer" style="display: flex; gap: 48px; align-items: flex-start;">
+  <!-- Row1 Left: キャラクター選択 + 対戦ルール -->
+  <div class="panel">
+    <div class="top-left">
+      <div class="section-title" style="margin:0;">キャラクター選択</div>
+      <div class="match-toggle" id="matchToggle">
+        <div class="pill active" data-type="origin"><span class="dot"></span><span>起源戦</span></div>
+        <div class="pill" data-type="complete"><span class="dot"></span><span>完全戦</span></div>
+        <div class="pill" data-type="paradox"><span class="dot"></span><span>逆理戦</span></div>
+      </div>
+    </div>
+  </div>
 
-<!-- 左側：カード一覧 -->
-<div id="cardContainer"></div>
+  <!-- Row1 Right: ルール統計（枠なし） -->
+  <div class="panel-plain">
+    <div id="ruleStatsLine"></div>
+  </div>
 
-<!-- 右側：拡大表示 -->
-<div id="card-preview" style="flex-shrink: 0;">
-<img id="preview-image" src="" alt=""
-style="width:200px; height:auto; display:block; border:1px solid #ccc; padding:4px; background:transparent;">
+  <!-- Row2 Left: 自分キャラ一覧 -->
+  <div class="panel">
+    <div id="myTarotList" class="tarot-list"></div>
+  </div>
+
+  <!-- Row2 Right: 自分選択中 + ペア統計 -->
+  <div>
+    <div id="mySelectedSlots" class="selected-slots"></div>
+    <div id="pairStatLine"></div>
+  </div>
+
+  <!-- Row3: カード一覧（全幅） -->
+  <div class="panel card-area">
+    <div class="section-title">カード一覧</div>
+    <div id="cardListContainer">
+      <div id="cardContainer"></div>
+
+      <div id="card-preview" style="flex-shrink:0;">
+        <img id="preview-image" src="" alt=""
+          style="width:200px; height:auto; display:block; border:1px solid #ccc; padding:4px; background:transparent;">
+      </div>
+    </div>
+  </div>
+
+  <!-- Row4 Left: デッキ（固定高さ） -->
+  <div class="panel fixed-panel" id="deckPanel">
+    <div class="section-title">デッキ</div>
+
+    <div id="deckTopRow">
+      <input type="text" id="deckName" placeholder="デッキ名">
+      <input type="text" id="anonName" placeholder="@">
+
+      <div class="seg3" id="resultToggle" title="記録種別（勝/敗/他）">
+        <button type="button" data-result="win" class="active">勝</button>
+        <button type="button" data-result="loss">敗</button>
+        <button type="button" data-result="other">他</button>
+      </div>
+
+      <button id="saveBtn" type="button">保存</button>
+    </div>
+
+    <div id="deckRow">
+      <div id="deck"></div>
+
+      <div id="deckTools">
+        <button id="rearrangeBtn" class="iconbtn" title="再配置">≡</button>
+        <button id="resetBtn" class="iconbtn" title="リセット">↺</button>
+      </div>
+    </div>
+
+    <textarea id="deckMemo" placeholder="メモ"></textarea>
+  </div>
+
+  <!-- Row4 Right: 履歴（固定高さ、対戦履歴は残りでスクロール） -->
+  <div class="panel fixed-panel" id="historyPanel">
+    <div class="section-title">履歴</div>
+
+    <div class="history-canvas-wrap">
+      <canvas id="historyCanvas"></canvas>
+    </div>
+
+    <div class="filters-row">
+      <label for="filterPeriod">期間</label>
+      <select id="filterPeriod">
+        <option value="1d" selected>1日</option>
+        <option value="1w">1週間</option>
+        <option value="1m">1か月</option>
+        <option value="3m">3か月</option>
+        <option value="1y">1年</option>
+        <option value="all">すべて</option>
+      </select>
+
+      <label for="filterMatchType">対戦方式</label>
+      <select id="filterMatchType">
+        <option value="all" selected>すべて</option>
+        <option value="origin">起源</option>
+        <option value="complete">完全</option>
+        <option value="paradox">逆理</option>
+      </select>
+
+      <label for="filterSeason">シーズン</label>
+      <select id="filterSeason"></select>
+    </div>
+
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+  <!-- Row5 Left: 対戦相手（文字のみ） -->
+  <div class="panel">
+    <div class="section-title" style="margin:0;">対戦相手</div>
+  </div>
+
+  <!-- Row5 Right: 空き -->
+  <div class="spacer"></div>
+
+  <!-- Row6 Left: 相手キャラ一覧 -->
+  <div class="panel">
+    <div id="oppTarotList" class="tarot-list"></div>
+  </div>
+
+  <!-- Row6 Right: 相手選択中 -->
+  <div>
+    <div id="oppSelectedSlots" class="selected-slots"></div>
+  </div>
+
 </div>
 
-</div>
-
-
-<h2>デッキ</h2>
-<div id="deckWrapper">
-<!-- デッキ名入力は短く -->
-<input type="text" id="deckName" placeholder="デッキ名" style="width:360px;">
-
-<!-- 名前入力枠を追加 -->
-<label for="userName">@</label>
-<input type="text" id="userName" placeholder="@" style="width:80px;">
-
-<div id="deckNameDivider"></div>
-<div id="deck"></div>
-</div>
-
-<button id="exportDeck">デッキを画像として出力</button>
-<canvas id="deckCanvas" style="display:none;"></canvas>
-
-<textarea id="deckMemo" placeholder="メモを入力" style="width:100%; height:60px; resize:none;"></textarea>
-
-<!-- Firebase SDK読み込み -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
-
-<!-- Firebase 初期化 -->
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyABKEbvIc5hSJzKrCSjAzFIhns5o_HhSkg",
-  authDomain: "furuyoni-diary-1918f.firebaseapp.com",
-  projectId: "furuyoni-diary-1918f",
-  storageBucket: "furuyoni-diary-1918f.firebasestorage.app",
-  messagingSenderId: "1031976761542",
-  appId: "1:1031976761542:web:da9bd7fe26790c8940ffc7"
-};
-firebase.initializeApp(firebaseConfig);
-</script>
-
-<!-- 元のスクリプト -->
-<script src="script.js"></script>
+<script type="module" src="./script.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
