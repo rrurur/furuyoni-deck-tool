@@ -29,9 +29,6 @@ const baseFolder = "S10-1";
 
 /* =========================================================
    シーズン（ここだけ手動で更新しやすい）
-   - 現在：10-2（デフォルト）
-   - 過去：10-1, 10-0
-   - 10-3が来たら：CURRENT_SEASON="10-3" にして、PAST_SEASONSに"10-2"を追加するだけ
 ========================================================= */
 const CURRENT_SEASON = "10-2";
 const PAST_SEASONS = ["10-1", "10-0"];
@@ -72,6 +69,31 @@ function saveLocalPrefs(p){
 }
 let prefs = loadLocalPrefs();
 
+/* ---------------- 匿名時の履歴保存（Firestoreを触らない） ---------------- */
+const LS_PLAYS_KEY = "decktool_local_plays_v1";
+function loadLocalPlays(){
+  try{
+    const raw = localStorage.getItem(LS_PLAYS_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  }catch{
+    return [];
+  }
+}
+function saveLocalPlays(arr){
+  try{
+    localStorage.setItem(LS_PLAYS_KEY, JSON.stringify(Array.isArray(arr) ? arr : []));
+  }catch{}
+}
+function makeLocalId(){
+  if (globalThis.crypto?.randomUUID) return crypto.randomUUID();
+  return `local_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+}
+function isCloudUser(user){
+  return !!(user && !user.isAnonymous);
+}
+
 /* ---------------- 状態 ---------------- */
 let tarotData = [];
 let tarotIndexByName = new Map();
@@ -89,7 +111,7 @@ const deckSlots = Array(10).fill(null);
 let recordKind = "win"; // win / loss / other
 let userPlays = []; // {id, createdAtMs, matchTypeNum, resultTypeNum, season, myTarotIdx, oppTarotIdx, deckName, memo, cardIds}
 
-// ---- 追加：履歴ホバー/編集 ----
+// ---- 履歴ホバー/編集 ----
 let editingPlayId = null;  // nullなら通常、セットされている間は「保存」で上書き
 let hoverSnapshot = null;  // ホバー前の左デッキ状態退避
 let handlePrompted = false;
@@ -97,6 +119,7 @@ let handlePrompted = false;
 /* ---------------- DOM ---------------- */
 const elMatchToggle = document.getElementById("matchToggle");
 const elRuleStatsLine = document.getElementById("ruleStatsLine");
+const elDownloadBtn = document.getElementById("downloadBtn");
 
 const elMyTarotList = document.getElementById("myTarotList");
 const elMySelectedSlots = document.getElementById("mySelectedSlots");
@@ -113,7 +136,7 @@ const elDeckName = document.getElementById("deckName");
 const elMemo = document.getElementById("deckMemo");
 const elAnonName = document.getElementById("anonName");
 
-const elAuthIdText = document.getElementById("authIdText"); // あれば右上表示
+const elAuthIdText = document.getElementById("authIdText");
 const elLoginBtn = document.getElementById("loginBtn");
 const elSaveBtn = document.getElementById("saveBtn");
 const elResetBtn = document.getElementById("resetBtn");
@@ -132,6 +155,10 @@ const elHistoryList = document.getElementById("historyList");
 function pct(n, d, fallback=0){
   if (!d || d <= 0) return fallback;
   return Math.round((n / d) * 100);
+}
+
+function normalizeHandle(v){
+  return (v || "").trim().replace(/^@+/, "");
 }
 
 function getTarotNo(tarot){
@@ -172,19 +199,27 @@ function updateMatchUI(){
   });
 }
 
-/* ---------------- ログインID表示 ---------------- */
+/* ---------------- ログイン表示（右上） ---------------- */
 function updateAuthBar(user){
+  const logged = isCloudUser(user);
+
+  if (elLoginBtn){
+    elLoginBtn.style.display = logged ? "none" : "inline-flex";
+  }
   if (!elAuthIdText) return;
-  if (!user){
+
+  if (!logged){
     elAuthIdText.textContent = "";
     return;
   }
-  if (user.isAnonymous){
-    elAuthIdText.textContent = `匿名ID:${user.uid}`;
-  } else {
-    const h = (prefs.handle || "").trim();
-    elAuthIdText.textContent = h ? `@${h}` : `ID:${user.uid}`;
-  }
+
+  const h = normalizeHandle(prefs.handle);
+  elAuthIdText.textContent = h ? `@${h}` : "@未設定";
+}
+
+function syncHandleToInput(){
+  if (!elAnonName) return;
+  elAnonName.value = normalizeHandle(prefs.handle);
 }
 
 /* ---------------- 実行状態のリセット（ログイン時にリセットするもの） ---------------- */
@@ -210,8 +245,7 @@ async function safeGetUserDoc(uid){
     const ref = doc(db, "users", uid);
     const snap = await getDoc(ref);
     return snap.exists() ? snap.data() : null;
-  }catch(e){
-    console.warn("user doc read skipped:", e?.code || e);
+  }catch{
     return null;
   }
 }
@@ -219,27 +253,28 @@ async function safeSetUserDoc(uid, data){
   try{
     const ref = doc(db, "users", uid);
     await setDoc(ref, data, { merge: true });
-  }catch(e){
-    console.warn("user doc write skipped:", e?.code || e);
-  }
+  }catch{}
 }
 
-/* ---------------- 永続化（ローカル＋可能ならFirestore） ---------------- */
+/* ---------------- 永続化（ローカル＋ログイン時のみFirestore） ---------------- */
 function persistHandle(){
   if (!elAnonName) return;
-  prefs.handle = (elAnonName.value || "").trim();
+  prefs.handle = normalizeHandle(elAnonName.value);
   saveLocalPrefs(prefs);
+
   const u = auth.currentUser;
-  if (u) safeSetUserDoc(u.uid, { handle: prefs.handle });
+  if (isCloudUser(u)) safeSetUserDoc(u.uid, { handle: prefs.handle });
+
   updateAuthBar(auth.currentUser);
 }
+
 function persistMatchAndMyPicks(){
   prefs.matchType = matchType;
   prefs.myPicksByMode[matchType] = mySelected.map(t => t.name).slice(0, MAX_PICK);
   saveLocalPrefs(prefs);
 
   const u = auth.currentUser;
-  if (u) {
+  if (isCloudUser(u)) {
     safeSetUserDoc(u.uid, {
       handle: prefs.handle,
       prefs: { matchType: prefs.matchType, myPicksByMode: prefs.myPicksByMode },
@@ -256,6 +291,45 @@ function clampOppPickToMode(){
   oppSelected = oppSelected.filter(t => ok.has(t.name));
 }
 
+/* ---------------- 初回ログイン時：handle入力 ---------------- */
+async function ensureHandleOnFirstLogin(user, userDoc){
+  if (!isCloudUser(user)) return;
+
+  const docHandle = normalizeHandle(userDoc?.handle);
+  const localHandle = normalizeHandle(prefs.handle);
+
+  // すでにFirestoreにあるならそれを採用
+  if (docHandle){
+    if (docHandle !== localHandle){
+      prefs.handle = docHandle;
+      saveLocalPrefs(prefs);
+    }
+    return;
+  }
+
+  // Firestoreに無いがローカルにあるなら、それを紐付け（ポップアップ不要）
+  if (localHandle){
+    await safeSetUserDoc(user.uid, { handle: localHandle });
+    return;
+  }
+
+  // 両方無い＝初回 → ポップアップ
+  if (handlePrompted) return;
+  handlePrompted = true;
+
+  const def = normalizeHandle(user.displayName || "");
+  while (true){
+    const raw = prompt("初回ログイン：アカウント名(@)を入力してください（Gmailは表示に使いません）", def);
+    if (raw === null) break;
+    const h = normalizeHandle(raw);
+    if (!h) { alert("空欄は不可です。"); continue; }
+    prefs.handle = h;
+    saveLocalPrefs(prefs);
+    await safeSetUserDoc(user.uid, { handle: h });
+    break;
+  }
+}
+
 /* ---------------- 認証 ---------------- */
 async function initAuth(){
   onAuthStateChanged(auth, async (user) => {
@@ -266,8 +340,28 @@ async function initAuth(){
       return;
     }
 
-    const data = await safeGetUserDoc(user.uid);
+    // 匿名（未ログイン扱い）：右上はログインボタン、履歴はローカル
+    if (!isCloudUser(user)){
+      syncHandleToInput();
 
+      matchType = prefs.matchType || "origin";
+      updateMatchUI();
+
+      const names = prefs.myPicksByMode[matchType] || [];
+      mySelected = names.map(n => tarotData.find(t => t.name === n)).filter(Boolean).slice(0, MAX_PICK);
+      clampMyPickToMode();
+
+      resetRunState();
+      userPlays = loadLocalPlays().slice().sort((a,b)=>(b.createdAtMs||0)-(a.createdAtMs||0));
+      renderAll();
+      return;
+    }
+
+    // ログイン済み：ユーザードック取得→初回handle設定→同期
+    const data = await safeGetUserDoc(user.uid);
+    await ensureHandleOnFirstLogin(user, data);
+
+    // prefs の反映（prefsがdocにあれば優先）
     if (data?.prefs?.matchType && data?.prefs?.myPicksByMode) {
       const mt = data.prefs.matchType;
       if (["origin","complete","paradox"].includes(mt)) prefs.matchType = mt;
@@ -279,16 +373,14 @@ async function initAuth(){
         paradox: Array.isArray(mp.paradox) ? mp.paradox : []
       };
     }
-    if (typeof data?.handle === "string" && data.handle) prefs.handle = data.handle;
 
-    if (elAnonName) elAnonName.value = prefs.handle || "";
+    // handleはFirestore優先（ensureHandleで入ってる可能性もある）
+    const data2 = await safeGetUserDoc(user.uid);
+    if (normalizeHandle(data2?.handle)) prefs.handle = normalizeHandle(data2.handle);
 
-    // Gmailなどは表示名に使わない。未設定なら入力を促す（ログインは通す）
-    if (!prefs.handle && !handlePrompted) {
-      handlePrompted = true;
-      alert("表示名(@)を入力してください（Gmailアドレスは表示に使いません）");
-      if (elAnonName) elAnonName.focus();
-    }
+    saveLocalPrefs(prefs);
+    syncHandleToInput();
+    updateAuthBar(user);
 
     matchType = prefs.matchType || "origin";
     updateMatchUI();
@@ -301,7 +393,6 @@ async function initAuth(){
     await refreshUserPlays();
 
     renderAll();
-    persistHandle();
     persistMatchAndMyPicks();
   });
 }
@@ -317,16 +408,7 @@ async function doLogin(){
     } else {
       await signInWithPopup(auth, provider);
     }
-
-    // onAuthStateChangedで再描画されるが、念のため
-    updateAuthBar(auth.currentUser);
-
-    resetRunState();
-    await refreshUserPlays();
-    renderAll();
-
-    persistHandle();
-    persistMatchAndMyPicks();
+    // UI更新は onAuthStateChanged 側で行う
   }catch(e){
     console.error(e);
   }
@@ -388,13 +470,11 @@ function renderSelectedSlots(container, selectedArr, onRemoveAt, onSwapOrMove){
     const tarot = selectedArr[i];
     const img = document.createElement("img");
 
-    // 同じ画像を改めて読み込み（高解像度元を縮小している前提）
     img.src = tarot.img;
     img.alt = displayName(tarot);
 
     img.draggable = true;
 
-    // 右側の再選択 → 解除
     img.addEventListener("click", () => onRemoveAt(i));
 
     img.addEventListener("dragstart", (ev) => {
@@ -473,7 +553,6 @@ function renderCards(){
           elCardPreview.style.background = "#fff";
         }
 
-        // クリック直後にデッキへ反映
         if (deckSlots.includes(cardPath)) removeCardFromDeck(cardPath);
         else addCardToDeck(cardPath);
 
@@ -617,6 +696,98 @@ function deckReset(){
   renderCards();
 }
 
+/* ---------------- PNG出力 ---------------- */
+function safeFilename(s){
+  const name = (s || "").trim() || "deck";
+  return name.replace(/[\\\/:*?"<>|]/g, "_").slice(0, 60);
+}
+function loadImg(src){
+  return new Promise((resolve, reject) => {
+    const im = new Image();
+    im.onload = () => resolve(im);
+    im.onerror = () => reject(new Error("image load failed: " + src));
+    im.src = src;
+  });
+}
+async function exportDeckPng(){
+  try{
+    const cols = 5, rows = 2;
+
+    const slotW = 240;
+    const slotH = 336;
+
+    const gap = 12;
+    const pad = 18;
+    const scale = 2;
+
+    const w = pad * 2 + cols * slotW + (cols - 1) * gap;
+    const h = pad * 2 + rows * slotH + (rows - 1) * gap;
+
+    const canvas = document.createElement("canvas");
+    canvas.width  = Math.floor(w * scale);
+    canvas.height = Math.floor(h * scale);
+
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.strokeStyle = "rgba(0,0,0,0.18)";
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 10; i++){
+      const r = Math.floor(i / cols);
+      const c = i % cols;
+      const x = pad + c * (slotW + gap);
+      const y = pad + r * (slotH + gap);
+      ctx.strokeRect(x, y, slotW, slotH);
+    }
+
+    const tasks = [];
+    for (let i = 0; i < 10; i++){
+      const p = deckSlots[i];
+      if (!p) continue;
+      tasks.push(loadImg(p).then(img => ({ i, img })).catch(() => null));
+    }
+    const loaded = (await Promise.all(tasks)).filter(Boolean);
+
+    for (const it of loaded){
+      const i = it.i;
+      const img = it.img;
+
+      const r = Math.floor(i / cols);
+      const c = i % cols;
+      const x = pad + c * (slotW + gap);
+      const y = pad + r * (slotH + gap);
+
+      const s = Math.min(slotW / img.width, slotH / img.height);
+      const dw = img.width * s;
+      const dh = img.height * s;
+      const dx = x + (slotW - dw) / 2;
+      const dy = y + (slotH - dh) / 2;
+
+      ctx.drawImage(img, dx, dy, dw, dh);
+    }
+
+    const dn = safeFilename(elDeckName?.value);
+    const stamp = new Date();
+    const y = stamp.getFullYear();
+    const mo = String(stamp.getMonth() + 1).padStart(2, "0");
+    const da = String(stamp.getDate()).padStart(2, "0");
+    const hh = String(stamp.getHours()).padStart(2, "0");
+    const mm = String(stamp.getMinutes()).padStart(2, "0");
+    const ss = String(stamp.getSeconds()).padStart(2, "0");
+
+    const a = document.createElement("a");
+    a.download = `${dn}_${y}${mo}${da}_${hh}${mm}${ss}.png`;
+    a.href = canvas.toDataURL("image/png");
+    a.click();
+  }catch(e){
+    console.error(e);
+    alert("PNG出力に失敗しました（画像パス/配置を確認してください）");
+  }
+}
+
 /* ---------------- IDマップ ---------------- */
 function buildIdMaps(){
   tarotIndexByName = new Map();
@@ -731,7 +902,6 @@ function beginEdit(play){
   hoverSnapshot = null;
   editingPlayId = play.id;
 
-  // その履歴の状態で編集
   matchType = matchTypeFromId(play.matchTypeNum);
   updateMatchUI();
 
@@ -759,13 +929,8 @@ function beginEdit(play){
   renderAll();
 }
 
-/* ---------------- Firestore 書き込み ---------------- */
+/* ---------------- 保存（匿名はローカル、ログイン時はFirestore） ---------------- */
 async function saveDeck(){
-  const user = auth.currentUser;
-  if (!user) {
-    try { await signInAnonymously(auth); } catch(e) { console.error(e); return; }
-  }
-
   const deckName = (elDeckName ? elDeckName.value : "").trim();
   const memo = (elMemo ? elMemo.value : "").trim();
   const season = CURRENT_SEASON;
@@ -788,20 +953,64 @@ async function saveDeck(){
     myTarotIdx,
     oppTarotIdx,
     cardIds,
+    updatedAtMs: Date.now()
+  };
+
+  const u = auth.currentUser;
+
+  // 匿名（未ログイン扱い）ならローカル保存
+  if (!isCloudUser(u)){
+    const nowMs = Date.now();
+    if (editingPlayId){
+      const i = userPlays.findIndex(p => p.id === editingPlayId);
+      if (i >= 0){
+        userPlays[i] = { ...userPlays[i], ...basePayload };
+      }
+      editingPlayId = null;
+    } else {
+      userPlays.unshift({
+        id: makeLocalId(),
+        createdAtMs: nowMs,
+        matchTypeNum: basePayload.matchType,
+        resultTypeNum: basePayload.resultType,
+        season,
+        myTarotIdx,
+        oppTarotIdx,
+        deckName,
+        memo,
+        cardIds
+      });
+    }
+    saveLocalPlays(userPlays);
+    renderRightStatsAndHistory();
+    return;
+  }
+
+  // ログイン済みはFirestore
+  const cloudPayload = {
+    matchType: basePayload.matchType,
+    resultType: basePayload.resultType,
+    season,
+    deckName,
+    memo,
+    myTarotIdx,
+    oppTarotIdx,
+    cardIds,
     updatedAt: serverTimestamp(),
     updatedAtMs: Date.now()
   };
 
   try {
     if (editingPlayId) {
-      await updateDoc(doc(db, "decks", editingPlayId), basePayload);
+      await updateDoc(doc(db, "decks", editingPlayId), cloudPayload);
       editingPlayId = null;
     } else {
       await addDoc(collection(db, "decks"), {
         ownerUid: auth.currentUser.uid,
         createdAt: serverTimestamp(),
         createdAtMs: Date.now(),
-        ...basePayload
+        likeCount: 0,  
+        ...cloudPayload
       });
     }
   } catch (e) {
@@ -813,10 +1022,16 @@ async function saveDeck(){
   renderRightStatsAndHistory();
 }
 
-/* ---------------- 履歴の取得（doc id も保持 / deck+memo+cardIdsも持つ） ---------------- */
+/* ---------------- 履歴の取得（doc id も保持） ---------------- */
 async function refreshUserPlays(){
-  userPlays = [];
   const u = auth.currentUser;
+
+  if (!isCloudUser(u)){
+    userPlays = loadLocalPlays().slice().sort((a,b) => (b.createdAtMs||0)-(a.createdAtMs||0));
+    return;
+  }
+
+  userPlays = [];
   if (!u) return;
 
   try{
@@ -860,6 +1075,18 @@ async function refreshUserPlays(){
 
 async function deletePlay(playId){
   if (!playId) return;
+
+  const u = auth.currentUser;
+
+  // 匿名はローカル削除
+  if (!isCloudUser(u)){
+    if (editingPlayId === playId) editingPlayId = null;
+    userPlays = userPlays.filter(p => p.id !== playId);
+    saveLocalPlays(userPlays);
+    renderRightStatsAndHistory();
+    return;
+  }
+
   try{
     await deleteDoc(doc(db, "decks", playId));
   }catch(e){
@@ -922,7 +1149,7 @@ function filterForChart(){
   });
 }
 
-/* ---------------- 右上：ルール統計（"選択率"という文字は出さない） ---------------- */
+/* ---------------- 右上：ルール統計 ---------------- */
 function updateRuleStatsLine(){
   if (!elRuleStatsLine) return;
   const plays = filterForRuleStats();
@@ -946,7 +1173,6 @@ function updateRuleStatsLine(){
   const sel1 = pct(by[1].t, total, 0);
   const sel2 = pct(by[2].t, total, 0);
 
-  // 初期50%
   const wr0 = pct(by[0].w, by[0].w + by[0].l, 50);
   const wr1 = pct(by[1].w, by[1].w + by[1].l, 50);
   const wr2 = pct(by[2].w, by[2].w + by[2].l, 50);
@@ -964,7 +1190,7 @@ function updateRuleStatsLine(){
   elRuleStatsLine.appendChild(mk("逆理戦", sel2, wr2));
 }
 
-/* ---------------- 右：AB/BC/AC 3通りを縦表示（キャラ番号順のABCから） ---------------- */
+/* ---------------- 右：ペア統計 ---------------- */
 function updatePairStatLine(){
   if (!elPairStatLine) return;
   elPairStatLine.innerHTML = "";
@@ -1035,17 +1261,14 @@ function drawHistoryChart(){
   const w = cssW - padL - padR;
   const h = cssH - padT - padB;
 
-  // 枠
   ctx.strokeStyle = "rgba(0,0,0,0.18)";
   ctx.lineWidth = 1;
   ctx.strokeRect(padL, padT, w, h);
 
-  // y軸ラベル
   ctx.fillStyle = "rgba(0,0,0,0.75)";
   ctx.font = "12px system-ui";
   ctx.fillText("勝率(%)", 4, padT + 12);
 
-  // y目盛（0/50/100）
   const ticksY = [0,50,100];
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.font = "11px system-ui";
@@ -1061,7 +1284,6 @@ function drawHistoryChart(){
 
   const period = elFilterPeriod ? elFilterPeriod.value : "1d";
 
-  // 期間=1日 の場合：横軸を「今日の対戦回数」にする（例外仕様）
   if (period === "1d") {
     const startToday = new Date();
     startToday.setHours(0,0,0,0);
@@ -1152,7 +1374,6 @@ function drawHistoryChart(){
     return;
   }
 
-  // 1日以外：1w/1m は「日」、3m/1y/all は「月」
   const xMode =
     (period === "1w" || period === "1m") ? "day" :
     "month";
@@ -1181,7 +1402,6 @@ function drawHistoryChart(){
     return padT + (1 - y/100) * h;
   }
 
-  // x目盛（等間隔に5本）
   ctx.strokeStyle = "rgba(0,0,0,0.08)";
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.font = "11px system-ui";
@@ -1204,7 +1424,6 @@ function drawHistoryChart(){
     ctx.fillText(label, x - 10, padT + h + 18);
   }
 
-  // データ無し
   if (plays.length === 0) {
     const y50 = yToPx(50);
     ctx.strokeStyle = "rgba(0,119,204,0.35)";
@@ -1220,7 +1439,6 @@ function drawHistoryChart(){
     return;
   }
 
-  // 時間軸で累積勝率
   let wins = 0, losses = 0;
   const pts = [];
   for (const p of plays) {
@@ -1273,7 +1491,7 @@ function fmtDateTime(ms){
   });
 }
 
-/* ---------------- 右：対戦履歴（勝は赤、削除は青、編集追加、ホバーで左にプレビュー） ---------------- */
+/* ---------------- 右：対戦履歴（ホバーで左にプレビュー） ---------------- */
 function makeNamesSpanNoSpace(idxs){
   const wrap = document.createElement("span");
   wrap.className = "names";
@@ -1299,7 +1517,6 @@ function renderHistoryList(){
     const row = document.createElement("div");
     row.className = "hrow";
 
-    // ホバーでプレビュー（デッキ＋メモ）
     row.addEventListener("mouseenter", () => startHover(p));
     row.addEventListener("mouseleave", () => endHover());
 
@@ -1312,7 +1529,6 @@ function renderHistoryList(){
     left.appendChild(hy);
     left.appendChild(makeNamesSpanNoSpace(p.oppTarotIdx));
 
-    // ★ 追加：対戦日時（キャラの右／勝敗の左）
     const date = document.createElement("div");
     date.className = "hdate";
     date.textContent = fmtDateTime(p.createdAtMs);
@@ -1325,7 +1541,6 @@ function renderHistoryList(){
     if (p.resultTypeNum === 0) r.classList.add("res-win");
     right.appendChild(r);
 
-    // 編集（削除の左）
     const edit = document.createElement("button");
     edit.className = "editbtn";
     edit.type = "button";
@@ -1435,7 +1650,7 @@ function setupSeasonSelect(){
 /* ---------------- 初期化 ---------------- */
 async function main(){
   if (elAnonName){
-    elAnonName.value = prefs.handle || "";
+    syncHandleToInput();
     elAnonName.addEventListener("input", persistHandle);
   }
 
@@ -1454,6 +1669,7 @@ async function main(){
 
   if (elResetBtn) elResetBtn.addEventListener("click", deckReset);
   if (elRearrangeBtn) elRearrangeBtn.addEventListener("click", deckRearrange);
+  if (elDownloadBtn) elDownloadBtn.addEventListener("click", exportDeckPng);
 
   if (elResultToggle){
     elResultToggle.addEventListener("click", (e) => {
