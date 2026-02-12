@@ -398,17 +398,10 @@ async function initAuth(){
 }
 
 async function doLogin(){
-  const user = auth.currentUser;
   const provider = new GoogleAuthProvider();
   try{
-    if (!user) {
-      await signInWithPopup(auth, provider);
-    } else if (user.isAnonymous) {
-      await linkWithPopup(user, provider);
-    } else {
-      await signInWithPopup(auth, provider);
-    }
-    // UI更新は onAuthStateChanged 側で行う
+    await signInWithPopup(auth, provider);
+    // UI更新は onAuthStateChanged 側でOK
   }catch(e){
     console.error(e);
   }
