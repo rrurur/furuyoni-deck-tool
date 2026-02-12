@@ -1006,11 +1006,12 @@ async function saveDeck(){
       editingPlayId = null;
     } else {
       await addDoc(collection(db, "decks"), {
+        ...cloudPayload,
         ownerUid: auth.currentUser.uid,
         createdAt: serverTimestamp(),
         createdAtMs: Date.now(),
         likeCount: 0,  
-        ...cloudPayload
+ 
       });
     }
   } catch (e) {
