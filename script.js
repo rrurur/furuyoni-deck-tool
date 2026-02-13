@@ -1004,7 +1004,7 @@ async function saveDeck(){
         createdAt: serverTimestamp(),
         createdAtMs: Date.now(),
         likeCount: 0,  
- 
+
       });
     }
   } catch (e) {
@@ -1105,7 +1105,8 @@ function periodToMs(v){
 
 function filterBaseByPeriodAndSeason(){
   const now = Date.now();
-  const dur = periodToMs(elFilterPeriod ? elFilterPeriod.value : "1d");
+  // ★変更：要素が無い場合のデフォルトも "all"
+  const dur = periodToMs(elFilterPeriod ? elFilterPeriod.value : "all");
   const seasonSel = (elFilterSeason ? elFilterSeason.value : "all") || "all";
 
   return userPlays.filter(p => {
@@ -1276,7 +1277,8 @@ function drawHistoryChart(){
     ctx.fillText(String(t), 10, y + 4);
   }
 
-  const period = elFilterPeriod ? elFilterPeriod.value : "1d";
+  // ★変更：要素が無い場合のデフォルトも "all"
+  const period = elFilterPeriod ? elFilterPeriod.value : "all";
 
   if (period === "1d") {
     const startToday = new Date();
@@ -1385,8 +1387,17 @@ function drawHistoryChart(){
     .slice()
     .sort((a,b) => (a.createdAtMs||0) - (b.createdAtMs||0));
 
-  const endT = now;
-  const startT = dur ? (now - dur) : (plays.length ? plays[0].createdAtMs : now);
+  // ★変更：「all」は “最初の投稿〜最後の投稿” にする（nowで終わらせない）
+  let endT = now;
+  let startT = dur ? (now - dur) : (plays.length ? plays[0].createdAtMs : now);
+
+  if (!dur) {
+    const first = plays.length ? (plays[0].createdAtMs || now) : now;
+    const last  = plays.length ? (plays[plays.length - 1].createdAtMs || now) : now;
+    startT = first;
+    endT   = last;
+  }
+
   const span = Math.max(1, endT - startT);
 
   function tToPx(t){
@@ -1649,6 +1660,9 @@ async function main(){
   }
 
   setupSeasonSelect();
+
+  // ★追加：期間のデフォルトを「すべて」
+  if (elFilterPeriod) elFilterPeriod.value = "all";
 
   if (elMatchToggle){
     elMatchToggle.addEventListener("click", (e) => {
