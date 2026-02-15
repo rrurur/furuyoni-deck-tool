@@ -1,226 +1,587 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ふるよに デッキタイムライン</title>
-  <meta name="description" content="ふるよにのデッキ投稿タイムライン。" />
+<meta charset="UTF-8" />
+<title>デッキ編成ツール</title>
 
-  <style>
-    :root{
-      --bg:#f5f6f8;
-      --card:#fff;
-      --border:rgba(0,0,0,.12);
-      --text:#111;
-      --muted:rgba(0,0,0,.6);
-      --blue:#0b63d1;
-      --red:#d11b2e;
-      --green:#1b8f3a;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      overflow-x:hidden;
-    }
-    a{color:inherit;text-decoration:none}
-    header{
-      position:sticky; top:0; z-index:10;
-      background:rgba(255,255,255,.92);
-      backdrop-filter: blur(6px);
-      border-bottom:1px solid var(--border);
-    }
-    .topbar{
-      max-width:1400px; margin:0 auto;
-      padding:10px 14px;
-      display:flex; align-items:center; gap:12px;
-    }
-    .brand{font-weight:800;padding:6px 10px;border-radius:10px}
-    .toolLink{
-      margin-left:8px;
-      font-weight:800;
-      padding:6px 10px;
-      border-radius:10px;
-      border:2px solid var(--blue);
-      background:#fff;
-    }
-    .spacer{flex:1}
-    .userArea{display:flex; align-items:center; gap:10px}
-    .userLabel{font-size:12px; color:var(--muted); white-space:nowrap}
-    button{
-      border:1px solid var(--border);
-      background:#fff;
-      color:#111;
-      border-radius:10px;
-      padding:8px 12px;
-      cursor:pointer;
-      font-weight:800;
-    }
-    button.primary{background:var(--blue);border-color:transparent;color:#fff}
-    button.ghost{background:transparent}
-    main{max-width:1400px;margin:0 auto;padding:14px}
-    h1{font-size:20px;margin:10px 0 14px}
+<style>
+  :root{
+    --ui-font: system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
+    --panel-bg: rgba(255,255,255,0.86);
+    --border: rgba(0,0,0,0.14);
+    --blue: #0077cc;
+    --dh-height: 640px;
+  }
 
-    .tabs{display:flex; gap:8px; flex-wrap:wrap;margin:10px 0 12px}
-    .tab{padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:#fff;font-weight:900;cursor:pointer}
-    .tab.active{background:#111;color:#fff;border-color:#111}
+  body{
+    font-family: var(--ui-font);
+    margin:0;
+    padding:10px;
+    background: url("./bg.png") repeat;
+    background-color:#f0f0f0;
+  }
 
-    .filters{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:12px;
-      margin:0 0 14px;
-    }
-    .frow{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:10px}
-    .flabel{font-size:12px; color:var(--muted); min-width:90px}
-    .chips{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
-    label.chk{
-      display:inline-flex; align-items:center; gap:6px;
-      font-size:13px;
-      border:1px solid var(--border);
-      background:#fff;
-      padding:6px 10px;
-      border-radius:999px;
-      cursor:pointer;
-      user-select:none;
-      font-weight:800;
-    }
-    label.chk input{transform: translateY(1px)}
-    .weapons, .envs{display:flex; flex-wrap:wrap; gap:8px}
+  #authBar{
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    z-index: 9999;
+    background: rgba(255,255,255,0.86);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 10px;
+    backdrop-filter: blur(2px);
+  }
+  #authIdText{
+    font-size:12px;
+    color:#222;
+    white-space:nowrap;
+  }
 
-    /* ★ 横1列（縦並び） */
-    .posts{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      align-items:stretch;
-    }
-    .post{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:12px;
-      overflow:hidden;
-    }
-    .titleRow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
-    .title{font-weight:900;font-size:16px}
-    .by{font-size:12px;color:var(--blue);font-weight:900;cursor:pointer;white-space:nowrap}
-    .date{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+  .app-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:16px;
+    align-items:start;
+  }
 
-    .meta{
-      font-size:12px;
-      color:var(--muted);
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin:6px 0 10px;
-      font-weight:800;
-    }
-    .meta b{color:#111}
-    .meta b.win{color:var(--red)}
+  .panel{
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius:12px;
+    padding:10px;
+    box-sizing:border-box;
+  }
+  .panel-plain{
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
 
-    .canvasWrap{
-      width:100%;
-      border:1px solid var(--border);
-      border-radius:14px;
-      overflow:hidden;
-      background:#fff;
-    }
-    canvas.deck{width:100%;height:auto;display:block}
+  .section-title{
+    font-size:18px;
+    font-weight:700;
+    margin: 0 0 10px;
+  }
 
-    .memo{
-      margin-top:10px;
-      padding:10px 10px;
-      background:#fff;
-      font-size:13px;
-      line-height:1.5;
-      white-space:pre-wrap;
-      word-break:break-word;
-      font-weight:700;
-    }
+  .top-left{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
 
-    /* ★ キャラ表示：枠なし・スペースなし（JSで連結表示） */
-    .names{
-      margin-top:10px;
-      font-size:13px;
-      font-weight:400;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+  .match-toggle{
+    display:inline-flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 10px;
+    border:1px solid #888;
+    border-radius:999px;
+    background: rgba(255,255,255,0.9);
+    cursor:pointer;
+    user-select:none;
+    line-height:1.15;
+    white-space:nowrap;
+    font-size:14px;
+  }
+  .pill .dot{
+    width:12px; height:12px;
+    border-radius:50%;
+    border:2px solid #666;
+    box-sizing:border-box;
+    background:transparent;
+  }
+  .pill.active .dot{ background:#666; }
 
-    .actions{margin-top:10px;display:flex;align-items:center;gap:8px}
-    .likeBtn,.bmBtn{
-      width:32px;height:32px;border-radius:10px;
-      display:inline-flex;align-items:center;justify-content:center;
-      font-size:14px;border:1px solid var(--border);background:#fff;cursor:pointer;user-select:none;font-weight:900;line-height:1;
-    }
-    .likeBtn.on{background:rgba(209,27,46,.12);border-color:rgba(209,27,46,.35);color:var(--red)}
-    .bmBtn{color:#111}
-    .bmBtn.on{background:rgba(27,143,58,.14);border-color:rgba(27,143,58,.35);color:var(--green)}
-    .likeCount{font-weight:900;color:var(--muted);min-width:28px;font-size:12px}
+  #ruleStatsLine{
+    display:flex;
+    gap:18px;
+    align-items:baseline;
+    flex-wrap:wrap;
+    font-size:12px;
+    line-height:1.2;
+    padding:0;
+    margin: 2px 0 0;
+  }
 
-    #status{margin:14px 0 60px;font-size:12px;color:var(--muted);text-align:center;font-weight:800}
-  </style>
+  .tarot-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    justify-content:flex-start;
+    align-content:flex-start;
+  }
+  .tarot-list img{
+    max-height:150px;
+    height:auto;
+    cursor:pointer;
+    transition:filter 0.2s;
+    image-rendering:auto;
+  }
+  .tarot-list img.selected{
+    filter: grayscale(100%) brightness(0.7);
+  }
+
+  .selected-slots{
+    min-height: 1px;
+    box-sizing:border-box;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+  .selected-slots.has-selection{
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius:12px;
+    padding:10px;
+  }
+  .selected-slots-inner{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    justify-content:flex-start;
+  }
+
+  .sel-slot{
+    width:130px;
+    height:300px;
+    background: rgba(255,255,255,0.9);
+    border:1px solid rgba(0,0,0,0.16);
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .sel-slot img{
+    max-height:300px;
+    height:auto;
+    cursor:pointer;
+    user-select:none;
+    image-rendering:auto;
+  }
+  .sel-slot.disabled{
+    background: rgba(0,0,0,0.18);
+    border-color: rgba(0,0,0,0.22);
+  }
+  .sel-slot.disabled img{
+    filter: grayscale(100%) brightness(0.6);
+  }
+
+  #pairStatLine{
+    margin-top:8px;
+    font-size:12px;
+    line-height:1.2;
+  }
+  .pair-row{
+    margin:2px 0;
+    white-space:nowrap;
+  }
+
+  /* カード一覧（白背景を内容で閉じる） */
+  .card-area{
+    overflow: visible;
+    position: relative;
+    z-index: 5;
+    grid-column: 1 / 3;
+    justify-self: start;
+    width: max-content;
+    max-width: 100%;
+  }
+
+  #cardListContainer{
+    display: inline-grid;
+    grid-template-columns: auto auto; /* 左：一覧 / 右：拡大 */
+    column-gap: 24px;                /* ★ 少しスペース */
+    align-items: start;
+  }
+
+  #cardContainer{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin:0;
+    width: max-content;
+    max-width: calc(100vw - 60px - 240px); /* ざっくり上限（崩れ防止） */
+  }
+
+  #card-preview{
+    justify-self: start;
+  }
+
+  .card-row{
+    display:flex;
+    flex-wrap:nowrap;
+    gap:0;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding-bottom:6px;
+  }
+  .card-row img{
+    width:80px;
+    height:auto;
+    cursor:pointer;
+    transition:filter 0.2s;
+    flex:0 0 auto;
+  }
+  .card-row img.in-deck{
+    filter: grayscale(100%) brightness(0.7);
+  }
+
+  .fixed-panel{
+    height: var(--dh-height);
+    display:flex;
+    flex-direction:column;
+  }
+
+  #deckTopRow{
+    display:flex;
+    gap:6px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-bottom:8px;
+  }
+  #deckName{ width:10em; padding:4px 6px; font-size:14px; border:1px solid #aaa; box-sizing:border-box; }
+  #anonName{ width:6em;  padding:4px 6px; font-size:14px; border:1px solid #aaa; box-sizing:border-box; }
+
+  .seg3{
+    display:inline-flex;
+    border:1px solid #888;
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .seg3 button{
+    padding:6px 10px;
+    font-size:13px;
+    background:#fff;
+    color:#111;
+    border:none;
+    cursor:pointer;
+    min-width:48px;
+  }
+  .seg3 button + button{ border-left:1px solid #888; }
+  .seg3 button.active{ background: var(--blue); color:#fff; }
+
+  button{
+    padding:8px 16px;
+    font-size:14px;
+    border:none;
+    border-radius:6px;
+    background: var(--blue);
+    color:#fff;
+    cursor:pointer;
+  }
+  button:hover{ background:#005fa3; }
+
+  #deckRow{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  #deck{
+    display:grid;
+    grid-template-columns:repeat(5, auto);
+    grid-template-rows:repeat(2, auto);
+    gap:0;
+    justify-content:start;
+    background:#ddd;
+    padding:10px;
+    border-radius:10px;
+  }
+  .deck-slot{
+    width:100px; height:140px;
+    border:1px dashed #aaa;
+    display:flex; align-items:center; justify-content:center;
+    background:white;
+    overflow:hidden;
+  }
+  .deck-slot img{ max-width:100%; max-height:100%; cursor:pointer; }
+
+  #deckTools{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .iconbtn{
+    width:40px; height:40px;
+    border:none; border-radius:8px;
+    background: var(--blue); color:#fff;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px;
+    padding:0;
+  }
+  .iconbtn:hover{ background:#005fa3; }
+
+  #deckMemo{
+    width:100%;
+    height: 14.0em;
+    resize:none;
+    box-sizing:border-box;
+    font-family: var(--ui-font);
+    font-size:14px;
+    line-height:1.4;
+    padding:10px;
+    border-radius:12px;
+    border: 1px solid var(--border);
+    background: var(--panel-bg);
+    overflow:auto;
+  }
+
+  .history-canvas-wrap{
+    width:100%;
+    height:260px;
+    border:1px solid rgba(0,0,0,0.12);
+    border-radius:10px;
+    background: rgba(255,255,255,0.75);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    margin-bottom:10px;
+    flex: 0 0 auto;
+  }
+  #historyCanvas{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+
+  .filters-row{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+    font-size:12px;
+    flex: 0 0 auto;
+  }
+  .filters-row label{
+    opacity:0.9;
+    white-space:nowrap;
+  }
+  .filters-row select{
+    padding:6px 8px;
+    border-radius:8px;
+    border:1px solid #aaa;
+    background:#fff;
+    font-size:13px;
+  }
+
+  .history-list{
+    border:1px solid rgba(0,0,0,0.12);
+    border-radius:10px;
+    background: rgba(255,255,255,0.75);
+    overflow:auto;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .hrow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 10px;
+    border-bottom:1px solid rgba(0,0,0,0.08);
+    font-size:13px;
+  }
+  .hrow:last-child{ border-bottom:none; }
+
+  .hleft{
+    display:flex;
+    align-items:center;
+    flex:1 1 auto;
+    min-width:0;
+  }
+
+  /* ★追加：対戦日時 */
+  .hdate{
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 12px;
+    opacity: 0.75;
+  }
+
+  .names{
+    display:inline-flex;
+    align-items:center;
+    gap:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .names .dim{ opacity:0.45; }
+
+  .hright{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex:0 0 auto;
+    margin-left:auto;
+  }
+
+  .res-win{ color:#c00; font-weight:700; }
+
+  .editbtn{
+    padding:6px 10px;
+    font-size:12px;
+    border-radius:8px;
+    background: #fff;
+    color:#111;
+    border:1px solid rgba(0,0,0,0.25);
+    cursor:pointer;
+  }
+  .editbtn:hover{ background:#f3f3f3; }
+
+  .delbtn{
+    padding:6px 10px;
+    font-size:12px;
+    border-radius:8px;
+    background: var(--blue);
+    color:#fff;
+    border:none;
+    cursor:pointer;
+  }
+  .delbtn:hover{ background:#005fa3; }
+
+  .spacer{ min-height:1px; }
+</style>
 </head>
 
 <body>
-<header>
-  <div class="topbar">
-    <span class="brand">ふるよに デッキタイムライン</span>
-    <a class="toolLink" href="https://rrurur.github.io/furuyoni-deck-tool/" target="_blank" rel="noopener">デッキ編成ツール</a>
-    <div class="spacer"></div>
-    <div class="userArea">
-      <span id="userLabel" class="userLabel"></span>
-      <button id="loginBtn" class="primary" type="button">ログイン</button>
-      <button id="logoutBtn" class="ghost" type="button" style="display:none;">ログアウト</button>
+
+<div id="authBar">
+  <span id="authIdText"></span>
+  <button id="loginBtn" type="button">ログイン</button>
+</div>
+
+<div class="app-grid">
+
+  <div class="panel">
+    <div class="top-left">
+      <div class="section-title" style="margin:0;">キャラクター選択</div>
+      <div class="match-toggle" id="matchToggle">
+        <div class="pill active" data-type="origin"><span class="dot"></span><span>起源戦</span></div>
+        <div class="pill" data-type="complete"><span class="dot"></span><span>完全戦</span></div>
+        <div class="pill" data-type="paradox"><span class="dot"></span><span>逆理戦</span></div>
+      </div>
     </div>
   </div>
-</header>
 
-<main>
-  <h1>最近の投稿</h1>
-
-  <div class="tabs">
-    <div class="tab active" data-tab="latest">最新</div>
-    <div class="tab" data-tab="likes">いいね</div>
-    <div class="tab" data-tab="bookmarks">ブックマーク</div>
+  <div class="panel-plain">
+    <div id="ruleStatsLine"></div>
   </div>
 
-  <section class="filters">
-    <div class="frow">
-      <div class="flabel">対戦形式（OR）</div>
-      <div class="chips" id="matchChips">
-        <label class="chk"><input type="checkbox" data-mt="0">起源戦</label>
-        <label class="chk"><input type="checkbox" data-mt="1">完全戦</label>
-        <label class="chk"><input type="checkbox" data-mt="2">逆理戦</label>
+  <div class="panel">
+    <div id="myTarotList" class="tarot-list"></div>
+  </div>
+
+  <div>
+    <div id="mySelectedSlots" class="selected-slots"></div>
+    <div id="pairStatLine"></div>
+  </div>
+
+  <div class="panel card-area">
+    <div class="section-title">カード一覧</div>
+    <div id="cardListContainer">
+      <div id="cardContainer"></div>
+
+      <div id="card-preview">
+        <img id="preview-image" src="" alt=""
+          style="width:200px; height:auto; display:block; border:1px solid #ccc; padding:4px; background:transparent;">
+      </div>
+    </div>
+  </div>
+
+  <div class="panel fixed-panel" id="deckPanel">
+    <div class="section-title">デッキ</div>
+
+    <div id="deckTopRow">
+      <input type="text" id="deckName" placeholder="デッキ名">
+      <input type="text" id="anonName" placeholder="@">
+
+      <div class="seg3" id="resultToggle" title="記録種別（勝/敗/他）">
+        <button type="button" data-result="win" class="active">勝</button>
+        <button type="button" data-result="loss">敗</button>
+        <button type="button" data-result="other">他</button>
+      </div>
+
+      <button id="saveBtn" type="button">保存</button>
+    </div>
+
+    <div id="deckRow">
+      <div id="deck"></div>
+
+      <div id="deckTools">
+        <button id="rearrangeBtn" class="iconbtn" title="再配置">≡</button>
+        <!-- ★追加：再配置の下、リセットの上 -->
+        <button id="downloadBtn" class="iconbtn" title="PNG出力">⬇</button>
+        <button id="resetBtn" class="iconbtn" title="リセット">↺</button>
       </div>
     </div>
 
-    <div class="frow">
-      <div class="flabel">環境（OR）</div>
-      <div class="envs" id="envBox"></div>
+    <textarea id="deckMemo" placeholder="メモ"></textarea>
+  </div>
+
+  <div class="panel fixed-panel" id="historyPanel">
+    <div class="section-title">履歴</div>
+
+    <div class="history-canvas-wrap">
+      <canvas id="historyCanvas"></canvas>
     </div>
 
-    <div class="frow">
-      <div class="flabel">メガミ（AND）</div>
-      <div class="weapons" id="weaponBox"></div>
+    <div class="filters-row">
+      <label for="filterPeriod">期間</label>
+      <select id="filterPeriod">
+        <option value="1d">1日</option>
+        <option value="1w">1週間</option>
+        <option value="1m">1か月</option>
+        <option value="3m">3か月</option>
+        <option value="1y">1年</option>
+        <option value="all" selected>すべて</option>
+      </select>
+
+      <label for="filterMatchType">対戦方式</label>
+      <select id="filterMatchType">
+        <option value="all" selected>すべて</option>
+        <option value="origin">起源</option>
+        <option value="complete">完全</option>
+        <option value="paradox">逆理</option>
+      </select>
+
+      <label for="filterSeason">シーズン</label>
+      <select id="filterSeason"></select>
     </div>
 
-    <div class="frow" id="playerFilterRow" style="display:none;">
-      <div class="flabel">user</div>
-      <div class="chips" id="playerFilterBox"></div>
-    </div>
-  </section>
+    <div class="history-list" id="historyList"></div>
+  </div>
 
-  <section id="posts" class="posts"></section>
-  <div id="sentinel" style="height:1px;"></div>
-  <div id="status"></div>
-</main>
+  <div class="panel">
+    <div class="section-title" style="margin:0;">対戦相手</div>
+  </div>
 
+  <div class="spacer"></div>
+
+  <div class="panel">
+    <div id="oppTarotList" class="tarot-list"></div>
+  </div>
+
+  <div>
+    <div id="oppSelectedSlots" class="selected-slots"></div>
+  </div>
+
+</div>
+<script type="text/javascript">blogparts={"base":"https://www.dlsite.com/","type":"circle","site":"home","circle_key":"yost","query":{"keyword_maker_name":"RG62982","order":"rate_d","ana_flg":"all","options":["-GRO","-MEN"]},"title":"サークル作品","display":"horizontal","detail":"1","column":"h","image":"small","count":"3","wrapper":"1","autorotate":true,"aid":"fururu"}</script><script type="text/javascript" src="https://www.dlsite.com/js/blogparts.js" charset="UTF-8"></script>
 <script type="module" src="./script.js"></script>
 </body>
 </html>
