@@ -913,7 +913,7 @@
   },
   {
     "name": "korunu_a1",
-    "weapon": "橇A1",
+    "weapon": "試",
     "img": "tarots/tarot_15_a1.png",
     "cards": [
       "images/na_15_korunu_o_n_1.png",
@@ -931,7 +931,7 @@
   },
   {
     "name": "megumi_a1",
-    "weapon": "棹A1",
+    "weapon": "端",
     "img": "tarots/tarot_19_a1.png",
     "cards": [
       "images/na_19_megumi_o_n_1.png",
