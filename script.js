@@ -276,6 +276,18 @@ function resolveCardImagePath(cardPath, season=CURRENT_SEASON){
   }
   return p;
 }
+function applyCardImage(img, cardPath, season=CURRENT_SEASON){
+  const primary = resolveCardImagePath(cardPath, season);
+  const fallback = resolveCardImagePath(cardPath, CURRENT_SEASON);
+  img.onerror = null;
+  if (primary !== fallback) {
+    img.onerror = () => {
+      img.onerror = null;
+      img.src = fallback;
+    };
+  }
+  img.src = primary;
+}
 function normalizeStoredPlay(play){
   if (!play || typeof play !== "object") return null;
   return { ...play, season: normalizeSeason(play.season) };
@@ -623,14 +635,15 @@ function renderCards(){
 
     [...normals, ...trumps].forEach(cardPath => {
       const img = document.createElement("img");
-      img.src = resolveCardImagePath(cardPath, CURRENT_SEASON);
+      applyCardImage(img, cardPath, CURRENT_SEASON);
       img.alt = cardPath;
 
       if (deckSlots.includes(cardPath)) img.classList.add("in-deck");
 
       img.addEventListener("click", () => {
+        deckDisplaySeason = CURRENT_SEASON;
         if (elCardPreview){
-          elCardPreview.src = resolveCardImagePath(cardPath, CURRENT_SEASON);
+          applyCardImage(elCardPreview, cardPath, CURRENT_SEASON);
           elCardPreview.alt = cardPath;
           elCardPreview.style.background = "#fff";
         }
@@ -692,7 +705,7 @@ function renderDeck(){
     if (!cardPath) return;
 
     const img = document.createElement("img");
-    img.src = resolveCardImagePath(cardPath, deckDisplaySeason);
+    applyCardImage(img, cardPath, deckDisplaySeason);
     img.alt = cardPath;
     img.draggable = true;
 
@@ -791,6 +804,14 @@ function loadImg(src){
     im.src = src;
   });
 }
+function loadCardImage(cardPath, season=CURRENT_SEASON){
+  const primary = resolveCardImagePath(cardPath, season);
+  const fallback = resolveCardImagePath(cardPath, CURRENT_SEASON);
+  return loadImg(primary).catch(err => {
+    if (primary !== fallback) return loadImg(fallback);
+    throw err;
+  });
+}
 async function exportDeckPng(){
   try{
     const cols = 5, rows = 2;
@@ -829,7 +850,7 @@ async function exportDeckPng(){
     for (let i = 0; i < 10; i++){
       const p = deckSlots[i];
       if (!p) continue;
-      tasks.push(loadImg(resolveCardImagePath(p, deckDisplaySeason)).then(img => ({ i, img })).catch(() => null));
+      tasks.push(loadCardImage(p, deckDisplaySeason).then(img => ({ i, img })).catch(() => null));
     }
     const loaded = (await Promise.all(tasks)).filter(Boolean);
 
