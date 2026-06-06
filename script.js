@@ -143,6 +143,28 @@ const MATCH_TYPE_LABELS = SEASON_CONFIG.matchTypeLabels;
 const WEAPON_LABEL_OVERRIDES = SEASON_CONFIG.weaponLabelOverrides;
 const COMMONS_CREDIT = SEASON_CONFIG.commonsCredit;
 
+const DEFAULT_LEGACY_ID_MAP = Object.freeze({
+  cardPaths: [],
+  tarotNames: []
+});
+async function loadLegacyIdMap(){
+  try{
+    const r = await fetch("./legacy_id_map.json", { cache: "no-store" });
+    if (!r.ok) throw new Error(String(r.status));
+    const raw = await r.json();
+    return {
+      cardPaths: Array.isArray(raw?.cardPaths) ? raw.cardPaths.map(String) : [],
+      tarotNames: Array.isArray(raw?.tarotNames) ? raw.tarotNames.map(String) : []
+    };
+  }catch(e){
+    console.warn("legacy_id_map.json の読み込みに失敗したため現行順を予備利用します", e);
+    return DEFAULT_LEGACY_ID_MAP;
+  }
+}
+const LEGACY_ID_MAP = await loadLegacyIdMap();
+const LEGACY_CARD_PATHS = LEGACY_ID_MAP.cardPaths;
+const LEGACY_TAROT_NAMES = LEGACY_ID_MAP.tarotNames;
+
 function applyConfiguredCredit(){
   const textEl = document.getElementById("commonsCreditText");
   const linkEl = document.getElementById("commonsCreditLink");
@@ -230,7 +252,7 @@ let oppSelected = [];
 const deckSlots = Array(10).fill(null);
 
 let recordKind = "win"; // win / loss / other
-let userPlays = []; // {id, createdAtMs, matchTypeNum, resultTypeNum, season, myTarotIdx, oppTarotIdx, deckName, memo, cardIds}
+let userPlays = []; // 数値IDは旧互換用。新規保存ではカードパス・メガミ内部名も保持する。
 
 // ---- 履歴ホバー/編集 ----
 let editingPlayId = null;  // nullなら通常、セットされている間は「保存」で上書き
@@ -378,6 +400,36 @@ function applyCardImage(img, cardPath, season=CURRENT_SEASON){
 function normalizeStoredPlay(play){
   if (!play || typeof play !== "object") return null;
   return { ...play, season: normalizeSeason(play.season) };
+}
+function storedCardPaths(play){
+  if (Array.isArray(play?.cardPaths)) {
+    return play.cardPaths.slice(0, 10).map(path => typeof path === "string" ? path : "");
+  }
+  const ids = Array.isArray(play?.cardIds) ? play.cardIds : [];
+  const lookup = LEGACY_CARD_PATHS.length ? LEGACY_CARD_PATHS : cardPathById;
+  return ids.slice(0, 10).map(id => {
+    if (typeof id !== "number" || id < 0) return "";
+    return lookup[id] || "";
+  });
+}
+function storedTarotNames(play, namesKey, indexesKey){
+  const names = play?.[namesKey];
+  if (Array.isArray(names)) {
+    return names.filter(name => typeof name === "string" && name).slice(0, MAX_PICK);
+  }
+  const indexes = Array.isArray(play?.[indexesKey]) ? play[indexesKey] : [];
+  const lookup = LEGACY_TAROT_NAMES.length ? LEGACY_TAROT_NAMES : tarotData.map(t => t.name);
+  return indexes.map(index => lookup[index]).filter(Boolean).slice(0, MAX_PICK);
+}
+function storedTarots(play, namesKey, indexesKey){
+  return storedTarotNames(play, namesKey, indexesKey)
+    .map(name => tarotData.find(t => t.name === name))
+    .filter(Boolean);
+}
+function storedTarotIndexes(play, namesKey, indexesKey){
+  return storedTarotNames(play, namesKey, indexesKey)
+    .map(name => tarotIndexByName.get(name))
+    .filter(index => typeof index === "number");
 }
 function clearEditingState(){
   editingPlayId = null;
@@ -1059,13 +1111,11 @@ function restoreLeft(s){
     elCardPreview.style.background = s.previewBg || "transparent";
   }
 }
-function applyDeckFromCardIds(cardIds){
+function applyDeckFromStoredPlay(play){
   deckSlots.fill(null);
-  const arr = Array.isArray(cardIds) ? cardIds : [];
+  const arr = storedCardPaths(play);
   for (let i=0;i<10;i++){
-    const id = arr[i];
-    if (typeof id !== "number" || id < 0) { deckSlots[i] = null; continue; }
-    deckSlots[i] = cardPathById[id] || null;
+    deckSlots[i] = arr[i] || null;
   }
 }
 function startHover(play){
@@ -1076,7 +1126,7 @@ function startHover(play){
   deckDisplaySeason = normalizeSeason(play.season);
   if (elDeckName) elDeckName.value = play.deckName || "";
   if (elMemo) elMemo.value = play.memo || "";
-  applyDeckFromCardIds(play.cardIds);
+  applyDeckFromStoredPlay(play);
 
   renderDeck();
   renderCards();
@@ -1103,17 +1153,15 @@ function beginEdit(play){
 
   setRecordKind(resultKindFromId(play.resultTypeNum));
 
-  mySelected = (Array.isArray(play.myTarotIdx)? play.myTarotIdx: [])
-    .map(i => tarotData[i]).filter(Boolean).slice(0, MAX_PICK);
-  oppSelected = (Array.isArray(play.oppTarotIdx)? play.oppTarotIdx: [])
-    .map(i => tarotData[i]).filter(Boolean).slice(0, MAX_PICK);
+  mySelected = storedTarots(play, "myTarotNames", "myTarotIdx");
+  oppSelected = storedTarots(play, "oppTarotNames", "oppTarotIdx");
 
   clampMyPickToMode();
   clampOppPickToMode();
 
   if (elDeckName) elDeckName.value = play.deckName || "";
   if (elMemo) elMemo.value = play.memo || "";
-  applyDeckFromCardIds(play.cardIds);
+  applyDeckFromStoredPlay(play);
 
   if (elCardPreview){
     elCardPreview.src = "";
@@ -1136,9 +1184,12 @@ async function saveDeck(){
     const id = cardIdByPath.get(p);
     return (typeof id === "number") ? id : -1;
   });
+  const cardPaths = deckSlots.map(path => path || "");
 
   const myTarotIdx = mySelected.map(t => tarotIndexByName.get(t.name)).filter(n => typeof n === "number");
   const oppTarotIdx = oppSelected.map(t => tarotIndexByName.get(t.name)).filter(n => typeof n === "number");
+  const myTarotNames = mySelected.map(t => t.name);
+  const oppTarotNames = oppSelected.map(t => t.name);
 
   const basePayload = {
     matchType: matchTypeId(matchType),
@@ -1148,7 +1199,10 @@ async function saveDeck(){
     memo,
     myTarotIdx,
     oppTarotIdx,
+    myTarotNames,
+    oppTarotNames,
     cardIds,
+    cardPaths,
     updatedAtMs: Date.now()
   };
 
@@ -1174,9 +1228,12 @@ async function saveDeck(){
         season,
         myTarotIdx,
         oppTarotIdx,
+        myTarotNames,
+        oppTarotNames,
         deckName,
         memo,
-        cardIds
+        cardIds,
+        cardPaths
       });
     }
     saveLocalPlays(userPlays);
@@ -1193,7 +1250,10 @@ async function saveDeck(){
     memo,
     myTarotIdx,
     oppTarotIdx,
+    myTarotNames,
+    oppTarotNames,
     cardIds,
+    cardPaths,
     updatedAt: serverTimestamp(),
     updatedAtMs: Date.now()
   };
@@ -1259,9 +1319,12 @@ async function refreshUserPlays(){
         season,
         myTarotIdx: Array.isArray(d.myTarotIdx) ? d.myTarotIdx : [],
         oppTarotIdx: Array.isArray(d.oppTarotIdx) ? d.oppTarotIdx : [],
+        myTarotNames: Array.isArray(d.myTarotNames) ? d.myTarotNames : null,
+        oppTarotNames: Array.isArray(d.oppTarotNames) ? d.oppTarotNames : null,
         deckName: typeof d.deckName === "string" ? d.deckName : "",
         memo: typeof d.memo === "string" ? d.memo : "",
-        cardIds: Array.isArray(d.cardIds) ? d.cardIds.map(n => (typeof n==="number"? n : -1)) : Array(10).fill(-1)
+        cardIds: Array.isArray(d.cardIds) ? d.cardIds.map(n => (typeof n==="number"? n : -1)) : Array(10).fill(-1),
+        cardPaths: Array.isArray(d.cardPaths) ? d.cardPaths.map(path => typeof path === "string" ? path : "") : null
       });
     });
 
@@ -1419,7 +1482,7 @@ function updatePairStatLine(){
   for (const [A, B] of pairs) {
     let t=0, w=0, l=0;
     for (const p of plays) {
-      const s = new Set(p.myTarotIdx || []);
+      const s = new Set(storedTarotIndexes(p, "myTarotNames", "myTarotIdx"));
       if (s.has(A) && s.has(B)) {
         t++;
         if (p.resultTypeNum === 0) w++;
@@ -1704,14 +1767,14 @@ function fmtDateTime(ms){
 }
 
 /* ---------------- 右：対戦履歴（ホバーで左にプレビュー） ---------------- */
-function makeNamesSpanNoSpace(idxs){
+function makeNamesSpanNoSpace(play, namesKey, indexesKey){
   const wrap = document.createElement("span");
   wrap.className = "names";
 
-  const arr = (Array.isArray(idxs) ? idxs : []).slice(0,3);
+  const arr = storedTarots(play, namesKey, indexesKey).slice(0,3);
   for (let i=0;i<arr.length;i++){
     const s = document.createElement("span");
-    s.textContent = displayNameByIdx(arr[i]);
+    s.textContent = displayName(arr[i]);
     if (i === 2) s.classList.add("dim");
     wrap.appendChild(s);
   }
@@ -1735,11 +1798,11 @@ function renderHistoryList(){
     const left = document.createElement("div");
     left.className = "hleft";
 
-    left.appendChild(makeNamesSpanNoSpace(p.myTarotIdx));
+    left.appendChild(makeNamesSpanNoSpace(p, "myTarotNames", "myTarotIdx"));
     const hy = document.createElement("span");
     hy.textContent = " - ";
     left.appendChild(hy);
-    left.appendChild(makeNamesSpanNoSpace(p.oppTarotIdx));
+    left.appendChild(makeNamesSpanNoSpace(p, "oppTarotNames", "oppTarotIdx"));
 
     const date = document.createElement("div");
     date.className = "hdate";

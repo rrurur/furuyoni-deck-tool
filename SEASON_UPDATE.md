@@ -13,6 +13,9 @@
   - TL側も公開されたこのファイルを優先して読みます。
 - `characters_tarot.json`
   - メガミ、武器名、カードパスの本体です。
+- `legacy_id_map.json`
+  - 旧投稿の数値カードID・メガミIDを復元する固定表です。
+  - **次シーズン更新時に再生成・並べ替え・削除しません。**
 - `images/`
   - 現在環境のカードに加え、古典戦で必要な旧カードを保持します。
 - `tarots/`
@@ -21,6 +24,8 @@
   - 投稿済み旧デッキを表示するための画像スナップショットです。
 - `E:\自作ｐｙ\furutl\public\season_config.json`
   - TL側のローカル確認用フォールバックです。
+- `E:\自作ｐｙ\furutl\public\legacy_id_map.json`
+  - TL側で旧投稿を復元する固定表です。
 
 ## 公式素材の場所
 
@@ -84,6 +89,11 @@ pwsh -ExecutionPolicy Bypass -File E:\furuyoni-deck-tool\tools\import_official_a
 - 公式 `tarots/` と `characters_tarot.json` を照合し、完全戦対象の `replayTarotNames` を自動更新
 - `season_config.json` のシーズン名と旧画像フォルダ対応を更新
 - TL側の `E:\自作ｐｙ\furutl\public\season_config.json` へ設定を同期
+- 固定済みの `legacy_id_map.json` をTL側へ同期
+
+アーカイブ先がすでに存在する場合、誤って古い内容を使わないよう処理を停止します。
+内容を確認済みで既存アーカイブを再利用する場合だけ
+`-ReuseExistingArchive` を付けます。
 
 ### 4. メガミとカード定義を更新
 
@@ -135,7 +145,7 @@ pwsh -ExecutionPolicy Bypass -File E:\furuyoni-deck-tool\tools\import_official_a
 ```powershell
 node --check E:\furuyoni-deck-tool\script.js
 node --check E:\自作ｐｙ\furutl\public\script.js
-node -e "JSON.parse(require('fs').readFileSync('E:/furuyoni-deck-tool/season_config.json','utf8')); JSON.parse(require('fs').readFileSync('E:/furuyoni-deck-tool/characters_tarot.json','utf8')); console.log('json ok')"
+node -e "JSON.parse(require('fs').readFileSync('E:/furuyoni-deck-tool/season_config.json','utf8')); JSON.parse(require('fs').readFileSync('E:/furuyoni-deck-tool/characters_tarot.json','utf8')); JSON.parse(require('fs').readFileSync('E:/furuyoni-deck-tool/legacy_id_map.json','utf8')); console.log('json ok')"
 ```
 
 確認項目:
@@ -169,6 +179,7 @@ npx --yes firebase-tools deploy --only hosting --project furuyoni-diary-1918f
 
 - `images/` と `tarots/` の既存ファイルを一括削除しない
 - 投稿済みデッキ用の旧シーズン画像フォルダを削除しない
+- `legacy_id_map.json` を次シーズンのJSONから再生成しない
 - 表に見える日本語名を英語へ変更しない
 - クレジットを削除しない
 

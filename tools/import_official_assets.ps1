@@ -7,7 +7,8 @@ param(
   [string]$ArchiveTarotFolder = "",
   [string]$TimelinePublicDir = "E:\自作ｐｙ\furutl\public",
   [switch]$PlanOnly,
-  [switch]$SkipArchive
+  [switch]$SkipArchive,
+  [switch]$ReuseExistingArchive
 )
 
 $ErrorActionPreference = "Stop"
@@ -15,6 +16,7 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $ConfigPath = Join-Path $RepoRoot "season_config.json"
 $CharactersPath = Join-Path $RepoRoot "characters_tarot.json"
+$LegacyIdMapPath = Join-Path $RepoRoot "legacy_id_map.json"
 $ImagesDir = Join-Path $RepoRoot "images"
 $TarotsDir = Join-Path $RepoRoot "tarots"
 $CardsSourceDir = Join-Path $CommonsRoot "cards"
@@ -47,9 +49,15 @@ function Copy-File($Source, $Destination) {
 }
 
 function Copy-DirectorySnapshot($Source, $Destination) {
-  if ($PlanOnly) { return }
   if (Test-Path -LiteralPath $Destination) {
-    Write-Host "skip archive exists: $Destination"
+    if ($ReuseExistingArchive) {
+      Write-Host "reuse archive: $Destination"
+      return
+    }
+    throw "Archive already exists: $Destination. Use -ReuseExistingArchive only after confirming its contents, or choose another archive folder."
+  }
+  if ($PlanOnly) {
+    Write-Host "plan archive: $Source -> $Destination"
     return
   }
   Ensure-Directory $Destination
@@ -89,7 +97,7 @@ function Convert-TarotLeafName($OfficialLeaf) {
   return $OfficialLeaf
 }
 
-foreach ($path in @($ConfigPath, $CharactersPath, $CardsSourceDir, $TarotsSourceDir, $ImagesDir, $TarotsDir)) {
+foreach ($path in @($ConfigPath, $CharactersPath, $LegacyIdMapPath, $CardsSourceDir, $TarotsSourceDir, $ImagesDir, $TarotsDir)) {
   if (-not (Test-Path -LiteralPath $path)) {
     throw "Not found: $path"
   }
@@ -171,6 +179,7 @@ if ($NewSeason) {
 
 if (-not $PlanOnly -and (Test-Path -LiteralPath $TimelinePublicDir)) {
   Copy-File $ConfigPath (Join-Path $TimelinePublicDir "season_config.json")
+  Copy-File $LegacyIdMapPath (Join-Path $TimelinePublicDir "legacy_id_map.json")
 }
 
 [pscustomobject]@{
