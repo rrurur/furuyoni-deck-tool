@@ -6,9 +6,11 @@ param(
   [string]$ArchiveImageFolder = "",
   [string]$ArchiveTarotFolder = "",
   [string]$TimelinePublicDir = "E:\自作ｐｙ\furutl\public",
+  [string]$NewAssetFolder = "",
   [switch]$PlanOnly,
   [switch]$SkipArchive,
-  [switch]$ReuseExistingArchive
+  [switch]$ReuseExistingArchive,
+  [switch]$KeepLocalArchive
 )
 
 $ErrorActionPreference = "Stop"
@@ -21,6 +23,7 @@ $ImagesDir = Join-Path $RepoRoot "images"
 $TarotsDir = Join-Path $RepoRoot "tarots"
 $CardsSourceDir = Join-Path $CommonsRoot "cards"
 $TarotsSourceDir = Join-Path $CommonsRoot "tarots"
+$TimelineAssetsDir = Join-Path $TimelinePublicDir "assets"
 
 function Read-JsonFile($Path) {
   Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
@@ -68,6 +71,19 @@ function Copy-DirectorySnapshot($Source, $Destination) {
   }
 }
 
+function Sync-AssetDirectory($Source, $Destination) {
+  if ($PlanOnly) {
+    Write-Host "plan asset sync: $Source -> $Destination"
+    return
+  }
+  Ensure-Directory $Destination
+  if ($PSCmdlet.ShouldProcess($Destination, "Sync public assets from $Source")) {
+    Get-ChildItem -LiteralPath $Source -File | ForEach-Object {
+      Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $Destination $_.Name) -Force
+    }
+  }
+}
+
 function Get-OfficialCardSource($TargetLeaf) {
   $leaf = $TargetLeaf -replace "^na_", ""
   $direct = Join-Path $CardsSourceDir $leaf
@@ -107,10 +123,24 @@ $config = Read-JsonFile $ConfigPath
 if (-not $ArchiveSeason) { $ArchiveSeason = [string]$config.currentSeason }
 if (-not $ArchiveImageFolder) { $ArchiveImageFolder = "images_$ArchiveSeason" }
 if (-not $ArchiveTarotFolder) { $ArchiveTarotFolder = "tarots_$ArchiveSeason" }
+$currentAssetFolder = [string]$config.currentAssetFolder
+if (-not $currentAssetFolder) { throw "season_config.json currentAssetFolder is required." }
+if ($NewSeason -and -not $NewAssetFolder) {
+  throw "-NewAssetFolder is required when -NewSeason is specified. Use an internal English folder name such as season11."
+}
 
 if (-not $SkipArchive) {
-  Copy-DirectorySnapshot $ImagesDir (Join-Path $RepoRoot $ArchiveImageFolder)
-  Copy-DirectorySnapshot $TarotsDir (Join-Path $RepoRoot $ArchiveTarotFolder)
+  $currentAssetDir = Join-Path $TimelineAssetsDir $currentAssetFolder
+  if (-not (Test-Path -LiteralPath $currentAssetDir)) {
+    Sync-AssetDirectory $ImagesDir (Join-Path $currentAssetDir "images")
+    Sync-AssetDirectory $TarotsDir (Join-Path $currentAssetDir "tarots")
+  } else {
+    Write-Host "current season assets already archived: $currentAssetDir"
+  }
+  if ($KeepLocalArchive) {
+    Copy-DirectorySnapshot $ImagesDir (Join-Path $RepoRoot $ArchiveImageFolder)
+    Copy-DirectorySnapshot $TarotsDir (Join-Path $RepoRoot $ArchiveTarotFolder)
+  }
 }
 
 $copiedCards = 0
@@ -170,6 +200,12 @@ if ($NewSeason) {
     $config | Add-Member -NotePropertyName "imageFoldersBySeason" -NotePropertyValue ([pscustomobject]@{})
   }
   $config.imageFoldersBySeason | Add-Member -NotePropertyName $ArchiveSeason -NotePropertyValue $ArchiveImageFolder -Force
+  if (-not $config.PSObject.Properties["assetFoldersBySeason"]) {
+    $config | Add-Member -NotePropertyName "assetFoldersBySeason" -NotePropertyValue ([pscustomobject]@{})
+  }
+  $config.assetFoldersBySeason | Add-Member -NotePropertyName $ArchiveSeason -NotePropertyValue $currentAssetFolder -Force
+  $config.currentAssetFolder = $NewAssetFolder
+  $config.assetVersion = (Get-Date).ToUniversalTime().ToString("yyyyMMdd-HHmmss")
   $config.replayTarotNames = @($replayTarotNames)
 
   if (-not $PlanOnly -and $PSCmdlet.ShouldProcess($ConfigPath, "Update currentSeason, image folders, and complete-match tarot list")) {
@@ -178,6 +214,13 @@ if ($NewSeason) {
 }
 
 if (-not $PlanOnly -and (Test-Path -LiteralPath $TimelinePublicDir)) {
+  $publishAssetFolder = if ($NewSeason) { $NewAssetFolder } else { $currentAssetFolder }
+  $publishAssetDir = Join-Path $TimelineAssetsDir $publishAssetFolder
+  if ((Test-Path -LiteralPath $publishAssetDir) -and $NewSeason -and -not $ReuseExistingArchive) {
+    throw "New asset folder already exists: $publishAssetDir. Choose another -NewAssetFolder or use -ReuseExistingArchive after confirming its contents."
+  }
+  Sync-AssetDirectory $ImagesDir (Join-Path $publishAssetDir "images")
+  Sync-AssetDirectory $TarotsDir (Join-Path $publishAssetDir "tarots")
   Copy-File $ConfigPath (Join-Path $TimelinePublicDir "season_config.json")
   Copy-File $LegacyIdMapPath (Join-Path $TimelinePublicDir "legacy_id_map.json")
 }
@@ -188,6 +231,8 @@ if (-not $PlanOnly -and (Test-Path -LiteralPath $TimelinePublicDir)) {
   ArchiveSeason = $ArchiveSeason
   ArchiveImageFolder = $ArchiveImageFolder
   ArchiveTarotFolder = $ArchiveTarotFolder
+  CurrentAssetFolder = $currentAssetFolder
+  NewAssetFolder = $NewAssetFolder
   CopiedCards = $copiedCards
   AliasCopies = $aliasCopies
   CopiedTarots = $copiedTarots

@@ -1,5 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
+  initializeAppCheck,
+  ReCaptchaEnterpriseProvider
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app-check.js";
+import {
   getAuth,
   onAuthStateChanged,
   signInAnonymously,
@@ -22,7 +26,7 @@ import {
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-import { firebaseConfig } from "./firebaseConfig.js";
+import { firebaseConfig, appCheckConfig } from "./firebaseConfig.js";
 
 /* （未使用でもOK：将来の保存先用） */
 const baseFolder = "S10-1";
@@ -32,12 +36,18 @@ const baseFolder = "S10-1";
    - 次シーズン更新時は season_config.json と SEASON_UPDATE.md を確認
 ========================================================= */
 const DEFAULT_SEASON_CONFIG = Object.freeze({
+  assetVersion: "20260606-4",
   currentSeason: "再演",
   legacySeason: "10-2",
   pastSeasons: ["10-2", "10-1", "10-0"],
   legacyImageFolder: "images_10-2",
   imageFoldersBySeason: {
     "10-2": "images_10-2"
+  },
+  assetBaseUrl: "https://furuyoni-diary-1918f.web.app/assets",
+  currentAssetFolder: "replay",
+  assetFoldersBySeason: {
+    "10-2": "s10-2"
   },
   replayTarotNames: [
     "chikage",
@@ -109,11 +119,15 @@ function normalizeSeasonConfig(raw){
   const legacySeason = text("legacySeason", DEFAULT_SEASON_CONFIG.legacySeason);
   const pastSeasons = list("pastSeasons", DEFAULT_SEASON_CONFIG.pastSeasons);
   return {
+    assetVersion: text("assetVersion", DEFAULT_SEASON_CONFIG.assetVersion),
     currentSeason: text("currentSeason", DEFAULT_SEASON_CONFIG.currentSeason),
     legacySeason,
     pastSeasons: pastSeasons.includes(legacySeason) ? pastSeasons : [legacySeason, ...pastSeasons],
     legacyImageFolder: text("legacyImageFolder", DEFAULT_SEASON_CONFIG.legacyImageFolder),
     imageFoldersBySeason: object("imageFoldersBySeason", DEFAULT_SEASON_CONFIG.imageFoldersBySeason),
+    assetBaseUrl: text("assetBaseUrl", DEFAULT_SEASON_CONFIG.assetBaseUrl).replace(/\/+$/, ""),
+    currentAssetFolder: text("currentAssetFolder", DEFAULT_SEASON_CONFIG.currentAssetFolder),
+    assetFoldersBySeason: object("assetFoldersBySeason", DEFAULT_SEASON_CONFIG.assetFoldersBySeason),
     replayTarotNames: list("replayTarotNames", DEFAULT_SEASON_CONFIG.replayTarotNames),
     matchTypes: list("matchTypes", DEFAULT_SEASON_CONFIG.matchTypes),
     matchTypeLabels: object("matchTypeLabels", DEFAULT_SEASON_CONFIG.matchTypeLabels),
@@ -137,6 +151,9 @@ const LEGACY_SEASON = SEASON_CONFIG.legacySeason;
 const PAST_SEASONS = SEASON_CONFIG.pastSeasons;
 const LEGACY_IMAGE_FOLDER = SEASON_CONFIG.legacyImageFolder;
 const IMAGE_FOLDERS_BY_SEASON = SEASON_CONFIG.imageFoldersBySeason;
+const ASSET_BASE_URL = SEASON_CONFIG.assetBaseUrl;
+const CURRENT_ASSET_FOLDER = SEASON_CONFIG.currentAssetFolder;
+const ASSET_FOLDERS_BY_SEASON = SEASON_CONFIG.assetFoldersBySeason;
 const REPLAY_TAROT_NAMES = SEASON_CONFIG.replayTarotNames;
 const MATCH_TYPES = SEASON_CONFIG.matchTypes;
 const MATCH_TYPE_LABELS = SEASON_CONFIG.matchTypeLabels;
@@ -181,6 +198,12 @@ applyConfiguredCredit();
 
 /* ---------------- Firebase ---------------- */
 const app = initializeApp(firebaseConfig);
+if (appCheckConfig.recaptchaEnterpriseSiteKey) {
+  initializeAppCheck(app, {
+    provider: new ReCaptchaEnterpriseProvider(appCheckConfig.recaptchaEnterpriseSiteKey),
+    isTokenAutoRefreshEnabled: true
+  });
+}
 const auth = getAuth(app);
 const db = getFirestore(app);
 
@@ -377,13 +400,28 @@ function imageFolderForSeason(season){
   const s = normalizeSeason(season);
   return IMAGE_FOLDERS_BY_SEASON[s] || LEGACY_IMAGE_FOLDER;
 }
-function resolveCardImagePath(cardPath, season=CURRENT_SEASON){
-  const p = String(cardPath || "");
+function assetFolderForSeason(season){
+  const s = normalizeSeason(season);
+  if (s === CURRENT_SEASON) return CURRENT_ASSET_FOLDER;
+  return ASSET_FOLDERS_BY_SEASON[s] || ASSET_FOLDERS_BY_SEASON[LEGACY_SEASON] || CURRENT_ASSET_FOLDER;
+}
+function resolveAssetPath(assetPath, season=CURRENT_SEASON){
+  const p = String(assetPath || "").replace(/^\.\//, "");
   if (!p) return "";
+  if (/^https?:\/\//.test(p)) return p;
+  if (ASSET_BASE_URL && /^(images|tarots)\//.test(p)) {
+    return `${ASSET_BASE_URL}/${assetFolderForSeason(season)}/${p}`;
+  }
   if (usesLegacyImages(season) && p.startsWith("images/")) {
     return p.replace(/^images\//, `${imageFolderForSeason(season)}/`);
   }
   return p;
+}
+function resolveCardImagePath(cardPath, season=CURRENT_SEASON){
+  return resolveAssetPath(cardPath, season);
+}
+function resolveTarotImagePath(tarotPath){
+  return resolveAssetPath(tarotPath, CURRENT_SEASON);
 }
 function applyCardImage(img, cardPath, season=CURRENT_SEASON){
   const primary = resolveCardImagePath(cardPath, season);
@@ -499,6 +537,12 @@ async function safeSetUserDoc(uid, data){
     await setDoc(ref, data, { merge: true });
   }catch{}
 }
+async function safeSetProfileDoc(uid, handle){
+  try{
+    const ref = doc(db, "profiles", uid);
+    await setDoc(ref, { handle: normalizeHandle(handle) }, { merge: true });
+  }catch{}
+}
 
 /* ---------------- 永続化（ローカル＋ログイン時のみFirestore） ---------------- */
 function persistHandle(){
@@ -507,7 +551,10 @@ function persistHandle(){
   saveLocalPrefs(prefs);
 
   const u = auth.currentUser;
-  if (isCloudUser(u)) safeSetUserDoc(u.uid, { handle: prefs.handle });
+  if (isCloudUser(u)) {
+    safeSetUserDoc(u.uid, { handle: prefs.handle });
+    safeSetProfileDoc(u.uid, prefs.handle);
+  }
 
   updateAuthBar(auth.currentUser);
 }
@@ -524,6 +571,7 @@ function persistMatchAndMyPicks(){
       prefs: { matchType: prefs.matchType, myPicksByMode: prefs.myPicksByMode },
       updatedAt: serverTimestamp()
     });
+    safeSetProfileDoc(u.uid, prefs.handle);
   }
 }
 function clampMyPickToMode(){
@@ -548,12 +596,14 @@ async function ensureHandleOnFirstLogin(user, userDoc){
       prefs.handle = docHandle;
       saveLocalPrefs(prefs);
     }
+    await safeSetProfileDoc(user.uid, docHandle);
     return;
   }
 
   // Firestoreに無いがローカルにあるなら、それを紐付け（ポップアップ不要）
   if (localHandle){
     await safeSetUserDoc(user.uid, { handle: localHandle });
+    await safeSetProfileDoc(user.uid, localHandle);
     return;
   }
 
@@ -570,6 +620,7 @@ async function ensureHandleOnFirstLogin(user, userDoc){
     prefs.handle = h;
     saveLocalPrefs(prefs);
     await safeSetUserDoc(user.uid, { handle: h });
+    await safeSetProfileDoc(user.uid, h);
     break;
   }
 }
@@ -673,7 +724,7 @@ function renderTarotList(container, selectedArr, onToggle){
   container.innerHTML = "";
   filteredTarots().forEach(t => {
     const img = document.createElement("img");
-    img.src = t.img;
+    img.src = resolveTarotImagePath(t.img);
     img.alt = displayName(t);
     if (findIndexByName(selectedArr, t.name) >= 0) img.classList.add("selected");
     img.addEventListener("click", () => onToggle(t));
@@ -703,7 +754,7 @@ function renderSelectedSlots(container, selectedArr, onRemoveAt, onSwapOrMove){
     const tarot = selectedArr[i];
     const img = document.createElement("img");
 
-    img.src = tarot.img;
+    img.src = resolveTarotImagePath(tarot.img);
     img.alt = displayName(tarot);
 
     img.draggable = true;

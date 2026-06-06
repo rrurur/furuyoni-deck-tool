@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "assetVersion": "20260606-4",
   "currentSeason": "再演",
   "legacySeason": "10-2",
   "pastSeasons": [
@@ -10,6 +11,11 @@
   "legacyImageFolder": "images_10-2",
   "imageFoldersBySeason": {
     "10-2": "images_10-2"
+  },
+  "assetBaseUrl": "https://furuyoni-diary-1918f.web.app/assets",
+  "currentAssetFolder": "replay",
+  "assetFoldersBySeason": {
+    "10-2": "s10-2"
   },
   "replayTarotNames": [
     "chikage",

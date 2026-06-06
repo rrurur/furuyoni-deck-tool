@@ -6,3 +6,6 @@ export const firebaseConfig = {
   messagingSenderId: "1031976761542",
   appId: "1:1031976761542:web:da9bd7fe26790c8940ffc7"
 };
+export const appCheckConfig = {
+  recaptchaEnterpriseSiteKey: ""
+};

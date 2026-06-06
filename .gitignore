@@ -1,0 +1,5 @@
+# Card and tarot images are deployed from the local archive to Firebase Hosting.
+images/
+images_*/
+tarots/
+tarots_*/

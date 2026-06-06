@@ -17,11 +17,14 @@
   - 旧投稿の数値カードID・メガミIDを復元する固定表です。
   - **次シーズン更新時に再生成・並べ替え・削除しません。**
 - `images/`
+  - ローカル作業用です。Gitには含めず、Firebase Hostingへ同期します。
   - 現在環境のカードに加え、古典戦で必要な旧カードを保持します。
 - `tarots/`
+  - ローカル作業用です。Gitには含めず、Firebase Hostingへ同期します。
   - 現在環境のタロットに加え、古典戦で必要な旧タロットを保持します。
-- `images_シーズン名/`
-  - 投稿済み旧デッキを表示するための画像スナップショットです。
+- `E:\自作ｐｙ\furutl\public\assets/`
+  - 公開カード・タロットの実体です。
+  - Gitには含めませんが、Firebase Hostingのデプロイ対象です。
 - `E:\自作ｐｙ\furutl\public\season_config.json`
   - TL側のローカル確認用フォールバックです。
 - `E:\自作ｐｙ\furutl\public\legacy_id_map.json`
@@ -65,6 +68,7 @@ pwsh -ExecutionPolicy Bypass -File E:\furuyoni-deck-tool\tools\import_official_a
   -CommonsRoot "C:\Users\fragi\Desktop\furuyoni_commons_re\furuyoni_re" `
   -ArchiveSeason "再演" `
   -NewSeason "次のシーズン名" `
+  -NewAssetFolder "next-season" `
   -PlanOnly
 ```
 
@@ -74,13 +78,13 @@ pwsh -ExecutionPolicy Bypass -File E:\furuyoni-deck-tool\tools\import_official_a
 pwsh -ExecutionPolicy Bypass -File E:\furuyoni-deck-tool\tools\import_official_assets.ps1 `
   -CommonsRoot "C:\Users\fragi\Desktop\furuyoni_commons_re\furuyoni_re" `
   -ArchiveSeason "再演" `
-  -NewSeason "次のシーズン名"
+  -NewSeason "次のシーズン名" `
+  -NewAssetFolder "next-season"
 ```
 
 このスクリプトは次を行います。
 
-- 現在の `images/` を `images_再演/` などへ保存
-- 現在の `tarots/` を `tarots_再演/` などへ保存
+- 現在シーズン素材がFirebase Hosting側に保存済みか確認
 - 公式 `cards/*.png` を `images/na_*.png` として上書き・追加
 - `characters_tarot.json` が参照する旧互換名にも画像をコピー
   - 例: `_s8` 付きの公開名を、公式の接尾辞なし画像から作成
@@ -90,10 +94,11 @@ pwsh -ExecutionPolicy Bypass -File E:\furuyoni-deck-tool\tools\import_official_a
 - `season_config.json` のシーズン名と旧画像フォルダ対応を更新
 - TL側の `E:\自作ｐｙ\furutl\public\season_config.json` へ設定を同期
 - 固定済みの `legacy_id_map.json` をTL側へ同期
+- 新シーズン素材を `public/assets/英字フォルダ名/` へ同期
 
-アーカイブ先がすでに存在する場合、誤って古い内容を使わないよう処理を停止します。
-内容を確認済みで既存アーカイブを再利用する場合だけ
-`-ReuseExistingArchive` を付けます。
+`NewAssetFolder` は画面には表示されない内部名なので英字を使用します。
+新シーズンの公開素材フォルダがすでに存在する場合は処理を停止します。
+内容を確認済みで再利用する場合だけ `-ReuseExistingArchive` を付けます。
 
 ### 4. メガミとカード定義を更新
 
@@ -118,6 +123,11 @@ pwsh -ExecutionPolicy Bypass -File E:\furuyoni-deck-tool\tools\import_official_a
   "imageFoldersBySeason": {
     "直前シーズン": "images_直前シーズン"
   },
+  "assetBaseUrl": "https://furuyoni-diary-1918f.web.app/assets",
+  "currentAssetFolder": "現在シーズンの英字フォルダ",
+  "assetFoldersBySeason": {
+    "直前シーズン": "直前シーズンの英字フォルダ"
+  },
   "replayTarotNames": [],
   "weaponLabelOverrides": {}
 }
@@ -128,7 +138,11 @@ pwsh -ExecutionPolicy Bypass -File E:\furuyoni-deck-tool\tools\import_official_a
 - `pastSeasons`
   - 履歴検索に表示する過去シーズン
 - `imageFoldersBySeason`
-  - 投稿済み旧デッキを表示する画像フォルダ対応
+  - Firebase素材配信へ切り替えられない場合の旧互換設定
+- `currentAssetFolder`
+  - 現在シーズン素材の内部フォルダ名
+- `assetFoldersBySeason`
+  - 投稿済み旧デッキを表示するFirebase素材フォルダ対応
 - `replayTarotNames`
   - 完全戦で表示するメガミの内部名
 - `matchTypeLabels`
@@ -179,6 +193,7 @@ npx --yes firebase-tools deploy --only hosting --project furuyoni-diary-1918f
 
 - `images/` と `tarots/` の既存ファイルを一括削除しない
 - 投稿済みデッキ用の旧シーズン画像フォルダを削除しない
+- `public/assets/` をGitへ追加しない
 - `legacy_id_map.json` を次シーズンのJSONから再生成しない
 - 表に見える日本語名を英語へ変更しない
 - クレジットを削除しない
