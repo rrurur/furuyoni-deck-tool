@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "currentSeason": "再演",
+  "legacySeason": "10-2",
+  "pastSeasons": [
+    "10-2",
+    "10-1",
+    "10-0"
+  ],
+  "legacyImageFolder": "images_10-2",
+  "imageFoldersBySeason": {
+    "10-2": "images_10-2"
+  },
+  "replayTarotNames": [
+    "chikage",
+    "chikage_a1",
+    "hagane",
+    "hagane_a1",
+    "himika",
+    "himika_a1",
+    "korunu",
+    "korunu_a1",
+    "kururu",
+    "kururu_a1",
+    "kururu_a2",
+    "megumi",
+    "megumi_a1",
+    "oboro",
+    "oboro_a1",
+    "oboro_a2",
+    "raira",
+    "raira_a1",
+    "saine",
+    "saine_a1",
+    "saine_a2",
+    "shinra",
+    "shinra_a1",
+    "thallya",
+    "thallya_a1",
+    "tokoyo",
+    "tokoyo_a1",
+    "tokoyo_a2",
+    "yukihi_a",
+    "yukihi_a1",
+    "yurina",
+    "yurina_a1",
+    "yurina_a2"
+  ],
+  "matchTypes": [
+    "complete",
+    "origin",
+    "classic"
+  ],
+  "matchTypeLabels": {
+    "complete": "完全戦",
+    "origin": "起源戦",
+    "classic": "古典戦"
+  },
+  "weaponLabelOverrides": {
+    "橇A1": "試",
+    "橇Ａ１": "試",
+    "棹A1": "端",
+    "棹Ａ１": "端"
+  },
+  "commonsCredit": {
+    "text": "ふるよに再演コモンズ/BakaFire,TOKIAME",
+    "role": "ふるよにコモンズ作成",
+    "url": "https://furuyoni.sekiseiro.com/re/add-contents/commons/"
+  }
+}

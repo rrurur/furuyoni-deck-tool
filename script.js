@@ -28,53 +28,134 @@ import { firebaseConfig } from "./firebaseConfig.js";
 const baseFolder = "S10-1";
 
 /* =========================================================
-   シーズン（ここだけ手動で更新しやすい）
+   シーズン設定
+   - 次シーズン更新時は season_config.json と SEASON_UPDATE.md を確認
 ========================================================= */
-const CURRENT_SEASON = "再演";
-const LEGACY_SEASON = "10-2";
-const PAST_SEASONS = [LEGACY_SEASON, "10-1", "10-0"];
-const LEGACY_IMAGE_FOLDER = "images_10-2";
-const REPLAY_TAROT_NAMES = [
-  "chikage",
-  "chikage_a1",
-  "hagane",
-  "hagane_a1",
-  "himika",
-  "himika_a1",
-  "korunu",
-  "korunu_a1",
-  "kururu",
-  "kururu_a1",
-  "kururu_a2",
-  "megumi",
-  "megumi_a1",
-  "oboro",
-  "oboro_a1",
-  "oboro_a2",
-  "raira",
-  "raira_a1",
-  "saine",
-  "saine_a1",
-  "saine_a2",
-  "shinra",
-  "shinra_a1",
-  "thallya",
-  "thallya_a1",
-  "tokoyo",
-  "tokoyo_a1",
-  "tokoyo_a2",
-  "yukihi_a",
-  "yukihi_a1",
-  "yurina",
-  "yurina_a1",
-  "yurina_a2"
-];
-const MATCH_TYPES = ["complete", "origin", "classic"];
-const MATCH_TYPE_LABELS = {
-  complete: "完全戦",
-  origin: "起源戦",
-  classic: "古典戦"
-};
+const DEFAULT_SEASON_CONFIG = Object.freeze({
+  currentSeason: "再演",
+  legacySeason: "10-2",
+  pastSeasons: ["10-2", "10-1", "10-0"],
+  legacyImageFolder: "images_10-2",
+  imageFoldersBySeason: {
+    "10-2": "images_10-2"
+  },
+  replayTarotNames: [
+    "chikage",
+    "chikage_a1",
+    "hagane",
+    "hagane_a1",
+    "himika",
+    "himika_a1",
+    "korunu",
+    "korunu_a1",
+    "kururu",
+    "kururu_a1",
+    "kururu_a2",
+    "megumi",
+    "megumi_a1",
+    "oboro",
+    "oboro_a1",
+    "oboro_a2",
+    "raira",
+    "raira_a1",
+    "saine",
+    "saine_a1",
+    "saine_a2",
+    "shinra",
+    "shinra_a1",
+    "thallya",
+    "thallya_a1",
+    "tokoyo",
+    "tokoyo_a1",
+    "tokoyo_a2",
+    "yukihi_a",
+    "yukihi_a1",
+    "yurina",
+    "yurina_a1",
+    "yurina_a2"
+  ],
+  matchTypes: ["complete", "origin", "classic"],
+  matchTypeLabels: {
+    complete: "完全戦",
+    origin: "起源戦",
+    classic: "古典戦"
+  },
+  weaponLabelOverrides: {
+    "橇A1": "試",
+    "橇Ａ１": "試",
+    "棹A1": "端",
+    "棹Ａ１": "端"
+  },
+  commonsCredit: {
+    text: "ふるよに再演コモンズ/BakaFire,TOKIAME",
+    role: "ふるよにコモンズ作成",
+    url: "https://furuyoni.sekiseiro.com/re/add-contents/commons/"
+  }
+});
+function normalizeSeasonConfig(raw){
+  const src = (raw && typeof raw === "object") ? raw : {};
+  const text = (key, fallback) => {
+    const v = src[key];
+    return (typeof v === "string" && v.trim()) ? v.trim() : fallback;
+  };
+  const list = (key, fallback) => {
+    const v = src[key];
+    return Array.isArray(v) ? v.filter(x => typeof x === "string" && x.trim()).map(x => x.trim()) : fallback.slice();
+  };
+  const object = (key, fallback) => {
+    const v = src[key];
+    return (v && typeof v === "object" && !Array.isArray(v)) ? { ...fallback, ...v } : { ...fallback };
+  };
+  const legacySeason = text("legacySeason", DEFAULT_SEASON_CONFIG.legacySeason);
+  const pastSeasons = list("pastSeasons", DEFAULT_SEASON_CONFIG.pastSeasons);
+  return {
+    currentSeason: text("currentSeason", DEFAULT_SEASON_CONFIG.currentSeason),
+    legacySeason,
+    pastSeasons: pastSeasons.includes(legacySeason) ? pastSeasons : [legacySeason, ...pastSeasons],
+    legacyImageFolder: text("legacyImageFolder", DEFAULT_SEASON_CONFIG.legacyImageFolder),
+    imageFoldersBySeason: object("imageFoldersBySeason", DEFAULT_SEASON_CONFIG.imageFoldersBySeason),
+    replayTarotNames: list("replayTarotNames", DEFAULT_SEASON_CONFIG.replayTarotNames),
+    matchTypes: list("matchTypes", DEFAULT_SEASON_CONFIG.matchTypes),
+    matchTypeLabels: object("matchTypeLabels", DEFAULT_SEASON_CONFIG.matchTypeLabels),
+    weaponLabelOverrides: object("weaponLabelOverrides", DEFAULT_SEASON_CONFIG.weaponLabelOverrides),
+    commonsCredit: object("commonsCredit", DEFAULT_SEASON_CONFIG.commonsCredit)
+  };
+}
+async function loadSeasonConfig(){
+  try{
+    const r = await fetch("./season_config.json", { cache: "no-store" });
+    if (!r.ok) throw new Error(String(r.status));
+    return normalizeSeasonConfig(await r.json());
+  }catch(e){
+    console.warn("season_config.json の読み込みに失敗したため既定値を使います", e);
+    return normalizeSeasonConfig(DEFAULT_SEASON_CONFIG);
+  }
+}
+const SEASON_CONFIG = await loadSeasonConfig();
+const CURRENT_SEASON = SEASON_CONFIG.currentSeason;
+const LEGACY_SEASON = SEASON_CONFIG.legacySeason;
+const PAST_SEASONS = SEASON_CONFIG.pastSeasons;
+const LEGACY_IMAGE_FOLDER = SEASON_CONFIG.legacyImageFolder;
+const IMAGE_FOLDERS_BY_SEASON = SEASON_CONFIG.imageFoldersBySeason;
+const REPLAY_TAROT_NAMES = SEASON_CONFIG.replayTarotNames;
+const MATCH_TYPES = SEASON_CONFIG.matchTypes;
+const MATCH_TYPE_LABELS = SEASON_CONFIG.matchTypeLabels;
+const WEAPON_LABEL_OVERRIDES = SEASON_CONFIG.weaponLabelOverrides;
+const COMMONS_CREDIT = SEASON_CONFIG.commonsCredit;
+
+function applyConfiguredCredit(){
+  const textEl = document.getElementById("commonsCreditText");
+  const linkEl = document.getElementById("commonsCreditLink");
+  if (textEl) {
+    const role = String(COMMONS_CREDIT.role || "").trim();
+    textEl.textContent = role ? `${COMMONS_CREDIT.text}（${role}）` : COMMONS_CREDIT.text;
+  }
+  if (linkEl) {
+    linkEl.href = COMMONS_CREDIT.url;
+    linkEl.textContent = COMMONS_CREDIT.url;
+  }
+}
+applyConfiguredCredit();
 
 /* ---------------- Firebase ---------------- */
 const app = initializeApp(firebaseConfig);
@@ -208,7 +289,9 @@ function getTarotNo(tarot){
 }
 
 function displayName(tarot){
-  return String(tarot?.weapon || tarot?.name || "");
+  const raw = String(tarot?.weapon || tarot?.name || "").trim();
+  const normalized = raw.replace(/Ａ/g, "A");
+  return WEAPON_LABEL_OVERRIDES[raw] || WEAPON_LABEL_OVERRIDES[normalized] || raw;
 }
 function displayNameByIdx(idx){
   const t = tarotData[idx];
@@ -268,11 +351,15 @@ function normalizeSeason(value){
 function usesLegacyImages(season){
   return normalizeSeason(season) !== CURRENT_SEASON;
 }
+function imageFolderForSeason(season){
+  const s = normalizeSeason(season);
+  return IMAGE_FOLDERS_BY_SEASON[s] || LEGACY_IMAGE_FOLDER;
+}
 function resolveCardImagePath(cardPath, season=CURRENT_SEASON){
   const p = String(cardPath || "");
   if (!p) return "";
   if (usesLegacyImages(season) && p.startsWith("images/")) {
-    return p.replace(/^images\//, `${LEGACY_IMAGE_FOLDER}/`);
+    return p.replace(/^images\//, `${imageFolderForSeason(season)}/`);
   }
   return p;
 }
