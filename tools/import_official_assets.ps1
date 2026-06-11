@@ -105,6 +105,40 @@ function Get-OfficialCardSource($TargetLeaf) {
   return $null
 }
 
+function Get-CardSlotInfo($Leaf) {
+  if ($Leaf -notmatch "^(?:na_)?(?<number>\d+)_(?<character>[^_]+)_(?<form>[^_]+)_(?<kind>[ns])_(?<index>\d+)(?:_.*)?\.png$") {
+    return $null
+  }
+
+  return [pscustomobject]@{
+    CharacterKey = "$($Matches.number)_$($Matches.character)"
+    Form = $Matches.form
+    Slot = "$($Matches.kind)_$($Matches.index)"
+  }
+}
+
+function Get-TarotForm($TarotPath) {
+  $leaf = Split-Path -Leaf ([string]$TarotPath)
+  if ($leaf -match "^tarot_\d+(?:_(?<form>[^.]+))?\.png$") {
+    if ($Matches.form) { return $Matches.form }
+    return "o"
+  }
+  return ""
+}
+
+function Get-OfficialStandardCardIndex {
+  $index = @{}
+  foreach ($source in Get-ChildItem -LiteralPath $CardsSourceDir -File -Filter "*.png") {
+    if ($source.Name -notmatch "^(?<number>\d+)_(?<character>[^_]+)_(?<form>[^_]+)_(?<kind>[ns])_(?<index>\d+)\.png$") {
+      continue
+    }
+
+    $key = "$($Matches.number)_$($Matches.character)|$($Matches.form)|$($Matches.kind)_$($Matches.index)"
+    $index[$key] = "images/na_$($source.Name)"
+  }
+  return $index
+}
+
 function Convert-TarotLeafName($OfficialLeaf) {
   $name = [System.IO.Path]::GetFileNameWithoutExtension($OfficialLeaf)
   if ($name -match "^tarot_(\d+)_.+?(_a\d+)?$") {
@@ -191,6 +225,52 @@ foreach ($source in Get-ChildItem -LiteralPath $TarotsSourceDir -File -Filter "*
   }
 }
 
+$officialStandardCards = Get-OfficialStandardCardIndex
+$replayTarotNameSet = @{}
+foreach ($name in $replayTarotNames) {
+  $replayTarotNameSet[[string]$name] = $true
+}
+
+$replayBaseReplacements = 0
+$replayFormReplacements = 0
+$replayCardChanges = 0
+foreach ($tarot in $characters) {
+  if (-not $replayTarotNameSet.ContainsKey([string]$tarot.name)) { continue }
+  if (-not ($tarot.cards -is [System.Collections.IEnumerable])) { continue }
+
+  $tarotForm = Get-TarotForm $tarot.img
+  $updatedCards = @()
+  foreach ($cardPath in $tarot.cards) {
+    $originalPath = [string]$cardPath
+    $selectedPath = $originalPath
+    $slotInfo = Get-CardSlotInfo (Split-Path -Leaf $selectedPath)
+    if ($slotInfo) {
+      $baseKey = "$($slotInfo.CharacterKey)|o|$($slotInfo.Slot)"
+      if ($officialStandardCards.ContainsKey($baseKey)) {
+        $basePath = [string]$officialStandardCards[$baseKey]
+        if ($selectedPath -ne $basePath) { $replayBaseReplacements++ }
+        $selectedPath = $basePath
+      }
+
+      if ($tarotForm -and $tarotForm -ne "o") {
+        $formKey = "$($slotInfo.CharacterKey)|$tarotForm|$($slotInfo.Slot)"
+        if ($officialStandardCards.ContainsKey($formKey)) {
+          $formPath = [string]$officialStandardCards[$formKey]
+          if ($selectedPath -ne $formPath) { $replayFormReplacements++ }
+          $selectedPath = $formPath
+        }
+      }
+    }
+    if ($selectedPath -ne $originalPath) { $replayCardChanges++ }
+    $updatedCards += $selectedPath
+  }
+  $tarot.cards = $updatedCards
+}
+
+if (-not $PlanOnly -and $PSCmdlet.ShouldProcess($CharactersPath, "Apply replay base cards, then replay form replacements")) {
+  Save-JsonFile $CharactersPath $characters
+}
+
 if ($NewSeason) {
   $config.currentSeason = $NewSeason
   $past = @($ArchiveSeason) + @($config.pastSeasons | Where-Object { $_ -ne $ArchiveSeason -and $_ -ne $NewSeason })
@@ -237,6 +317,9 @@ if (-not $PlanOnly -and (Test-Path -LiteralPath $TimelinePublicDir)) {
   AliasCopies = $aliasCopies
   CopiedTarots = $copiedTarots
   ReplayTarotCount = $replayTarotNames.Count
+  ReplayBaseReplacements = $replayBaseReplacements
+  ReplayFormReplacements = $replayFormReplacements
+  ReplayCardChanges = $replayCardChanges
   MissingAliasCount = $missingAliases.Count
   UnmatchedTarotCount = $unmatchedTarots.Count
   TimelineConfig = if (Test-Path -LiteralPath $TimelinePublicDir) { Join-Path $TimelinePublicDir "season_config.json" } else { "not found" }

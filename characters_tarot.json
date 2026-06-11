@@ -7,13 +7,13 @@
       "images/na_01_yurina_o_n_1.png",
       "images/na_01_yurina_o_n_2.png",
       "images/na_01_yurina_o_n_3.png",
-      "images/na_01_yurina_o_n_4_s2.png",
-      "images/na_01_yurina_o_n_5_s9_5.png",
+      "images/na_01_yurina_o_n_4.png",
+      "images/na_01_yurina_o_n_5.png",
       "images/na_01_yurina_o_n_6.png",
       "images/na_01_yurina_o_n_7.png",
       "images/na_01_yurina_o_s_1.png",
-      "images/na_01_yurina_o_s_2_s5.png",
-      "images/na_01_yurina_o_s_3_s2.png",
+      "images/na_01_yurina_o_s_2.png",
+      "images/na_01_yurina_o_s_3.png",
       "images/na_01_yurina_o_s_4.png"
     ]
   },
@@ -25,13 +25,13 @@
       "images/na_01_yurina_a1_n_1.png",
       "images/na_01_yurina_o_n_2.png",
       "images/na_01_yurina_o_n_3.png",
-      "images/na_01_yurina_o_n_4_s2.png",
-      "images/na_01_yurina_o_n_5_s9_5.png",
+      "images/na_01_yurina_o_n_4.png",
+      "images/na_01_yurina_o_n_5.png",
       "images/na_01_yurina_a1_n_6.png",
       "images/na_01_yurina_o_n_7.png",
       "images/na_01_yurina_o_s_1.png",
-      "images/na_01_yurina_a1_s_2_s5.png",
-      "images/na_01_yurina_o_s_3_s2.png",
+      "images/na_01_yurina_a1_s_2.png",
+      "images/na_01_yurina_o_s_3.png",
       "images/na_01_yurina_o_s_4.png"
     ]
   },
@@ -43,13 +43,13 @@
       "images/na_01_yurina_o_n_1.png",
       "images/na_01_yurina_o_n_2.png",
       "images/na_01_yurina_a2_n_3.png",
-      "images/na_01_yurina_o_n_4_s2.png",
-      "images/na_01_yurina_o_n_5_s9_5.png",
+      "images/na_01_yurina_o_n_4.png",
+      "images/na_01_yurina_o_n_5.png",
       "images/na_01_yurina_o_n_6.png",
       "images/na_01_yurina_a2_n_7.png",
       "images/na_01_yurina_a2_s_1.png",
-      "images/na_01_yurina_o_s_2_s5.png",
-      "images/na_01_yurina_o_s_3_s2.png",
+      "images/na_01_yurina_o_s_2.png",
+      "images/na_01_yurina_o_s_3.png",
       "images/na_01_yurina_o_s_4.png"
     ]
   },
@@ -58,17 +58,17 @@
     "img": "tarots/tarot_02.png",
     "weapon": "薙",
     "cards": [
-      "images/na_02_saine_o_n_1_s6_2.png",
+      "images/na_02_saine_o_n_1.png",
       "images/na_02_saine_o_n_2.png",
-      "images/na_02_saine_o_n_3_s6_2.png",
-      "images/na_02_saine_o_n_4_s6_2.png",
-      "images/na_02_saine_o_n_5_s5.png",
-      "images/na_02_saine_o_n_6_s3.png",
+      "images/na_02_saine_o_n_3.png",
+      "images/na_02_saine_o_n_4.png",
+      "images/na_02_saine_o_n_5.png",
+      "images/na_02_saine_o_n_6.png",
       "images/na_02_saine_o_n_7.png",
-      "images/na_02_saine_o_s_1_s2.png",
-      "images/na_02_saine_o_s_2_s2.png",
-      "images/na_02_saine_o_s_3_s6_2.png",
-      "images/na_02_saine_o_s_4_s2.png"
+      "images/na_02_saine_o_s_1.png",
+      "images/na_02_saine_o_s_2.png",
+      "images/na_02_saine_o_s_3.png",
+      "images/na_02_saine_o_s_4.png"
     ]
   },
   {
@@ -76,17 +76,17 @@
     "img": "tarots/tarot_02_a1.png",
     "weapon": "琵",
     "cards": [
-      "images/na_02_saine_a1_n_1_rework.png",
+      "images/na_02_saine_a1_n_1.png",
       "images/na_02_saine_o_n_2.png",
-      "images/na_02_saine_o_n_3_s6_2.png",
-      "images/na_02_saine_o_n_4_s6_2.png",
-      "images/na_02_saine_o_n_5_s5.png",
-      "images/na_02_saine_a1_n_6_rework.png",
+      "images/na_02_saine_o_n_3.png",
+      "images/na_02_saine_o_n_4.png",
+      "images/na_02_saine_o_n_5.png",
+      "images/na_02_saine_a1_n_6.png",
       "images/na_02_saine_o_n_7.png",
-      "images/na_02_saine_o_s_1_s2.png",
-      "images/na_02_saine_a1_s_2_rework.png",
-      "images/na_02_saine_o_s_3_s6_2.png",
-      "images/na_02_saine_o_s_4_s2.png"
+      "images/na_02_saine_o_s_1.png",
+      "images/na_02_saine_a1_s_2.png",
+      "images/na_02_saine_o_s_3.png",
+      "images/na_02_saine_o_s_4.png"
     ]
   },
   {
@@ -94,17 +94,17 @@
     "weapon": "拒",
     "img": "tarots/tarot_02_a2.png",
     "cards": [
-      "images/na_02_saine_o_n_1_s6_2.png",
-      "images/na_02_saine_a2_n_2_s8_2.png",
-      "images/na_02_saine_o_n_3_s6_2.png",
-      "images/na_02_saine_o_n_4_s6_2.png",
-      "images/na_02_saine_o_n_5_s5.png",
-      "images/na_02_saine_o_n_6_s3.png",
-      "images/na_02_saine_a2_n_7_s7_2.png",
-      "images/na_02_saine_o_s_1_s2.png",
-      "images/na_02_saine_o_s_2_s2.png",
-      "images/na_02_saine_a2_s_3_s6_2.png",
-      "images/na_02_saine_o_s_4_s2.png"
+      "images/na_02_saine_o_n_1.png",
+      "images/na_02_saine_a2_n_2.png",
+      "images/na_02_saine_o_n_3.png",
+      "images/na_02_saine_o_n_4.png",
+      "images/na_02_saine_o_n_5.png",
+      "images/na_02_saine_o_n_6.png",
+      "images/na_02_saine_a2_n_7.png",
+      "images/na_02_saine_o_s_1.png",
+      "images/na_02_saine_o_s_2.png",
+      "images/na_02_saine_a2_s_3.png",
+      "images/na_02_saine_o_s_4.png"
     ]
   },
   {
@@ -113,11 +113,11 @@
     "img": "tarots/tarot_03.png",
     "cards": [
       "images/na_03_himika_o_n_1.png",
-      "images/na_03_himika_o_n_2_s4.png",
+      "images/na_03_himika_o_n_2.png",
       "images/na_03_himika_o_n_3.png",
       "images/na_03_himika_o_n_4.png",
       "images/na_03_himika_o_n_5.png",
-      "images/na_03_himika_o_n_6_s5.png",
+      "images/na_03_himika_o_n_6.png",
       "images/na_03_himika_o_n_7.png",
       "images/na_03_himika_o_s_1.png",
       "images/na_03_himika_o_s_2.png",
@@ -135,10 +135,10 @@
       "images/na_03_himika_o_n_3.png",
       "images/na_03_himika_o_n_4.png",
       "images/na_03_himika_a1_n_5.png",
-      "images/na_03_himika_o_n_6_s5.png",
+      "images/na_03_himika_o_n_6.png",
       "images/na_03_himika_o_n_7.png",
       "images/na_03_himika_o_s_1.png",
-      "images/na_03_himika_a1_s_2_s6_2.png",
+      "images/na_03_himika_a1_s_2.png",
       "images/na_03_himika_o_s_3.png",
       "images/na_03_himika_o_s_4.png"
     ]
@@ -148,16 +148,16 @@
     "weapon": "扇",
     "img": "tarots/tarot_04.png",
     "cards": [
-      "images/na_04_tokoyo_o_n_1_s2.png",
+      "images/na_04_tokoyo_o_n_1.png",
       "images/na_04_tokoyo_o_n_2.png",
       "images/na_04_tokoyo_o_n_3.png",
       "images/na_04_tokoyo_o_n_4.png",
       "images/na_04_tokoyo_o_n_5.png",
       "images/na_04_tokoyo_o_n_6.png",
-      "images/na_04_tokoyo_o_n_7_s6_2.png",
+      "images/na_04_tokoyo_o_n_7.png",
       "images/na_04_tokoyo_o_s_1.png",
       "images/na_04_tokoyo_o_s_2.png",
-      "images/na_04_tokoyo_o_s_3_s2.png",
+      "images/na_04_tokoyo_o_s_3.png",
       "images/na_04_tokoyo_o_s_4.png"
     ]
   },
@@ -166,16 +166,16 @@
     "weapon": "笛",
     "img": "tarots/tarot_04_a1.png",
     "cards": [
-      "images/na_04_tokoyo_a1_n_1_rework.png",
+      "images/na_04_tokoyo_a1_n_1.png",
       "images/na_04_tokoyo_o_n_2.png",
       "images/na_04_tokoyo_o_n_3.png",
-      "images/na_04_tokoyo_a1_n_4_rework.png",
+      "images/na_04_tokoyo_o_n_4.png",
       "images/na_04_tokoyo_o_n_5.png",
       "images/na_04_tokoyo_o_n_6.png",
-      "images/na_04_tokoyo_o_n_7_s6_2.png",
+      "images/na_04_tokoyo_o_n_7.png",
       "images/na_04_tokoyo_o_s_1.png",
       "images/na_04_tokoyo_o_s_2.png",
-      "images/na_04_tokoyo_a1_s_3_rework.png",
+      "images/na_04_tokoyo_a1_s_3.png",
       "images/na_04_tokoyo_o_s_4.png"
     ]
   },
@@ -184,13 +184,13 @@
     "weapon": "恐",
     "img": "tarots/tarot_04_a2.png",
     "cards": [
-      "images/na_04_tokoyo_o_n_1_s2.png",
-      "images/na_04_tokoyo_a2_n_2.png",
-      "images/na_04_tokoyo_o_n_3.png",
+      "images/na_04_tokoyo_o_n_1.png",
+      "images/na_04_tokoyo_o_n_2.png",
+      "images/na_04_tokoyo_a2_n_3.png",
       "images/na_04_tokoyo_o_n_4.png",
       "images/na_04_tokoyo_o_n_5.png",
       "images/na_04_tokoyo_o_n_6.png",
-      "images/na_04_tokoyo_o_n_7_s6_2.png",
+      "images/na_04_tokoyo_o_n_7.png",
       "images/na_04_tokoyo_o_s_1.png",
       "images/na_04_tokoyo_a2_s_2.png",
       "images/na_04_tokoyo_a2_s_3.png",
@@ -203,16 +203,16 @@
     "img": "tarots/tarot_05.png",
     "cards": [
       "images/na_05_oboro_o_n_1.png",
-      "images/na_05_oboro_o_n_2_s2.png",
+      "images/na_05_oboro_o_n_2.png",
       "images/na_05_oboro_o_n_3.png",
-      "images/na_05_oboro_o_n_4_s3.png",
+      "images/na_05_oboro_o_n_4.png",
       "images/na_05_oboro_o_n_5.png",
       "images/na_05_oboro_o_n_6.png",
       "images/na_05_oboro_o_n_7.png",
       "images/na_05_oboro_o_s_1.png",
-      "images/na_05_oboro_o_s_2_s3.png",
-      "images/na_05_oboro_o_s_3_s8_2.png",
-      "images/na_05_oboro_o_s_4_s3.png"
+      "images/na_05_oboro_o_s_2.png",
+      "images/na_05_oboro_o_s_3.png",
+      "images/na_05_oboro_o_s_4.png"
     ]
   },
   {
@@ -222,14 +222,14 @@
     "cards": [
       "images/na_05_oboro_o_n_1.png",
       "images/na_05_oboro_a1_n_2.png",
-      "images/na_05_oboro_a1_n_3_s5.png",
-      "images/na_05_oboro_o_n_4_s3.png",
+      "images/na_05_oboro_o_n_3.png",
+      "images/na_05_oboro_a1_n_4.png",
       "images/na_05_oboro_o_n_5.png",
       "images/na_05_oboro_o_n_6.png",
       "images/na_05_oboro_o_n_7.png",
       "images/na_05_oboro_o_s_1.png",
-      "images/na_05_oboro_o_s_2_s3.png",
-      "images/na_05_oboro_o_s_3_s8_2.png",
+      "images/na_05_oboro_o_s_2.png",
+      "images/na_05_oboro_o_s_3.png",
       "images/na_05_oboro_a1_s_4.png"
     ]
   },
@@ -239,16 +239,16 @@
     "img": "tarots/tarot_05_a2.png",
     "cards": [
       "images/na_05_oboro_a2_n_1.png",
-      "images/na_05_oboro_o_n_2_s2.png",
+      "images/na_05_oboro_o_n_2.png",
       "images/na_05_oboro_o_n_3.png",
-      "images/na_05_oboro_o_n_4_s3.png",
+      "images/na_05_oboro_o_n_4.png",
       "images/na_05_oboro_o_n_5.png",
       "images/na_05_oboro_o_n_6.png",
       "images/na_05_oboro_o_n_7.png",
       "images/na_05_oboro_a2_s_1.png",
-      "images/na_05_oboro_o_s_2_s3.png",
+      "images/na_05_oboro_o_s_2.png",
       "images/na_05_oboro_a2_s_3.png",
-      "images/na_05_oboro_o_s_4_s3.png"
+      "images/na_05_oboro_o_s_4.png"
     ]
   },
   {
@@ -257,13 +257,13 @@
     "img": "tarots/tarot_06.png",
     "cards": [
       "images/na_06_yukihi_o_n_1.png",
-      "images/na_06_yukihi_o_n_2_s8_2.png",
+      "images/na_06_yukihi_o_n_2.png",
       "images/na_06_yukihi_o_n_3.png",
       "images/na_06_yukihi_o_n_4.png",
-      "images/na_06_yukihi_o_n_5_s9_5.png",
+      "images/na_06_yukihi_o_n_5.png",
       "images/na_06_yukihi_o_n_6.png",
       "images/na_06_yukihi_o_n_7.png",
-      "images/na_06_yukihi_o_s_1_s8.png",
+      "images/na_06_yukihi_o_s_1.png",
       "images/na_06_yukihi_o_s_2.png",
       "images/na_06_yukihi_o_s_3.png",
       "images/na_06_yukihi_o_s_4.png"
@@ -278,10 +278,10 @@
       "images/na_06_yukihi_a1_n_2.png",
       "images/na_06_yukihi_o_n_3.png",
       "images/na_06_yukihi_a1_n_4.png",
-      "images/na_06_yukihi_o_n_5_s9_5.png",
+      "images/na_06_yukihi_o_n_5.png",
       "images/na_06_yukihi_o_n_6.png",
       "images/na_06_yukihi_o_n_7.png",
-      "images/na_06_yukihi_o_s_1_s8.png",
+      "images/na_06_yukihi_o_s_1.png",
       "images/na_06_yukihi_a1_s_2.png",
       "images/na_06_yukihi_o_s_3.png",
       "images/na_06_yukihi_o_s_4.png"
@@ -293,14 +293,14 @@
     "img": "tarots/tarot_07.png",
     "cards": [
       "images/na_07_shinra_o_n_1.png",
-      "images/na_07_shinra_o_n_2_s10.png",
+      "images/na_07_shinra_o_n_2.png",
       "images/na_07_shinra_o_n_3.png",
       "images/na_07_shinra_o_n_4.png",
       "images/na_07_shinra_o_n_5.png",
-      "images/na_07_shinra_o_n_6_s3.png",
+      "images/na_07_shinra_o_n_6.png",
       "images/na_07_shinra_o_n_7.png",
-      "images/na_07_shinra_o_s_1_s6.png",
-      "images/na_07_shinra_o_s_2_s2.png",
+      "images/na_07_shinra_o_s_1.png",
+      "images/na_07_shinra_o_s_2.png",
       "images/na_07_shinra_o_s_3.png",
       "images/na_07_shinra_o_s_4.png"
     ]
@@ -315,10 +315,10 @@
       "images/na_07_shinra_o_n_3.png",
       "images/na_07_shinra_o_n_4.png",
       "images/na_07_shinra_o_n_5.png",
-      "images/na_07_shinra_o_n_6_s3.png",
-      "images/na_07_shinra_a1_n_7_s8_2.png",
-      "images/na_07_shinra_o_s_1_s6.png",
-      "images/na_07_shinra_o_s_2_s2.png",
+      "images/na_07_shinra_o_n_6.png",
+      "images/na_07_shinra_a1_n_7.png",
+      "images/na_07_shinra_o_s_1.png",
+      "images/na_07_shinra_o_s_2.png",
       "images/na_07_shinra_a1_s_3.png",
       "images/na_07_shinra_o_s_4.png"
     ]
@@ -328,17 +328,17 @@
     "weapon": "鎚",
     "img": "tarots/tarot_08.png",
     "cards": [
-      "images/na_08_hagane_o_n_1_s2.png",
+      "images/na_08_hagane_o_n_1.png",
       "images/na_08_hagane_o_n_2.png",
       "images/na_08_hagane_o_n_3.png",
-      "images/na_08_hagane_o_n_4_s6_2.png",
+      "images/na_08_hagane_o_n_4.png",
       "images/na_08_hagane_o_n_5.png",
-      "images/na_08_hagane_o_n_6_s8.png",
-      "images/na_08_hagane_o_n_7_s7_2.png",
-      "images/na_08_hagane_o_s_1_s5.png",
+      "images/na_08_hagane_o_n_6.png",
+      "images/na_08_hagane_o_n_7.png",
+      "images/na_08_hagane_o_s_1.png",
       "images/na_08_hagane_o_s_2.png",
       "images/na_08_hagane_o_s_3.png",
-      "images/na_08_hagane_o_s_4_s10.png"
+      "images/na_08_hagane_o_s_4.png"
     ]
   },
   {
@@ -347,16 +347,16 @@
     "img": "tarots/tarot_08_a1.png",
     "cards": [
       "images/na_08_hagane_a1_n_1.png",
-      "images/na_08_hagane_a1_n_2.png",
+      "images/na_08_hagane_o_n_2.png",
       "images/na_08_hagane_o_n_3.png",
-      "images/na_08_hagane_o_n_4_s6_2.png",
+      "images/na_08_hagane_o_n_4.png",
       "images/na_08_hagane_o_n_5.png",
-      "images/na_08_hagane_o_n_6_s8.png",
-      "images/na_08_hagane_o_n_7_s7_2.png",
+      "images/na_08_hagane_o_n_6.png",
+      "images/na_08_hagane_a1_n_7.png",
       "images/na_08_hagane_a1_s_1.png",
       "images/na_08_hagane_o_s_2.png",
       "images/na_08_hagane_o_s_3.png",
-      "images/na_08_hagane_o_s_4_s10.png"
+      "images/na_08_hagane_o_s_4.png"
     ]
   },
   {
@@ -366,8 +366,8 @@
     "cards": [
       "images/na_09_chikage_o_n_1.png",
       "images/na_09_chikage_o_n_2.png",
-      "images/na_09_chikage_o_n_3_s5.png",
-      "images/na_09_chikage_o_n_4_s8_2.png",
+      "images/na_09_chikage_o_n_3.png",
+      "images/na_09_chikage_o_n_4.png",
       "images/na_09_chikage_o_n_5.png",
       "images/na_09_chikage_o_n_6.png",
       "images/na_09_chikage_o_n_7.png",
@@ -384,15 +384,15 @@
     "cards": [
       "images/na_09_chikage_o_n_1.png",
       "images/na_09_chikage_o_n_2.png",
-      "images/na_09_chikage_o_n_3_s5.png",
-      "images/na_09_chikage_o_n_4_s8_2.png",
+      "images/na_09_chikage_o_n_3.png",
+      "images/na_09_chikage_o_n_4.png",
       "images/na_09_chikage_a1_n_5.png",
       "images/na_09_chikage_a1_n_6.png",
       "images/na_09_chikage_o_n_7.png",
       "images/na_09_chikage_o_s_1.png",
       "images/na_09_chikage_o_s_2.png",
       "images/na_09_chikage_o_s_3.png",
-      "images/na_09_chikage_a1_s_4_s6_2.png"
+      "images/na_09_chikage_a1_s_4.png"
     ]
   },
   {
@@ -404,11 +404,11 @@
       "images/na_10_kururu_o_n_2.png",
       "images/na_10_kururu_o_n_3.png",
       "images/na_10_kururu_o_n_4.png",
-      "images/na_10_kururu_o_n_5_s7_2.png",
+      "images/na_10_kururu_o_n_5.png",
       "images/na_10_kururu_o_n_6.png",
       "images/na_10_kururu_o_n_7.png",
       "images/na_10_kururu_o_s_1.png",
-      "images/na_10_kururu_o_s_2_s2.png",
+      "images/na_10_kururu_o_s_2.png",
       "images/na_10_kururu_o_s_3.png",
       "images/na_10_kururu_o_s_4.png"
     ]
@@ -422,12 +422,12 @@
       "images/na_10_kururu_o_n_2.png",
       "images/na_10_kururu_a1_n_3.png",
       "images/na_10_kururu_o_n_4.png",
-      "images/na_10_kururu_o_n_5_s7_2.png",
+      "images/na_10_kururu_o_n_5.png",
       "images/na_10_kururu_o_n_6.png",
       "images/na_10_kururu_o_n_7.png",
       "images/na_10_kururu_o_s_1.png",
-      "images/na_10_kururu_o_s_2_s2.png",
-      "images/na_10_kururu_a1_s_3_s8_2.png",
+      "images/na_10_kururu_o_s_2.png",
+      "images/na_10_kururu_a1_s_3.png",
       "images/na_10_kururu_o_s_4.png"
     ]
   },
@@ -440,11 +440,11 @@
       "images/na_10_kururu_a2_n_2.png",
       "images/na_10_kururu_o_n_3.png",
       "images/na_10_kururu_o_n_4.png",
-      "images/na_10_kururu_o_n_5_s7_2.png",
+      "images/na_10_kururu_o_n_5.png",
       "images/na_10_kururu_o_n_6.png",
       "images/na_10_kururu_o_n_7.png",
       "images/na_10_kururu_o_s_1.png",
-      "images/na_10_kururu_o_s_2_s2.png",
+      "images/na_10_kururu_o_s_2.png",
       "images/na_10_kururu_o_s_3.png",
       "images/na_10_kururu_a2_s_4.png"
     ]
@@ -455,16 +455,16 @@
     "img": "tarots/tarot_11.png",
     "cards": [
       "images/na_11_thallya_o_n_1.png",
-      "images/na_11_thallya_o_n_2_s9_5.png",
+      "images/na_11_thallya_o_n_2.png",
       "images/na_11_thallya_o_n_3.png",
-      "images/na_11_thallya_o_n_4_s8_2.png",
+      "images/na_11_thallya_o_n_4.png",
       "images/na_11_thallya_o_n_5.png",
       "images/na_11_thallya_o_n_6.png",
       "images/na_11_thallya_o_n_7.png",
       "images/na_11_thallya_o_s_1.png",
       "images/na_11_thallya_o_s_2.png",
-      "images/na_11_thallya_o_s_3_s9_5.png",
-      "images/na_11_thallya_o_s_4_s3.png"
+      "images/na_11_thallya_o_s_3.png",
+      "images/na_11_thallya_o_s_4.png"
     ]
   },
   {
@@ -473,16 +473,16 @@
     "img": "tarots/tarot_11_a1.png",
     "cards": [
       "images/na_11_thallya_o_n_1.png",
-      "images/na_11_thallya_o_n_2_s9_5.png",
+      "images/na_11_thallya_o_n_2.png",
       "images/na_11_thallya_o_n_3.png",
-      "images/na_11_thallya_o_n_4_s8_2.png",
+      "images/na_11_thallya_o_n_4.png",
       "images/na_11_thallya_a1_n_5.png",
       "images/na_11_thallya_o_n_6.png",
       "images/na_11_thallya_o_n_7.png",
       "images/na_11_thallya_a1_s_1.png",
       "images/na_11_thallya_a1_s_2.png",
-      "images/na_11_thallya_o_s_3_s9_5.png",
-      "images/na_11_thallya_o_s_4_s3.png"
+      "images/na_11_thallya_o_s_3.png",
+      "images/na_11_thallya_o_s_4.png"
     ]
   },
   {
@@ -490,17 +490,17 @@
     "weapon": "爪",
     "img": "tarots/tarot_12.png",
     "cards": [
-      "images/na_12_raira_o_n_1_s2.png",
-      "images/na_12_raira_o_n_2_s8_2.png",
+      "images/na_12_raira_o_n_1.png",
+      "images/na_12_raira_o_n_2.png",
       "images/na_12_raira_o_n_3.png",
       "images/na_12_raira_o_n_4.png",
       "images/na_12_raira_o_n_5.png",
-      "images/na_12_raira_o_n_6_s9_5.png",
+      "images/na_12_raira_o_n_6.png",
       "images/na_12_raira_o_n_7.png",
       "images/na_12_raira_o_s_1.png",
       "images/na_12_raira_o_s_2.png",
-      "images/na_12_raira_o_s_3_s4.png",
-      "images/na_12_raira_o_s_4_s5.png"
+      "images/na_12_raira_o_s_3.png",
+      "images/na_12_raira_o_s_4.png"
     ]
   },
   {
@@ -508,8 +508,8 @@
     "weapon": "嵐",
     "img": "tarots/tarot_12_a1.png",
     "cards": [
-      "images/na_12_raira_o_n_1_s2.png",
-      "images/na_12_raira_a1_n_2_s6.png",
+      "images/na_12_raira_o_n_1.png",
+      "images/na_12_raira_a1_n_2.png",
       "images/na_12_raira_o_n_3.png",
       "images/na_12_raira_o_n_4.png",
       "images/na_12_raira_o_n_5.png",
@@ -518,7 +518,7 @@
       "images/na_12_raira_o_s_1.png",
       "images/na_12_raira_o_s_2.png",
       "images/na_12_raira_a1_s_3.png",
-      "images/na_12_raira_o_s_4_s5.png"
+      "images/na_12_raira_o_s_4.png"
     ]
   },
   {
@@ -602,13 +602,13 @@
       "images/na_15_korunu_o_n_2.png",
       "images/na_15_korunu_o_n_3.png",
       "images/na_15_korunu_o_n_4.png",
-      "images/na_15_korunu_o_n_5_s7_2.png",
+      "images/na_15_korunu_o_n_5.png",
       "images/na_15_korunu_o_n_6.png",
-      "images/na_15_korunu_o_n_7_s6.png",
+      "images/na_15_korunu_o_n_7.png",
       "images/na_15_korunu_o_s_1.png",
       "images/na_15_korunu_o_s_2.png",
       "images/na_15_korunu_o_s_3.png",
-      "images/na_15_korunu_o_s_4_s6.png"
+      "images/na_15_korunu_o_s_4.png"
     ]
   },
   {
@@ -726,7 +726,7 @@
       "images/na_19_megumi_o_n_6.png",
       "images/na_19_megumi_o_n_7.png",
       "images/na_19_megumi_o_s_1.png",
-      "images/na_19_megumi_o_s_2_s8.png",
+      "images/na_19_megumi_o_s_2.png",
       "images/na_19_megumi_o_s_3.png",
       "images/na_19_megumi_o_s_4.png"
     ]
@@ -920,13 +920,13 @@
       "images/na_15_korunu_o_n_2.png",
       "images/na_15_korunu_o_n_3.png",
       "images/na_15_korunu_o_n_4.png",
-      "images/na_15_korunu_o_n_5_s7_2.png",
+      "images/na_15_korunu_o_n_5.png",
       "images/na_15_korunu_a1_n_6.png",
-      "images/na_15_korunu_o_n_7_s6.png",
+      "images/na_15_korunu_o_n_7.png",
       "images/na_15_korunu_a1_s_1.png",
       "images/na_15_korunu_o_s_2.png",
       "images/na_15_korunu_a1_s_3.png",
-      "images/na_15_korunu_o_s_4_s6.png"
+      "images/na_15_korunu_o_s_4.png"
     ]
   },
   {
@@ -942,7 +942,7 @@
       "images/na_19_megumi_o_n_6.png",
       "images/na_19_megumi_o_n_7.png",
       "images/na_19_megumi_o_s_1.png",
-      "images/na_19_megumi_o_s_2_s8.png",
+      "images/na_19_megumi_o_s_2.png",
       "images/na_19_megumi_a1_s_3.png",
       "images/na_19_megumi_a1_s_4.png",
       "images/na_19_megumi_a1_s_a_1.png"
