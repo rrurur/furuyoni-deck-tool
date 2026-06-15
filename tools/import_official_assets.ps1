@@ -84,6 +84,34 @@ function Sync-AssetDirectory($Source, $Destination) {
   }
 }
 
+function Assert-OfficialCardSync($Destination) {
+  if ($PlanOnly) { return 0 }
+
+  $mismatches = New-Object System.Collections.Generic.List[string]
+  $verified = 0
+  foreach ($source in Get-ChildItem -LiteralPath $CardsSourceDir -File -Filter "*.png") {
+    $target = Join-Path $Destination ("na_" + $source.Name)
+    if (-not (Test-Path -LiteralPath $target)) {
+      $mismatches.Add("missing: $target")
+      continue
+    }
+
+    $sourceHash = (Get-FileHash -LiteralPath $source.FullName -Algorithm SHA256).Hash
+    $targetHash = (Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash
+    if ($sourceHash -ne $targetHash) {
+      $mismatches.Add("different: $target")
+      continue
+    }
+    $verified++
+  }
+
+  if ($mismatches.Count -gt 0) {
+    $details = ($mismatches | Select-Object -First 20) -join [Environment]::NewLine
+    throw "Official card sync verification failed for $Destination`n$details"
+  }
+  return $verified
+}
+
 function Get-OfficialCardSource($TargetLeaf) {
   $leaf = $TargetLeaf -replace "^na_", ""
   $direct = Join-Path $CardsSourceDir $leaf
@@ -182,6 +210,7 @@ foreach ($source in Get-ChildItem -LiteralPath $CardsSourceDir -File -Filter "*.
   Copy-File $source.FullName (Join-Path $ImagesDir ("na_" + $source.Name))
   $copiedCards++
 }
+$verifiedLocalCards = Assert-OfficialCardSync $ImagesDir
 
 $characters = Read-JsonFile $CharactersPath
 $aliasCopies = 0
@@ -267,7 +296,7 @@ foreach ($tarot in $characters) {
   $tarot.cards = $updatedCards
 }
 
-if (-not $PlanOnly -and $PSCmdlet.ShouldProcess($CharactersPath, "Apply replay base cards, then replay form replacements")) {
+if (-not $PlanOnly -and $replayCardChanges -gt 0 -and $PSCmdlet.ShouldProcess($CharactersPath, "Apply replay base cards, then replay form replacements")) {
   Save-JsonFile $CharactersPath $characters
 }
 
@@ -285,14 +314,15 @@ if ($NewSeason) {
   }
   $config.assetFoldersBySeason | Add-Member -NotePropertyName $ArchiveSeason -NotePropertyValue $currentAssetFolder -Force
   $config.currentAssetFolder = $NewAssetFolder
-  $config.assetVersion = (Get-Date).ToUniversalTime().ToString("yyyyMMdd-HHmmss")
-  $config.replayTarotNames = @($replayTarotNames)
-
-  if (-not $PlanOnly -and $PSCmdlet.ShouldProcess($ConfigPath, "Update currentSeason, image folders, and complete-match tarot list")) {
-    Save-JsonFile $ConfigPath $config
-  }
 }
 
+$config.assetVersion = (Get-Date).ToUniversalTime().ToString("yyyyMMdd-HHmmss")
+$config.replayTarotNames = @($replayTarotNames | Sort-Object)
+if (-not $PlanOnly -and $PSCmdlet.ShouldProcess($ConfigPath, "Update season configuration, complete-match tarot list, and asset version")) {
+  Save-JsonFile $ConfigPath $config
+}
+
+$verifiedPublishedCards = 0
 if (-not $PlanOnly -and (Test-Path -LiteralPath $TimelinePublicDir)) {
   $publishAssetFolder = if ($NewSeason) { $NewAssetFolder } else { $currentAssetFolder }
   $publishAssetDir = Join-Path $TimelineAssetsDir $publishAssetFolder
@@ -301,6 +331,7 @@ if (-not $PlanOnly -and (Test-Path -LiteralPath $TimelinePublicDir)) {
   }
   Sync-AssetDirectory $ImagesDir (Join-Path $publishAssetDir "images")
   Sync-AssetDirectory $TarotsDir (Join-Path $publishAssetDir "tarots")
+  $verifiedPublishedCards = Assert-OfficialCardSync (Join-Path $publishAssetDir "images")
   Copy-File $ConfigPath (Join-Path $TimelinePublicDir "season_config.json")
   Copy-File $LegacyIdMapPath (Join-Path $TimelinePublicDir "legacy_id_map.json")
 }
@@ -314,6 +345,8 @@ if (-not $PlanOnly -and (Test-Path -LiteralPath $TimelinePublicDir)) {
   CurrentAssetFolder = $currentAssetFolder
   NewAssetFolder = $NewAssetFolder
   CopiedCards = $copiedCards
+  VerifiedLocalCards = $verifiedLocalCards
+  VerifiedPublishedCards = $verifiedPublishedCards
   AliasCopies = $aliasCopies
   CopiedTarots = $copiedTarots
   ReplayTarotCount = $replayTarotNames.Count

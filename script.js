@@ -154,6 +154,7 @@ const IMAGE_FOLDERS_BY_SEASON = SEASON_CONFIG.imageFoldersBySeason;
 const ASSET_BASE_URL = SEASON_CONFIG.assetBaseUrl;
 const CURRENT_ASSET_FOLDER = SEASON_CONFIG.currentAssetFolder;
 const ASSET_FOLDERS_BY_SEASON = SEASON_CONFIG.assetFoldersBySeason;
+const ASSET_VERSION = SEASON_CONFIG.assetVersion;
 const REPLAY_TAROT_NAMES = SEASON_CONFIG.replayTarotNames;
 const MATCH_TYPES = SEASON_CONFIG.matchTypes;
 const MATCH_TYPE_LABELS = SEASON_CONFIG.matchTypeLabels;
@@ -410,7 +411,11 @@ function resolveAssetPath(assetPath, season=CURRENT_SEASON){
   if (!p) return "";
   if (/^https?:\/\//.test(p)) return p;
   if (ASSET_BASE_URL && /^(images|tarots)\//.test(p)) {
-    return `${ASSET_BASE_URL}/${assetFolderForSeason(season)}/${p}`;
+    const url = `${ASSET_BASE_URL}/${assetFolderForSeason(season)}/${p}`;
+    if (normalizeSeason(season) === CURRENT_SEASON && ASSET_VERSION) {
+      return `${url}?v=${encodeURIComponent(ASSET_VERSION)}`;
+    }
+    return url;
   }
   if (usesLegacyImages(season) && p.startsWith("images/")) {
     return p.replace(/^images\//, `${imageFolderForSeason(season)}/`);

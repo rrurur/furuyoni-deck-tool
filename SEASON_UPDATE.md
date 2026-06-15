@@ -103,11 +103,13 @@ pwsh -ExecutionPolicy Bypass -File E:\furuyoni-deck-tool\tools\import_official_a
 
 - 現在シーズン素材がFirebase Hosting側に保存済みか確認
 - 公式 `cards/*.png` を `images/na_*.png` として上書き・追加
+- 公式カードとローカル・公開側のSHA-256を照合し、同名の旧画像が残っていれば処理を停止
 - `characters_tarot.json` が参照する旧互換名にも画像をコピー
   - 例: `_s8` 付きの公開名を、公式の接尾辞なし画像から作成
 - 公式タロット名を公開側の短い名前へ変換
   - 例: `tarot_19_megumi_a1.png` → `tarot_19_a1.png`
 - 公式 `tarots/` と `characters_tarot.json` を照合し、完全戦対象の `replayTarotNames` を自動更新
+- 同じシーズンの素材差し替えでも `assetVersion` を更新し、ブラウザの旧画像キャッシュを回避
 - `season_config.json` のシーズン名と旧画像フォルダ対応を更新
 - TL側の `E:\自作ｐｙ\furutl\public\season_config.json` へ設定を同期
 - 固定済みの `legacy_id_map.json` をTL側へ同期
@@ -116,6 +118,12 @@ pwsh -ExecutionPolicy Bypass -File E:\furuyoni-deck-tool\tools\import_official_a
 `NewAssetFolder` は画面には表示されない内部名なので英字を使用します。
 新シーズンの公開素材フォルダがすでに存在する場合は処理を停止します。
 内容を確認済みで再利用する場合だけ `-ReuseExistingArchive` を付けます。
+
+同じシーズン内で公式 `cards/` の内容だけ更新された場合は、シーズン指定なしで再実行します。
+
+```powershell
+pwsh -ExecutionPolicy Bypass -File E:\furuyoni-deck-tool\tools\import_official_assets.ps1 -SkipArchive
+```
 
 ### 4. メガミとカード定義を更新
 
