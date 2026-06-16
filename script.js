@@ -1340,11 +1340,78 @@ async function saveDeck(){
 }
 
 /* ---------------- 履歴の取得（doc id も保持） ---------------- */
+function rowFromDeckDoc(docSnap){
+  const d = docSnap.data();
+  const mt = typeof d.matchType === "number" ? d.matchType : null;
+  const rt = typeof d.resultType === "number" ? d.resultType : null;
+  const season = typeof d.season === "string" ? d.season : "";
+
+  let ms = 0;
+  if (typeof d.createdAtMs === "number") ms = d.createdAtMs;
+  else if (d.createdAt && typeof d.createdAt.toMillis === "function") ms = d.createdAt.toMillis();
+
+  return {
+    id: docSnap.id,
+    createdAtMs: ms,
+    matchTypeNum: mt,
+    resultTypeNum: rt,
+    season,
+    myTarotIdx: Array.isArray(d.myTarotIdx) ? d.myTarotIdx : [],
+    oppTarotIdx: Array.isArray(d.oppTarotIdx) ? d.oppTarotIdx : [],
+    myTarotNames: Array.isArray(d.myTarotNames) ? d.myTarotNames : null,
+    oppTarotNames: Array.isArray(d.oppTarotNames) ? d.oppTarotNames : null,
+    deckName: typeof d.deckName === "string" ? d.deckName : "",
+    memo: typeof d.memo === "string" ? d.memo : "",
+    cardIds: Array.isArray(d.cardIds) ? d.cardIds.map(n => (typeof n==="number"? n : -1)) : Array(10).fill(-1),
+    cardPaths: Array.isArray(d.cardPaths) ? d.cardPaths.map(path => typeof path === "string" ? path : "") : null
+  };
+}
+async function fetchDeckRowsByOwnerUid(uid){
+  if (!uid) return [];
+  const qy = query(collection(db, "decks"), where("ownerUid", "==", uid));
+  const snap = await getDocs(qy);
+  const rows = [];
+  snap.forEach(docSnap => rows.push(rowFromDeckDoc(docSnap)));
+  return rows;
+}
+function autoReplayHandleCandidates(){
+  const h = normalizeHandle(prefs.handle);
+  if (!h) return [];
+  const base = h.replace(/\(steam\)$/i, "");
+  return Array.from(new Set([h, `${base}(steam)`].filter(Boolean)));
+}
+async function fetchAutoReplayOwnerUids(){
+  const handles = autoReplayHandleCandidates();
+  if (handles.length === 0) return [];
+  const qy = query(collection(db, "profiles"), where("handle", "in", handles));
+  const snap = await getDocs(qy);
+  const uids = [];
+  snap.forEach(docSnap => {
+    const h = normalizeHandle(docSnap.data()?.handle);
+    if (handles.includes(h)) uids.push(docSnap.id);
+  });
+  return Array.from(new Set(uids));
+}
+async function fetchAutoReplayRows(excludeUid=""){
+  const rows = [];
+  try{
+    const uids = await fetchAutoReplayOwnerUids();
+    for (const uid of uids){
+      if (excludeUid && uid === excludeUid) continue;
+      rows.push(...await fetchDeckRowsByOwnerUid(uid));
+    }
+  }catch(e){
+    console.warn("auto replay history read skipped:", e?.code || e);
+  }
+  return rows;
+}
 async function refreshUserPlays(){
   const u = auth.currentUser;
 
   if (!isCloudUser(u)){
-    userPlays = loadLocalPlays().slice().sort((a,b) => (b.createdAtMs||0)-(a.createdAtMs||0));
+    const localRows = loadLocalPlays().slice();
+    const autoRows = await fetchAutoReplayRows();
+    userPlays = [...localRows, ...autoRows].sort((a,b) => (b.createdAtMs||0)-(a.createdAtMs||0));
     return;
   }
 
@@ -1352,37 +1419,10 @@ async function refreshUserPlays(){
   if (!u) return;
 
   try{
-    const qy = query(collection(db, "decks"), where("ownerUid", "==", u.uid));
-    const snap = await getDocs(qy);
-
-    const rows = [];
-    snap.forEach(docSnap => {
-      const d = docSnap.data();
-
-      const mt = typeof d.matchType === "number" ? d.matchType : null;
-      const rt = typeof d.resultType === "number" ? d.resultType : null;
-      const season = typeof d.season === "string" ? d.season : "";
-
-      let ms = 0;
-      if (typeof d.createdAtMs === "number") ms = d.createdAtMs;
-      else if (d.createdAt && typeof d.createdAt.toMillis === "function") ms = d.createdAt.toMillis();
-
-      rows.push({
-        id: docSnap.id,
-        createdAtMs: ms,
-        matchTypeNum: mt,
-        resultTypeNum: rt,
-        season,
-        myTarotIdx: Array.isArray(d.myTarotIdx) ? d.myTarotIdx : [],
-        oppTarotIdx: Array.isArray(d.oppTarotIdx) ? d.oppTarotIdx : [],
-        myTarotNames: Array.isArray(d.myTarotNames) ? d.myTarotNames : null,
-        oppTarotNames: Array.isArray(d.oppTarotNames) ? d.oppTarotNames : null,
-        deckName: typeof d.deckName === "string" ? d.deckName : "",
-        memo: typeof d.memo === "string" ? d.memo : "",
-        cardIds: Array.isArray(d.cardIds) ? d.cardIds.map(n => (typeof n==="number"? n : -1)) : Array(10).fill(-1),
-        cardPaths: Array.isArray(d.cardPaths) ? d.cardPaths.map(path => typeof path === "string" ? path : "") : null
-      });
-    });
+    const rows = [
+      ...await fetchDeckRowsByOwnerUid(u.uid),
+      ...await fetchAutoReplayRows(u.uid)
+    ];
 
     rows.sort((a,b) => (b.createdAtMs||0) - (a.createdAtMs||0));
     userPlays = rows;
