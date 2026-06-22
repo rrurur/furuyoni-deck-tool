@@ -22,6 +22,7 @@ import {
   getDocs,
   query,
   where,
+  limit,
   serverTimestamp,
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
@@ -30,6 +31,9 @@ import { firebaseConfig, appCheckConfig } from "./firebaseConfig.js";
 
 /* （未使用でもOK：将来の保存先用） */
 const baseFolder = "S10-1";
+const FIRESTORE_READ_CACHE_TTL_MS = 5 * 60 * 1000;
+const HISTORY_FETCH_LIMIT = 200;
+const firestoreReadCache = new Map();
 
 /* =========================================================
    シーズン設定
@@ -1253,6 +1257,7 @@ async function saveDeck(){
     season,
     deckName,
     memo,
+    ownerHandle: normalizeHandle(prefs.handle),
     myTarotIdx,
     oppTarotIdx,
     myTarotNames,
@@ -1335,6 +1340,7 @@ async function saveDeck(){
     return;
   }
 
+  clearFirestoreReadCache();
   await refreshUserPlays();
   renderRightStatsAndHistory();
 }
@@ -1366,13 +1372,42 @@ function rowFromDeckDoc(docSnap){
     cardPaths: Array.isArray(d.cardPaths) ? d.cardPaths.map(path => typeof path === "string" ? path : "") : null
   };
 }
+
+function cloneHistoryRows(rows){
+  return rows.map(row => ({
+    ...row,
+    myTarotIdx: Array.isArray(row.myTarotIdx) ? row.myTarotIdx.slice() : [],
+    oppTarotIdx: Array.isArray(row.oppTarotIdx) ? row.oppTarotIdx.slice() : [],
+    myTarotNames: Array.isArray(row.myTarotNames) ? row.myTarotNames.slice() : row.myTarotNames,
+    oppTarotNames: Array.isArray(row.oppTarotNames) ? row.oppTarotNames.slice() : row.oppTarotNames,
+    cardIds: Array.isArray(row.cardIds) ? row.cardIds.slice() : Array(10).fill(-1),
+    cardPaths: Array.isArray(row.cardPaths) ? row.cardPaths.slice() : row.cardPaths
+  }));
+}
+
+async function cachedFirestoreRead(key, loader, cloneValue = value => value){
+  const cached = firestoreReadCache.get(key);
+  if (cached && Date.now() - cached.savedAt < FIRESTORE_READ_CACHE_TTL_MS){
+    return cloneValue(cached.value);
+  }
+  const value = await loader();
+  firestoreReadCache.set(key, { savedAt: Date.now(), value: cloneValue(value) });
+  return cloneValue(value);
+}
+
+function clearFirestoreReadCache(){
+  firestoreReadCache.clear();
+}
+
 async function fetchDeckRowsByOwnerUid(uid){
   if (!uid) return [];
-  const qy = query(collection(db, "decks"), where("ownerUid", "==", uid));
-  const snap = await getDocs(qy);
-  const rows = [];
-  snap.forEach(docSnap => rows.push(rowFromDeckDoc(docSnap)));
-  return rows;
+  return cachedFirestoreRead(`deckRows:${uid}`, async () => {
+    const qy = query(collection(db, "decks"), where("ownerUid", "==", uid), limit(HISTORY_FETCH_LIMIT));
+    const snap = await getDocs(qy);
+    const rows = [];
+    snap.forEach(docSnap => rows.push(rowFromDeckDoc(docSnap)));
+    return rows;
+  }, cloneHistoryRows);
 }
 function autoReplayHandleCandidates(){
   const h = normalizeHandle(prefs.handle);
@@ -1383,14 +1418,16 @@ function autoReplayHandleCandidates(){
 async function fetchAutoReplayOwnerUids(){
   const handles = autoReplayHandleCandidates();
   if (handles.length === 0) return [];
-  const qy = query(collection(db, "profiles"), where("handle", "in", handles));
-  const snap = await getDocs(qy);
-  const uids = [];
-  snap.forEach(docSnap => {
-    const h = normalizeHandle(docSnap.data()?.handle);
-    if (handles.includes(h)) uids.push(docSnap.id);
-  });
-  return Array.from(new Set(uids));
+  return cachedFirestoreRead(`autoReplayOwnerUids:${handles.join("|")}`, async () => {
+    const qy = query(collection(db, "profiles"), where("handle", "in", handles), limit(handles.length));
+    const snap = await getDocs(qy);
+    const uids = [];
+    snap.forEach(docSnap => {
+      const h = normalizeHandle(docSnap.data()?.handle);
+      if (handles.includes(h)) uids.push(docSnap.id);
+    });
+    return Array.from(new Set(uids));
+  }, value => value.slice());
 }
 async function fetchAutoReplayRows(excludeUid=""){
   const rows = [];
@@ -1453,6 +1490,7 @@ async function deletePlay(playId){
     console.error("delete failed:", e);
     return;
   }
+  clearFirestoreReadCache();
   if (editingPlayId === playId) editingPlayId = null;
   userPlays = userPlays.filter(p => p.id !== playId);
   renderRightStatsAndHistory();
