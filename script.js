@@ -22,6 +22,7 @@ import {
   getDocs,
   query,
   where,
+  orderBy,
   limit,
   serverTimestamp,
   deleteDoc
@@ -1402,7 +1403,7 @@ function clearFirestoreReadCache(){
 async function fetchDeckRowsByOwnerUid(uid){
   if (!uid) return [];
   return cachedFirestoreRead(`deckRows:${uid}`, async () => {
-    const qy = query(collection(db, "decks"), where("ownerUid", "==", uid), limit(HISTORY_FETCH_LIMIT));
+    const qy = query(collection(db, "decks"), where("ownerUid", "==", uid), orderBy("createdAtMs", "desc"), limit(HISTORY_FETCH_LIMIT));
     const snap = await getDocs(qy);
     const rows = [];
     snap.forEach(docSnap => rows.push(rowFromDeckDoc(docSnap)));
