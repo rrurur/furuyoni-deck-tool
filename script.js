@@ -1415,7 +1415,7 @@ async function fetchDeckRowsByOwnerUid(uid){
 async function fetchDeckRowsByOwnerHandles(handles){
   if (!handles.length) return [];
   return cachedFirestoreRead(`deckRowsByOwnerHandle:${handles.join("|")}`, async () => {
-    const qy = query(collection(db, "decks"), where("ownerHandle", "in", handles), orderBy("createdAtMs", "desc"), limit(HISTORY_FETCH_LIMIT));
+    const qy = query(collection(db, "decks"), where("ownerHandle", "in", handles), limit(HISTORY_FETCH_LIMIT));
     const snap = await getDocs(qy);
     const rows = [];
     snap.forEach(docSnap => rows.push(rowFromDeckDoc(docSnap)));
