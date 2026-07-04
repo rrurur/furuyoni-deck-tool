@@ -1359,6 +1359,8 @@ function rowFromDeckDoc(docSnap){
 
   return {
     id: docSnap.id,
+    ownerUid: typeof d.ownerUid === "string" ? d.ownerUid : "",
+    ownerHandle: typeof d.ownerHandle === "string" ? d.ownerHandle : "",
     createdAtMs: ms,
     matchTypeNum: mt,
     resultTypeNum: rt,
@@ -1410,6 +1412,16 @@ async function fetchDeckRowsByOwnerUid(uid){
     return rows;
   }, cloneHistoryRows);
 }
+async function fetchDeckRowsByOwnerHandles(handles){
+  if (!handles.length) return [];
+  return cachedFirestoreRead(`deckRowsByOwnerHandle:${handles.join("|")}`, async () => {
+    const qy = query(collection(db, "decks"), where("ownerHandle", "in", handles), orderBy("createdAtMs", "desc"), limit(HISTORY_FETCH_LIMIT));
+    const snap = await getDocs(qy);
+    const rows = [];
+    snap.forEach(docSnap => rows.push(rowFromDeckDoc(docSnap)));
+    return rows;
+  }, cloneHistoryRows);
+}
 function autoReplayHandleCandidates(){
   const h = normalizeHandle(prefs.handle);
   if (!h) return [];
@@ -1420,7 +1432,7 @@ async function fetchAutoReplayOwnerUids(){
   const handles = autoReplayHandleCandidates();
   if (handles.length === 0) return [];
   return cachedFirestoreRead(`autoReplayOwnerUids:${handles.join("|")}`, async () => {
-    const qy = query(collection(db, "profiles"), where("handle", "in", handles), limit(handles.length));
+    const qy = query(collection(db, "profiles"), where("handle", "in", handles), limit(20));
     const snap = await getDocs(qy);
     const uids = [];
     snap.forEach(docSnap => {
@@ -1431,17 +1443,25 @@ async function fetchAutoReplayOwnerUids(){
   }, value => value.slice());
 }
 async function fetchAutoReplayRows(excludeUid=""){
-  const rows = [];
+  const handles = autoReplayHandleCandidates();
+  const byId = new Map();
+  const addRows = sourceRows => {
+    for (const row of sourceRows){
+      if (excludeUid && row.ownerUid === excludeUid) continue;
+      if (!byId.has(row.id)) byId.set(row.id, row);
+    }
+  };
   try{
+    addRows(await fetchDeckRowsByOwnerHandles(handles));
     const uids = await fetchAutoReplayOwnerUids();
     for (const uid of uids){
       if (excludeUid && uid === excludeUid) continue;
-      rows.push(...await fetchDeckRowsByOwnerUid(uid));
+      addRows(await fetchDeckRowsByOwnerUid(uid));
     }
   }catch(e){
     console.warn("auto replay history read skipped:", e?.code || e);
   }
-  return rows;
+  return Array.from(byId.values());
 }
 async function refreshUserPlays(){
   const u = auth.currentUser;
