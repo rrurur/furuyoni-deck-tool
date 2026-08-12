@@ -7,5 +7,9 @@ export const firebaseConfig = {
   appId: "1:1031976761542:web:da9bd7fe26790c8940ffc7"
 };
 export const appCheckConfig = {
-  recaptchaEnterpriseSiteKey: "6LdYjQ8tAAAAAM3_yh4U75XVR9JG3H_Ct9MFVCJT"
+  recaptchaEnterpriseSiteKey: "6LdYjQ8tAAAAAM3_yh4U75XVR9JG3H_Ct9MFVCJT",
+  enabledOrigins: [
+    "https://furuyoni-diary-1918f.web.app",
+    "https://furuyoni-diary-1918f.firebaseapp.com"
+  ]
 };

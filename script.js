@@ -203,8 +203,15 @@ function applyConfiguredCredit(){
 applyConfiguredCredit();
 
 /* ---------------- Firebase ---------------- */
+function shouldEnableAppCheck(){
+  const key = String(appCheckConfig.recaptchaEnterpriseSiteKey || "").trim();
+  if (!key) return false;
+  const origins = Array.isArray(appCheckConfig.enabledOrigins) ? appCheckConfig.enabledOrigins : [];
+  return origins.length === 0 || origins.includes(location.origin);
+}
+
 const app = initializeApp(firebaseConfig);
-if (appCheckConfig.recaptchaEnterpriseSiteKey) {
+if (shouldEnableAppCheck()) {
   initializeAppCheck(app, {
     provider: new ReCaptchaEnterpriseProvider(appCheckConfig.recaptchaEnterpriseSiteKey),
     isTokenAutoRefreshEnabled: true
