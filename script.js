@@ -269,7 +269,10 @@ function loadLocalPlays(){
 function saveLocalPlays(arr){
   try{
     localStorage.setItem(LS_PLAYS_KEY, JSON.stringify(Array.isArray(arr) ? arr : []));
-  }catch{}
+    return true;
+  }catch{
+    return false;
+  }
 }
 function makeLocalId(){
   if (globalThis.crypto?.randomUUID) return crypto.randomUUID();
@@ -326,6 +329,7 @@ const elAnonName = document.getElementById("anonName");
 const elAuthIdText = document.getElementById("authIdText");
 const elLoginBtn = document.getElementById("loginBtn");
 const elSaveBtn = document.getElementById("saveBtn");
+const elSaveStatus = document.getElementById("saveStatus");
 const elResetBtn = document.getElementById("resetBtn");
 const elRearrangeBtn = document.getElementById("rearrangeBtn");
 
@@ -497,6 +501,21 @@ function clearEditingState(){
   editingPlayId = null;
   editingPlaySeason = null;
   deckDisplaySeason = CURRENT_SEASON;
+}
+function setSaveStatus(message="", kind=""){
+  if (!elSaveStatus) return;
+  elSaveStatus.textContent = message;
+  elSaveStatus.className = kind || "";
+}
+function saveErrorMessage(error){
+  const code = String(error?.code || "");
+  if (code.includes("permission-denied")) {
+    return "投稿に失敗しました。ログイン状態またはFirestore Rulesを確認してください。";
+  }
+  if (code.includes("app-check") || code.includes("unauthenticated")) {
+    return "投稿に失敗しました。App Checkまたはログイン状態を確認してください。";
+  }
+  return `投稿に失敗しました。${code || String(error?.message || error || "")}`;
 }
 function updateMatchUI(){
   if (!elMatchToggle) return;
@@ -1250,6 +1269,9 @@ function beginEdit(play){
 
 /* ---------------- 保存（匿名はローカル、ログイン時はFirestore） ---------------- */
 async function saveDeck(){
+  setSaveStatus("保存中…", "");
+  if (elSaveBtn) elSaveBtn.disabled = true;
+
   const deckName = (elDeckName ? elDeckName.value : "").trim();
   const memo = (elMemo ? elMemo.value : "").trim();
   const season = editingPlayId ? normalizeSeason(editingPlaySeason || CURRENT_SEASON) : CURRENT_SEASON;
@@ -1286,34 +1308,42 @@ async function saveDeck(){
 
   // 匿名（未ログイン扱い）ならローカル保存
   if (!isCloudUser(u)){
-    const nowMs = Date.now();
-    if (editingPlayId){
-      const i = userPlays.findIndex(p => p.id === editingPlayId);
-      if (i >= 0){
-        userPlays[i] = { ...userPlays[i], ...basePayload };
+    try {
+      const nowMs = Date.now();
+      if (editingPlayId){
+        const i = userPlays.findIndex(p => p.id === editingPlayId);
+        if (i >= 0){
+          userPlays[i] = { ...userPlays[i], ...basePayload };
+        }
+        clearEditingState();
+        renderDeck();
+        renderCards();
+      } else {
+        userPlays.unshift({
+          id: makeLocalId(),
+          createdAtMs: nowMs,
+          matchTypeNum: basePayload.matchType,
+          resultTypeNum: basePayload.resultType,
+          season,
+          myTarotIdx,
+          oppTarotIdx,
+          myTarotNames,
+          oppTarotNames,
+          deckName,
+          memo,
+          cardIds,
+          cardPaths
+        });
       }
-      clearEditingState();
-      renderDeck();
-      renderCards();
-    } else {
-      userPlays.unshift({
-        id: makeLocalId(),
-        createdAtMs: nowMs,
-        matchTypeNum: basePayload.matchType,
-        resultTypeNum: basePayload.resultType,
-        season,
-        myTarotIdx,
-        oppTarotIdx,
-        myTarotNames,
-        oppTarotNames,
-        deckName,
-        memo,
-        cardIds,
-        cardPaths
-      });
+      if (!saveLocalPlays(userPlays)) {
+        setSaveStatus("この端末への保存に失敗しました。ブラウザの保存容量や設定を確認してください。", "error");
+        return;
+      }
+      renderRightStatsAndHistory();
+      setSaveStatus("この端末の履歴に保存しました。公開投稿するにはログインしてください。", "warn");
+    } finally {
+      if (elSaveBtn) elSaveBtn.disabled = false;
     }
-    saveLocalPlays(userPlays);
-    renderRightStatsAndHistory();
     return;
   }
 
@@ -1340,8 +1370,9 @@ async function saveDeck(){
       clearEditingState();
       renderDeck();
       renderCards();
+      setSaveStatus("投稿を更新しました。", "ok");
     } else {
-      await addDoc(collection(db, "decks"), {
+      const savedRef = await addDoc(collection(db, "decks"), {
         ...cloudPayload,
         ownerUid: auth.currentUser.uid,
         createdAt: serverTimestamp(),
@@ -1349,15 +1380,19 @@ async function saveDeck(){
         likeCount: 0,  
 
       });
+      setSaveStatus(`投稿しました。ID: ${savedRef.id}`, "ok");
     }
   } catch (e) {
     console.error(e);
+    setSaveStatus(saveErrorMessage(e), "error");
+    if (elSaveBtn) elSaveBtn.disabled = false;
     return;
   }
 
   clearFirestoreReadCache();
   await refreshUserPlays();
   renderRightStatsAndHistory();
+  if (elSaveBtn) elSaveBtn.disabled = false;
 }
 
 /* ---------------- 履歴の取得（doc id も保持） ---------------- */

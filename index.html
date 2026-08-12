@@ -466,6 +466,17 @@
   }
   .delbtn:hover{ background:#005fa3; }
 
+  #saveStatus{
+    min-height:18px;
+    margin:6px 0 0;
+    font-size:12px;
+    font-weight:800;
+    color:#666;
+  }
+  #saveStatus.ok{ color:#0b7a31; }
+  #saveStatus.warn{ color:#a15c00; }
+  #saveStatus.error{ color:#c62828; }
+
   .spacer{ min-height:1px; }
 </style>
 </head>
@@ -530,6 +541,7 @@
 
       <button id="saveBtn" type="button">保存</button>
     </div>
+    <div id="saveStatus" aria-live="polite"></div>
 
     <div id="deckRow">
       <div id="deck"></div>
