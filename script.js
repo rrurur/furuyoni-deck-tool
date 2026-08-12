@@ -1433,6 +1433,16 @@ function rowFromDeckDoc(docSnap){
   };
 }
 
+function deckRowsFromSnapshot(snapshot){
+  const rows = [];
+  snapshot.forEach(docSnap => rows.push(rowFromDeckDoc(docSnap)));
+  return rows;
+}
+
+function sortHistoryRowsDesc(rows){
+  return rows.sort((a,b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+}
+
 function cloneHistoryRows(rows){
   return rows.map(row => ({
     ...row,
@@ -1459,24 +1469,42 @@ function clearFirestoreReadCache(){
   firestoreReadCache.clear();
 }
 
+function isMissingFirestoreIndexError(error){
+  const code = error?.code || "";
+  const message = String(error?.message || error || "");
+  return code === "failed-precondition" && message.toLowerCase().includes("index");
+}
+
 async function fetchDeckRowsByOwnerUid(uid){
   if (!uid) return [];
   return cachedFirestoreRead(`deckRows:${uid}`, async () => {
-    const qy = query(collection(db, "decks"), where("ownerUid", "==", uid), orderBy("createdAtMs", "desc"), limit(HISTORY_FETCH_LIMIT));
-    const snap = await getDocs(qy);
-    const rows = [];
-    snap.forEach(docSnap => rows.push(rowFromDeckDoc(docSnap)));
-    return rows;
+    try{
+      const qy = query(collection(db, "decks"), where("ownerUid", "==", uid), orderBy("createdAtMs", "desc"), limit(HISTORY_FETCH_LIMIT));
+      const snap = await getDocs(qy);
+      return deckRowsFromSnapshot(snap);
+    }catch(e){
+      if (!isMissingFirestoreIndexError(e)) throw e;
+      console.warn("owner history read fallback:", e?.code || e);
+      const fallbackQy = query(collection(db, "decks"), where("ownerUid", "==", uid), limit(HISTORY_FETCH_LIMIT));
+      const snap = await getDocs(fallbackQy);
+      return sortHistoryRowsDesc(deckRowsFromSnapshot(snap));
+    }
   }, cloneHistoryRows);
 }
 async function fetchDeckRowsByOwnerHandles(handles){
   if (!handles.length) return [];
   return cachedFirestoreRead(`deckRowsByOwnerHandle:${handles.join("|")}`, async () => {
-    const qy = query(collection(db, "decks"), where("ownerHandle", "in", handles), limit(HISTORY_FETCH_LIMIT));
-    const snap = await getDocs(qy);
-    const rows = [];
-    snap.forEach(docSnap => rows.push(rowFromDeckDoc(docSnap)));
-    return rows;
+    try{
+      const qy = query(collection(db, "decks"), where("ownerHandle", "in", handles), orderBy("createdAtMs", "desc"), limit(HISTORY_FETCH_LIMIT));
+      const snap = await getDocs(qy);
+      return deckRowsFromSnapshot(snap);
+    }catch(e){
+      if (!isMissingFirestoreIndexError(e)) throw e;
+      console.warn("handle history read fallback:", e?.code || e);
+      const fallbackQy = query(collection(db, "decks"), where("ownerHandle", "in", handles), limit(HISTORY_FETCH_LIMIT));
+      const snap = await getDocs(fallbackQy);
+      return sortHistoryRowsDesc(deckRowsFromSnapshot(snap));
+    }
   }, cloneHistoryRows);
 }
 function autoReplayHandleCandidates(){
