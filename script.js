@@ -517,6 +517,13 @@ function saveErrorMessage(error){
   }
   return `投稿に失敗しました。${code || String(error?.message || error || "")}`;
 }
+function timelineVisibilityNote(deckName, memo, cardPaths){
+  const cardCount = cardPaths.filter(Boolean).length;
+  if (cardCount < 10 && !deckName && !memo) {
+    return " 10枚未満でデッキ名・メモが空のため、タイムラインでは非表示です。";
+  }
+  return "";
+}
 function updateMatchUI(){
   if (!elMatchToggle) return;
   [...elMatchToggle.querySelectorAll(".pill")].forEach(p => {
@@ -1340,7 +1347,7 @@ async function saveDeck(){
         return;
       }
       renderRightStatsAndHistory();
-      setSaveStatus("この端末の履歴に保存しました。公開投稿するにはログインしてください。", "warn");
+      setSaveStatus("この端末の履歴に保存しました（公開投稿ではありません）。公開投稿するにはログインしてください。", "warn");
     } finally {
       if (elSaveBtn) elSaveBtn.disabled = false;
     }
@@ -1370,7 +1377,7 @@ async function saveDeck(){
       clearEditingState();
       renderDeck();
       renderCards();
-      setSaveStatus("投稿を更新しました。", "ok");
+      setSaveStatus(`投稿を更新しました。${timelineVisibilityNote(deckName, memo, cardPaths)}`, "ok");
     } else {
       const savedRef = await addDoc(collection(db, "decks"), {
         ...cloudPayload,
@@ -1380,7 +1387,7 @@ async function saveDeck(){
         likeCount: 0,  
 
       });
-      setSaveStatus(`投稿しました。ID: ${savedRef.id}`, "ok");
+      setSaveStatus(`投稿しました。ID: ${savedRef.id}.${timelineVisibilityNote(deckName, memo, cardPaths)}`, "ok");
     }
   } catch (e) {
     console.error(e);
