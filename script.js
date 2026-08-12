@@ -203,11 +203,18 @@ function applyConfiguredCredit(){
 applyConfiguredCredit();
 
 /* ---------------- Firebase ---------------- */
+const DEFAULT_APP_CHECK_ORIGINS = [
+  "https://furuyoni-diary-1918f.web.app",
+  "https://furuyoni-diary-1918f.firebaseapp.com"
+];
+
 function shouldEnableAppCheck(){
   const key = String(appCheckConfig.recaptchaEnterpriseSiteKey || "").trim();
   if (!key) return false;
-  const origins = Array.isArray(appCheckConfig.enabledOrigins) ? appCheckConfig.enabledOrigins : [];
-  return origins.length === 0 || origins.includes(location.origin);
+  const origins = Array.isArray(appCheckConfig.enabledOrigins)
+    ? appCheckConfig.enabledOrigins
+    : DEFAULT_APP_CHECK_ORIGINS;
+  return origins.includes(location.origin);
 }
 
 const app = initializeApp(firebaseConfig);
