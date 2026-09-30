@@ -25,7 +25,8 @@ import {
   orderBy,
   limit,
   serverTimestamp,
-  deleteDoc
+  deleteDoc,
+  Bytes
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 import {
   getStorage,
@@ -234,6 +235,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 const REPLAY_MAX_BYTES = 12 * 1024 * 1024;
+const REPLAY_FIRESTORE_CHUNK_BYTES = 700 * 1024;
 const TIMELINE_REPLAY_BASE = "https://furuyoni-diary-1918f.web.app/replay.html";
 
 /* ---------------- 永続化（ローカル） ---------------- */
@@ -530,10 +532,54 @@ async function uploadReplayForDeck(deckId, file){
     contentType: "application/octet-stream",
     customMetadata: { originalName: String(file.name || "replay.reply") }
   });
-  return { replayPath:path, replayName:String(file.name || "replay.reply"), replaySize:Number(file.size || 0), replayContentType:"application/octet-stream", replayVersion:1 };
+  return {
+    replayStorage:"storage",
+    replayPath:path,
+    replayName:String(file.name || "replay.reply"),
+    replaySize:Number(file.size || 0),
+    replayContentType:"application/octet-stream",
+    replayVersion:1,
+    replayChunkCount:0
+  };
+}
+async function uploadReplayToFirestore(deckId, file){
+  validateReplayFile(file);
+  const u = auth.currentUser;
+  if (!isCloudUser(u)) throw new Error("リプレイの公開にはGoogleログインが必要です。");
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const count = Math.ceil(bytes.length / REPLAY_FIRESTORE_CHUNK_BYTES);
+  for(let i=0;i<count;i++){
+    const start=i*REPLAY_FIRESTORE_CHUNK_BYTES;
+    const end=Math.min(bytes.length,start+REPLAY_FIRESTORE_CHUNK_BYTES);
+    const chunkId=String(i).padStart(4,"0");
+    await setDoc(doc(db,"decks",deckId,"replayChunks",chunkId),{
+      ownerUid:u.uid,
+      index:i,
+      data:Bytes.fromUint8Array(bytes.slice(start,end))
+    });
+  }
+  return {
+    replayStorage:"firestore",
+    replayPath:"",
+    replayName:String(file.name || "replay.reply"),
+    replaySize:Number(file.size || 0),
+    replayContentType:"application/octet-stream",
+    replayVersion:1,
+    replayChunkCount:count
+  };
+}
+async function saveReplayForDeck(deckId,file){
+  try{
+    return await uploadReplayForDeck(deckId,file);
+  }catch(storageError){
+    console.error("storage replay upload failed; using Firestore chunks:",storageError);
+    return await uploadReplayToFirestore(deckId,file);
+  }
 }
 function openReplay(play){
-  if (!play?.id || !play?.replayPath) return;
+  const hasReplay=!!String(play?.replayPath||"").trim()
+    || (play?.replayStorage==="firestore" && Number(play?.replayChunkCount)>0);
+  if (!play?.id || !hasReplay) return;
   window.open(`${TIMELINE_REPLAY_BASE}?deck=${encodeURIComponent(play.id)}`, "_blank", "noopener");
 }
 function clearEditingState(){
@@ -1515,7 +1561,7 @@ async function saveDeck(){
       const targetId = editingPlayId;
       await updateDoc(doc(db, "decks", targetId), cloudPayload);
       if (replayFile) {
-        const replayMeta = await uploadReplayForDeck(targetId, replayFile);
+        const replayMeta = await saveReplayForDeck(targetId, replayFile);
         await updateDoc(doc(db, "decks", targetId), { ...replayMeta, updatedAt: serverTimestamp(), updatedAtMs: Date.now() });
       }
       clearEditingState();
@@ -1531,7 +1577,7 @@ async function saveDeck(){
       });
       if (replayFile) {
         try {
-          const replayMeta = await uploadReplayForDeck(savedRef.id, replayFile);
+          const replayMeta = await saveReplayForDeck(savedRef.id, replayFile);
           await updateDoc(savedRef, { ...replayMeta, updatedAt: serverTimestamp(), updatedAtMs: Date.now() });
         } catch (replayError) {
           console.error("replay upload failed:", replayError);
@@ -1580,10 +1626,12 @@ function rowFromDeckDoc(docSnap){
     cardPaths: Array.isArray(d.cardPaths) ? d.cardPaths.map(path => typeof path === "string" ? path : "") : null,
     oppCardIds: Array.isArray(d.oppCardIds) ? d.oppCardIds.map(n => (typeof n==="number"? n : -1)) : Array(10).fill(-1),
     oppCardPaths: Array.isArray(d.oppCardPaths) ? d.oppCardPaths.map(path => typeof path === "string" ? path : "") : null,
+    replayStorage: typeof d.replayStorage === "string" ? d.replayStorage : "",
     replayPath: typeof d.replayPath === "string" ? d.replayPath : "",
     replayName: typeof d.replayName === "string" ? d.replayName : "",
     replaySize: typeof d.replaySize === "number" ? d.replaySize : 0,
-    replayVersion: typeof d.replayVersion === "number" ? d.replayVersion : 0
+    replayVersion: typeof d.replayVersion === "number" ? d.replayVersion : 0,
+    replayChunkCount: typeof d.replayChunkCount === "number" ? d.replayChunkCount : 0
   };
 }
 
@@ -2212,7 +2260,7 @@ function renderHistoryList(){
     if (p.resultTypeNum === 0) r.classList.add("res-win");
     right.appendChild(r);
 
-    if (p.replayPath) {
+    if (p.replayPath || (p.replayStorage === "firestore" && Number(p.replayChunkCount) > 0)) {
       const replay = document.createElement("button");
       replay.className = "editbtn";
       replay.type = "button";
