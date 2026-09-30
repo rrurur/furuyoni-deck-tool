@@ -34,6 +34,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
 
 import { firebaseConfig, appCheckConfig } from "./firebaseConfig.js";
+import { decodeReply, extractReplayFormData } from "./replay-import.js";
 
 /* （未使用でもOK：将来の保存先用） */
 const baseFolder = "S10-1";
@@ -304,6 +305,7 @@ let mySelected = [];
 let oppSelected = [];
 
 const deckSlots = Array(10).fill(null);
+const oppDeckSlots = Array(10).fill(null);
 
 let recordKind = "win"; // win / loss / other
 let userPlays = []; // 数値IDは旧互換用。新規保存ではカードパス・メガミ内部名も保持する。
@@ -325,6 +327,10 @@ const elPairStatLine = document.getElementById("pairStatLine");
 
 const elOppTarotList = document.getElementById("oppTarotList");
 const elOppSelectedSlots = document.getElementById("oppSelectedSlots");
+const elOppDeckToggle = document.getElementById("oppDeckToggle");
+const elOppDeckArea = document.getElementById("oppDeckArea");
+const elOppCardContainer = document.getElementById("oppCardContainer");
+const elOppDeck = document.getElementById("oppDeck");
 
 const elCardContainer = document.getElementById("cardContainer");
 const elCardPreview = document.getElementById("preview-image");
@@ -337,9 +343,7 @@ const elAnonName = document.getElementById("anonName");
 const elAuthIdText = document.getElementById("authIdText");
 const elLoginBtn = document.getElementById("loginBtn");
 const elSaveBtn = document.getElementById("saveBtn");
-const elSaveStatus = document.getElementById("saveStatus");
 const elReplayFile = document.getElementById("replayFile");
-const elReplayFileLabel = document.getElementById("replayFileLabel");
 const elResetBtn = document.getElementById("resetBtn");
 const elRearrangeBtn = document.getElementById("rearrangeBtn");
 
@@ -507,23 +511,8 @@ function storedTarotIndexes(play, namesKey, indexesKey){
     .map(name => tarotIndexByName.get(name))
     .filter(index => typeof index === "number");
 }
-function updateReplayFileLabel(existingReplayName=""){
-  if (!elReplayFileLabel) return;
-  const selected = elReplayFile?.files?.[0];
-  if (selected) {
-    elReplayFileLabel.textContent = selected.name;
-    elReplayFileLabel.title = selected.name;
-  } else if (existingReplayName) {
-    elReplayFileLabel.textContent = `添付済み: ${existingReplayName}`;
-    elReplayFileLabel.title = existingReplayName;
-  } else {
-    elReplayFileLabel.textContent = "リプレイなし";
-    elReplayFileLabel.title = "";
-  }
-}
 function clearReplaySelection(){
   if (elReplayFile) elReplayFile.value = "";
-  updateReplayFileLabel("");
 }
 function validateReplayFile(file){
   if (!file) return null;
@@ -553,27 +542,28 @@ function clearEditingState(){
   deckDisplaySeason = CURRENT_SEASON;
   clearReplaySelection();
 }
-function setSaveStatus(message="", kind=""){
-  if (!elSaveStatus) return;
-  elSaveStatus.textContent = message;
-  elSaveStatus.className = kind || "";
+function fillSlotsFromPaths(slots, paths){
+  slots.fill(null);
+  (paths || []).slice(0, 10).forEach((path, i) => { slots[i] = path || null; });
 }
-function saveErrorMessage(error){
-  const code = String(error?.code || "");
-  if (code.includes("permission-denied")) {
-    return "投稿に失敗しました。ログイン状態またはFirestore Rulesを確認してください。";
-  }
-  if (code.includes("app-check") || code.includes("unauthenticated")) {
-    return "投稿に失敗しました。App Checkまたはログイン状態を確認してください。";
-  }
-  return `投稿に失敗しました。${code || String(error?.message || error || "")}`;
+function tarotsFromNames(names){
+  return (names || []).map(name => tarotData.find(t => t.name === name)).filter(Boolean).slice(0, MAX_PICK);
 }
-function timelineVisibilityNote(deckName, memo, cardPaths){
-  const cardCount = cardPaths.filter(Boolean).length;
-  if (cardCount < 10 && !deckName && !memo) {
-    return " 10枚未満でデッキ名・メモが空のため、タイムラインでは非表示です。";
-  }
-  return "";
+async function applySelectedReplay(){
+  const file = validateReplayFile(elReplayFile?.files?.[0] || null);
+  if (!file) return;
+  const data = decodeReply(await file.arrayBuffer());
+  const imported = extractReplayFormData(data, tarotData);
+  mySelected = tarotsFromNames(imported.myTarotNames);
+  oppSelected = tarotsFromNames(imported.oppTarotNames);
+  fillSlotsFromPaths(deckSlots, imported.myDeckPaths);
+  fillSlotsFromPaths(oppDeckSlots, imported.oppDeckPaths);
+  deckDisplaySeason = CURRENT_SEASON;
+  setRecordKind(imported.resultKind);
+  clampMyPickToMode();
+  clampOppPickToMode();
+  persistMatchAndMyPicks();
+  renderAll();
 }
 function updateMatchUI(){
   if (!elMatchToggle) return;
@@ -611,6 +601,7 @@ function resetRunState(){
   if (elMemo) elMemo.value = "";
   oppSelected = [];
   deckSlots.fill(null);
+  oppDeckSlots.fill(null);
 
   if (elCardPreview){
     elCardPreview.src = "";
@@ -954,6 +945,83 @@ function renderCards(){
 }
 
 /* ---------------- デッキ ---------------- */
+function renderOpponentCards(){
+  if (!elOppCardContainer) return;
+  elOppCardContainer.innerHTML = "";
+  const targets = oppSelected.slice(0, 2);
+  targets.forEach(tarot => {
+    const row = document.createElement("div");
+    row.className = "card-row";
+    const normals = (tarot.cards || []).filter(p => !p.includes("_s_"));
+    const trumps = (tarot.cards || []).filter(p => p.includes("_s_"));
+    [...normals, ...trumps].forEach(cardPath => {
+      const img = document.createElement("img");
+      applyCardImage(img, cardPath, CURRENT_SEASON);
+      img.alt = cardPath;
+      if (oppDeckSlots.includes(cardPath)) img.classList.add("in-deck");
+      img.addEventListener("click", () => {
+        if (oppDeckSlots.includes(cardPath)) removeCardFromOpponentDeck(cardPath);
+        else addCardToOpponentDeck(cardPath);
+        renderOpponentDeck();
+        renderOpponentCards();
+      });
+      row.appendChild(img);
+    });
+    elOppCardContainer.appendChild(row);
+  });
+}
+function setupOpponentDeck(){
+  if (!elOppDeck) return;
+  elOppDeck.innerHTML = "";
+  for (let i=0;i<10;i++){
+    const slot=document.createElement("div");
+    slot.className="deck-slot";
+    slot.dataset.index=String(i);
+    slot.addEventListener("dragover", e=>e.preventDefault());
+    slot.addEventListener("drop", e=>{
+      e.preventDefault();
+      const from=parseInt(e.dataTransfer.getData("oppFromIndex"),10);
+      if (Number.isNaN(from)) return;
+      const fromIsTrump=from>=7, toIsTrump=i>=7;
+      if (fromIsTrump!==toIsTrump) return;
+      const tmp=oppDeckSlots[i]; oppDeckSlots[i]=oppDeckSlots[from]; oppDeckSlots[from]=tmp;
+      renderOpponentDeck(); renderOpponentCards();
+    });
+    elOppDeck.appendChild(slot);
+  }
+  renderOpponentDeck();
+}
+function renderOpponentDeck(){
+  if (!elOppDeck) return;
+  const slots=elOppDeck.querySelectorAll(".deck-slot");
+  slots.forEach((slotEl,i)=>{
+    slotEl.innerHTML="";
+    const cardPath=oppDeckSlots[i];
+    if(!cardPath) return;
+    const img=document.createElement("img");
+    applyCardImage(img, cardPath, deckDisplaySeason);
+    img.alt=cardPath;
+    img.draggable=true;
+    img.addEventListener("click",()=>{ removeCardFromOpponentDeck(cardPath); renderOpponentDeck(); renderOpponentCards(); });
+    img.addEventListener("dragstart",ev=>{ ev.dataTransfer.setData("oppFromIndex",String(i)); ev.dataTransfer.effectAllowed="move"; });
+    slotEl.appendChild(img);
+  });
+}
+function addCardToOpponentDeck(cardPath){
+  if (oppDeckSlots.includes(cardPath)) return;
+  const trump=isTrumpCard(cardPath);
+  const start=trump?7:0, end=trump?9:6;
+  for(let i=start;i<=end;i++){ if(!oppDeckSlots[i]){ oppDeckSlots[i]=cardPath; return; } }
+}
+function removeCardFromOpponentDeck(cardPath){
+  const i=oppDeckSlots.indexOf(cardPath);
+  if(i>=0) oppDeckSlots[i]=null;
+}
+function renderOpponentDeckEditor(){
+  renderOpponentCards();
+  renderOpponentDeck();
+}
+
 function setupDeck(){
   if (!elDeck) return;
   elDeck.innerHTML = "";
@@ -1315,8 +1383,8 @@ function beginEdit(play){
   if (elDeckName) elDeckName.value = play.deckName || "";
   if (elMemo) elMemo.value = play.memo || "";
   if (elReplayFile) elReplayFile.value = "";
-  updateReplayFileLabel(play.replayName || (play.replayPath ? "replay.reply" : ""));
   applyDeckFromStoredPlay(play);
+  fillSlotsFromPaths(oppDeckSlots, play.oppCardPaths || []);
 
   if (elCardPreview){
     elCardPreview.src = "";
@@ -1330,13 +1398,12 @@ function beginEdit(play){
 
 /* ---------------- 保存（匿名はローカル、ログイン時はFirestore） ---------------- */
 async function saveDeck(){
-  setSaveStatus("保存中…", "");
   if (elSaveBtn) elSaveBtn.disabled = true;
   let replayFile = null;
   try {
     replayFile = validateReplayFile(elReplayFile?.files?.[0] || null);
   } catch (e) {
-    setSaveStatus(String(e?.message || e), "error");
+    console.error(e);
     if (elSaveBtn) elSaveBtn.disabled = false;
     return;
   }
@@ -1351,6 +1418,12 @@ async function saveDeck(){
     return (typeof id === "number") ? id : -1;
   });
   const cardPaths = deckSlots.map(path => path || "");
+  const oppCardIds = oppDeckSlots.map(p => {
+    if (!p) return -1;
+    const id = cardIdByPath.get(p);
+    return (typeof id === "number") ? id : -1;
+  });
+  const oppCardPaths = oppDeckSlots.map(path => path || "");
 
   const myTarotIdx = mySelected.map(t => tarotIndexByName.get(t.name)).filter(n => typeof n === "number");
   const oppTarotIdx = oppSelected.map(t => tarotIndexByName.get(t.name)).filter(n => typeof n === "number");
@@ -1370,6 +1443,8 @@ async function saveDeck(){
     oppTarotNames,
     cardIds,
     cardPaths,
+    oppCardIds,
+    oppCardPaths,
     updatedAtMs: Date.now()
   };
 
@@ -1401,15 +1476,15 @@ async function saveDeck(){
           deckName,
           memo,
           cardIds,
-          cardPaths
+          cardPaths,
+          oppCardIds,
+          oppCardPaths
         });
       }
       if (!saveLocalPlays(userPlays)) {
-        setSaveStatus("この端末への保存に失敗しました。ブラウザの保存容量や設定を確認してください。", "error");
         return;
       }
       renderRightStatsAndHistory();
-      setSaveStatus("この端末の履歴に保存しました（公開投稿ではありません）。公開投稿するにはログインしてください。", "warn");
     } finally {
       if (elSaveBtn) elSaveBtn.disabled = false;
     }
@@ -1429,6 +1504,8 @@ async function saveDeck(){
     oppTarotNames,
     cardIds,
     cardPaths,
+    oppCardIds,
+    oppCardPaths,
     updatedAt: serverTimestamp(),
     updatedAtMs: Date.now()
   };
@@ -1437,16 +1514,13 @@ async function saveDeck(){
     if (editingPlayId) {
       const targetId = editingPlayId;
       await updateDoc(doc(db, "decks", targetId), cloudPayload);
-      let replayNote = "";
       if (replayFile) {
         const replayMeta = await uploadReplayForDeck(targetId, replayFile);
         await updateDoc(doc(db, "decks", targetId), { ...replayMeta, updatedAt: serverTimestamp(), updatedAtMs: Date.now() });
-        replayNote = " リプレイも更新しました。";
       }
       clearEditingState();
       renderDeck();
       renderCards();
-      setSaveStatus(`投稿を更新しました。${replayNote}${timelineVisibilityNote(deckName, memo, cardPaths)}`, "ok");
     } else {
       const savedRef = await addDoc(collection(db, "decks"), {
         ...cloudPayload,
@@ -1455,23 +1529,18 @@ async function saveDeck(){
         createdAtMs: Date.now(),
         likeCount: 0
       });
-      let replayNote = "";
       if (replayFile) {
         try {
           const replayMeta = await uploadReplayForDeck(savedRef.id, replayFile);
           await updateDoc(savedRef, { ...replayMeta, updatedAt: serverTimestamp(), updatedAtMs: Date.now() });
-          replayNote = " リプレイを添付しました。";
         } catch (replayError) {
           console.error("replay upload failed:", replayError);
-          replayNote = " 投稿自体は成功しましたが、リプレイのアップロードに失敗しました。";
         }
       }
       clearReplaySelection();
-      setSaveStatus(`投稿しました。ID: ${savedRef.id}.${replayNote}${timelineVisibilityNote(deckName, memo, cardPaths)}`, replayNote.includes("失敗") ? "warn" : "ok");
     }
   } catch (e) {
     console.error(e);
-    setSaveStatus(saveErrorMessage(e), "error");
     if (elSaveBtn) elSaveBtn.disabled = false;
     return;
   }
@@ -1509,6 +1578,8 @@ function rowFromDeckDoc(docSnap){
     memo: typeof d.memo === "string" ? d.memo : "",
     cardIds: Array.isArray(d.cardIds) ? d.cardIds.map(n => (typeof n==="number"? n : -1)) : Array(10).fill(-1),
     cardPaths: Array.isArray(d.cardPaths) ? d.cardPaths.map(path => typeof path === "string" ? path : "") : null,
+    oppCardIds: Array.isArray(d.oppCardIds) ? d.oppCardIds.map(n => (typeof n==="number"? n : -1)) : Array(10).fill(-1),
+    oppCardPaths: Array.isArray(d.oppCardPaths) ? d.oppCardPaths.map(path => typeof path === "string" ? path : "") : null,
     replayPath: typeof d.replayPath === "string" ? d.replayPath : "",
     replayName: typeof d.replayName === "string" ? d.replayName : "",
     replaySize: typeof d.replaySize === "number" ? d.replaySize : 0,
@@ -1534,7 +1605,9 @@ function cloneHistoryRows(rows){
     myTarotNames: Array.isArray(row.myTarotNames) ? row.myTarotNames.slice() : row.myTarotNames,
     oppTarotNames: Array.isArray(row.oppTarotNames) ? row.oppTarotNames.slice() : row.oppTarotNames,
     cardIds: Array.isArray(row.cardIds) ? row.cardIds.slice() : Array(10).fill(-1),
-    cardPaths: Array.isArray(row.cardPaths) ? row.cardPaths.slice() : row.cardPaths
+    cardPaths: Array.isArray(row.cardPaths) ? row.cardPaths.slice() : row.cardPaths,
+    oppCardIds: Array.isArray(row.oppCardIds) ? row.oppCardIds.slice() : Array(10).fill(-1),
+    oppCardPaths: Array.isArray(row.oppCardPaths) ? row.oppCardPaths.slice() : row.oppCardPaths
   }));
 }
 
@@ -2228,6 +2301,7 @@ function renderAll(){
 
   renderCards();
   renderDeck();
+  renderOpponentDeckEditor();
   renderRightStatsAndHistory();
 }
 
@@ -2278,7 +2352,14 @@ async function main(){
 
   if (elLoginBtn) elLoginBtn.addEventListener("click", doLogin);
   if (elSaveBtn) elSaveBtn.addEventListener("click", saveDeck);
-  if (elReplayFile) elReplayFile.addEventListener("change", () => updateReplayFileLabel(""));
+  if (elReplayFile) elReplayFile.addEventListener("change", () => {
+    applySelectedReplay().catch(error => console.error("replay import failed:", error));
+  });
+  if (elOppDeckToggle && elOppDeckArea) elOppDeckToggle.addEventListener("click", () => {
+    const open = elOppDeckArea.hidden;
+    elOppDeckArea.hidden = !open;
+    elOppDeckToggle.textContent = open ? "▼対戦相手のデッキ" : "▶対戦相手のデッキ";
+  });
 
   if (elResetBtn) elResetBtn.addEventListener("click", deckReset);
   if (elRearrangeBtn) elRearrangeBtn.addEventListener("click", deckRearrange);
@@ -2307,6 +2388,7 @@ async function main(){
 
   buildIdMaps();
   setupDeck();
+  setupOpponentDeck();
 
   matchType = normalizeMatchType(prefs.matchType);
   updateMatchUI();

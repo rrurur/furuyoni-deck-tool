@@ -271,9 +271,7 @@
     font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;
   }
   .replayAttachBtn:hover{ background:#394957; }
-  #replayFileLabel{ font-size:11px;color:#555;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
-
-  .seg3{
+.seg3{
     display:inline-flex;
     border:1px solid #888;
     border-radius:10px;
@@ -326,6 +324,19 @@
     overflow:hidden;
   }
   .deck-slot img{ max-width:100%; max-height:100%; cursor:pointer; }
+  .opp-deck-toggle{
+    margin-top:10px;
+    padding:0;
+    background:transparent;
+    color:#111;
+    border:none;
+    border-radius:0;
+    font-weight:700;
+  }
+  .opp-deck-toggle:hover{ background:transparent; }
+  #oppDeckArea{ margin-top:8px; }
+  #oppCardContainer{ display:flex; flex-direction:column; gap:10px; margin-bottom:8px; }
+  #oppDeck{ display:grid; grid-template-columns:repeat(5, auto); grid-template-rows:repeat(2, auto); gap:0; justify-content:start; background:#ddd; padding:10px; border-radius:10px; width:max-content; }
 
   #deckTools{
     display:flex;
@@ -472,19 +483,7 @@
     cursor:pointer;
   }
   .delbtn:hover{ background:#005fa3; }
-
-  #saveStatus{
-    min-height:18px;
-    margin:6px 0 0;
-    font-size:12px;
-    font-weight:800;
-    color:#666;
-  }
-  #saveStatus.ok{ color:#0b7a31; }
-  #saveStatus.warn{ color:#a15c00; }
-  #saveStatus.error{ color:#c62828; }
-
-  .spacer{ min-height:1px; }
+.spacer{ min-height:1px; }
 </style>
 </head>
 
@@ -548,10 +547,8 @@
 
       <label class="replayAttachBtn" for="replayFile">Steamリプレイ選択</label>
       <input id="replayFile" type="file" accept=".reply,application/octet-stream" hidden>
-      <span id="replayFileLabel">リプレイなし</span>
-      <button id="saveBtn" type="button">保存</button>
+            <button id="saveBtn" type="button">保存</button>
     </div>
-    <div id="saveStatus" aria-live="polite"></div>
 
     <div id="deckRow">
       <div id="deck"></div>
@@ -612,6 +609,11 @@
 
   <div>
     <div id="oppSelectedSlots" class="selected-slots"></div>
+    <button id="oppDeckToggle" class="opp-deck-toggle" type="button">▶対戦相手のデッキ</button>
+    <div id="oppDeckArea" hidden>
+      <div id="oppCardContainer"></div>
+      <div id="oppDeck"></div>
+    </div>
   </div>
   
 </div>
