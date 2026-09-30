@@ -1287,8 +1287,6 @@ function startHover(play){
   deckDisplaySeason = normalizeSeason(play.season);
   if (elDeckName) elDeckName.value = play.deckName || "";
   if (elMemo) elMemo.value = play.memo || "";
-  if (elReplayFile) elReplayFile.value = "";
-  updateReplayFileLabel(play.replayName || (play.replayPath ? "replay.reply" : ""));
   applyDeckFromStoredPlay(play);
 
   renderDeck();
@@ -1324,6 +1322,8 @@ function beginEdit(play){
 
   if (elDeckName) elDeckName.value = play.deckName || "";
   if (elMemo) elMemo.value = play.memo || "";
+  if (elReplayFile) elReplayFile.value = "";
+  updateReplayFileLabel(play.replayName || (play.replayPath ? "replay.reply" : ""));
   applyDeckFromStoredPlay(play);
 
   if (elCardPreview){
