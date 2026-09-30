@@ -34,6 +34,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
 
 import { firebaseConfig, appCheckConfig } from "./firebaseConfig.js";
+import { decodeReply, extractReplayFormData } from "./replay-import.js";
 
 /* （未使用でもOK：将来の保存先用） */
 const baseFolder = "S10-1";
@@ -304,6 +305,7 @@ let mySelected = [];
 let oppSelected = [];
 
 const deckSlots = Array(10).fill(null);
+const oppDeckSlots = Array(10).fill(null);
 
 let recordKind = "win"; // win / loss / other
 let userPlays = []; // 数値IDは旧互換用。新規保存ではカードパス・メガミ内部名も保持する。
@@ -325,6 +327,10 @@ const elPairStatLine = document.getElementById("pairStatLine");
 
 const elOppTarotList = document.getElementById("oppTarotList");
 const elOppSelectedSlots = document.getElementById("oppSelectedSlots");
+const elOppDeckToggle = document.getElementById("oppDeckToggle");
+const elOppDeckArea = document.getElementById("oppDeckArea");
+const elOppCardContainer = document.getElementById("oppCardContainer");
+const elOppDeck = document.getElementById("oppDeck");
 
 const elCardContainer = document.getElementById("cardContainer");
 const elCardPreview = document.getElementById("preview-image");
@@ -337,9 +343,7 @@ const elAnonName = document.getElementById("anonName");
 const elAuthIdText = document.getElementById("authIdText");
 const elLoginBtn = document.getElementById("loginBtn");
 const elSaveBtn = document.getElementById("saveBtn");
-const elSaveStatus = document.getElementById("saveStatus");
 const elReplayFile = document.getElementById("replayFile");
-const elReplayFileLabel = document.getElementById("replayFileLabel");
 const elResetBtn = document.getElementById("resetBtn");
 const elRearrangeBtn = document.getElementById("rearrangeBtn");
 
@@ -507,23 +511,8 @@ function storedTarotIndexes(play, namesKey, indexesKey){
     .map(name => tarotIndexByName.get(name))
     .filter(index => typeof index === "number");
 }
-function updateReplayFileLabel(existingReplayName=""){
-  if (!elReplayFileLabel) return;
-  const selected = elReplayFile?.files?.[0];
-  if (selected) {
-    elReplayFileLabel.textContent = selected.name;
-    elReplayFileLabel.title = selected.name;
-  } else if (existingReplayName) {
-    elReplayFileLabel.textContent = `添付済み: ${existingReplayName}`;
-    elReplayFileLabel.title = existingReplayName;
-  } else {
-    elReplayFileLabel.textContent = "リプレイなし";
-    elReplayFileLabel.title = "";
-  }
-}
 function clearReplaySelection(){
   if (elReplayFile) elReplayFile.value = "";
-  updateReplayFileLabel("");
 }
 function validateReplayFile(file){
   if (!file) return null;
@@ -553,28 +542,8 @@ function clearEditingState(){
   deckDisplaySeason = CURRENT_SEASON;
   clearReplaySelection();
 }
-function setSaveStatus(message="", kind=""){
-  if (!elSaveStatus) return;
-  elSaveStatus.textContent = message;
-  elSaveStatus.className = kind || "";
-}
-function saveErrorMessage(error){
-  const code = String(error?.code || "");
-  if (code.includes("permission-denied")) {
-    return "投稿に失敗しました。ログイン状態またはFirestore Rulesを確認してください。";
-  }
-  if (code.includes("app-check") || code.includes("unauthenticated")) {
-    return "投稿に失敗しました。App Checkまたはログイン状態を確認してください。";
-  }
-  return `投稿に失敗しました。${code || String(error?.message || error || "")}`;
-}
-function timelineVisibilityNote(deckName, memo, cardPaths){
-  const cardCount = cardPaths.filter(Boolean).length;
-  if (cardCount < 10 && !deckName && !memo) {
-    return " 10枚未満でデッキ名・メモが空のため、タイムラインでは非表示です。";
-  }
-  return "";
-}
+function setSaveStatus(){}
+function timelineVisibilityNote(){ return ""; }
 function updateMatchUI(){
   if (!elMatchToggle) return;
   [...elMatchToggle.querySelectorAll(".pill")].forEach(p => {
