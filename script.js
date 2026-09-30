@@ -596,17 +596,22 @@ async function uploadReplayToFirestore(deckId, file){
   };
 }
 async function saveReplayForDeck(deckId,file){
+  return await uploadReplayToFirestore(deckId,file);
+}
+async function hasReplayForPlay(play){
+  if(!play?.id) return false;
+  if(String(play?.replayPath||"").trim()) return true;
+  if(play?.replayStorage==="firestore" && Number(play?.replayChunkCount)>0) return true;
   try{
-    return await uploadReplayForDeck(deckId,file);
-  }catch(storageError){
-    console.error("storage replay upload failed; using Firestore chunks:",storageError);
-    return await uploadReplayToFirestore(deckId,file);
+    const chunk0=await getDoc(doc(db,"decks",play.id,"replayChunks","0000"));
+    return chunk0.exists();
+  }catch(error){
+    console.error("replay presence check failed:",error);
+    return false;
   }
 }
 function openReplay(play){
-  const hasReplay=!!String(play?.replayPath||"").trim()
-    || (play?.replayStorage==="firestore" && Number(play?.replayChunkCount)>0);
-  if (!play?.id || !hasReplay) return;
+  if (!play?.id) return;
   window.open(`${TIMELINE_REPLAY_BASE}?deck=${encodeURIComponent(play.id)}`, "_blank", "noopener");
 }
 function clearEditingState(){
@@ -1474,122 +1479,18 @@ async function saveDeck(){
   if (elSaveBtn) elSaveBtn.disabled = true;
   let replayFile = null;
   try {
-    replayFile = validateReplayFile(elReplayFile?.files?.[0] || null);
-  } catch (e) {
-    console.error(e);
-    if (elSaveBtn) elSaveBtn.disabled = false;
-    return;
-  }
-
-  const deckName = (elDeckName ? elDeckName.value : "").trim();
-  const memo = (elMemo ? elMemo.value : "").trim();
-  const season = editingPlayId ? normalizeSeason(editingPlaySeason || CURRENT_SEASON) : CURRENT_SEASON;
-
-  const cardIds = deckSlots.map(p => {
-    if (!p) return -1;
-    const id = cardIdByPath.get(p);
-    return (typeof id === "number") ? id : -1;
-  });
-  const cardPaths = deckSlots.map(path => path || "");
-  const oppCardIds = oppDeckSlots.map(p => {
-    if (!p) return -1;
-    const id = cardIdByPath.get(p);
-    return (typeof id === "number") ? id : -1;
-  });
-  const oppCardPaths = oppDeckSlots.map(path => path || "");
-
-  const myTarotIdx = mySelected.map(t => tarotIndexByName.get(t.name)).filter(n => typeof n === "number");
-  const oppTarotIdx = oppSelected.map(t => tarotIndexByName.get(t.name)).filter(n => typeof n === "number");
-  const myTarotNames = mySelected.map(t => t.name);
-  const oppTarotNames = oppSelected.map(t => t.name);
-
-  const basePayload = {
-    matchType: matchTypeId(matchType),
-    resultType: resultTypeId(recordKind),
-    season,
-    deckName,
-    memo,
-    ownerHandle: normalizeHandle(prefs.handle),
-    myTarotIdx,
-    oppTarotIdx,
-    myTarotNames,
-    oppTarotNames,
-    cardIds,
-    cardPaths,
-    oppCardIds,
-    oppCardPaths,
-    updatedAtMs: Date.now()
-  };
-
-  const u = auth.currentUser;
-
-  // 匿名（未ログイン扱い）ならローカル保存
-  if (!isCloudUser(u)){
-    try {
-      const nowMs = Date.now();
-      if (editingPlayId){
-        const i = userPlays.findIndex(p => p.id === editingPlayId);
-        if (i >= 0){
-          userPlays[i] = { ...userPlays[i], ...basePayload };
-        }
-        clearEditingState();
-        renderDeck();
-        renderCards();
-      } else {
-        userPlays.unshift({
-          id: makeLocalId(),
-          createdAtMs: nowMs,
-          matchTypeNum: basePayload.matchType,
-          resultTypeNum: basePayload.resultType,
-          season,
-          myTarotIdx,
-          oppTarotIdx,
-          myTarotNames,
-          oppTarotNames,
-          deckName,
-          memo,
-          cardIds,
-          cardPaths,
-          oppCardIds,
-          oppCardPaths
-        });
-      }
-      if (!saveLocalPlays(userPlays)) {
-        return;
-      }
-      renderRightStatsAndHistory();
-    } finally {
-      if (elSaveBtn) elSaveBtn.disabled = false;
-    }
-    return;
-  }
-
-  // ログイン済みはFirestore
-  const cloudPayload = {
-    matchType: basePayload.matchType,
-    resultType: basePayload.resultType,
-    season,
-    deckName,
-    memo,
-    myTarotIdx,
-    oppTarotIdx,
-    myTarotNames,
-    oppTarotNames,
-    cardIds,
-    cardPaths,
-    oppCardIds,
-    oppCardPaths,
-    updatedAt: serverTimestamp(),
-    updatedAtMs: Date.now()
-  };
-
-  try {
     if (editingPlayId) {
       const targetId = editingPlayId;
-      await updateDoc(doc(db, "decks", targetId), cloudPayload);
       if (replayFile) {
         const replayMeta = await saveReplayForDeck(targetId, replayFile);
-        await updateDoc(doc(db, "decks", targetId), { ...replayMeta, updatedAt: serverTimestamp(), updatedAtMs: Date.now() });
+        await updateDoc(doc(db, "decks", targetId), {
+          ...cloudPayload,
+          ...replayMeta,
+          updatedAt: serverTimestamp(),
+          updatedAtMs: Date.now()
+        });
+      } else {
+        await updateDoc(doc(db, "decks", targetId), cloudPayload);
       }
       clearEditingState();
       renderDeck();
@@ -1605,9 +1506,15 @@ async function saveDeck(){
       if (replayFile) {
         try {
           const replayMeta = await saveReplayForDeck(savedRef.id, replayFile);
-          await updateDoc(savedRef, { ...replayMeta, updatedAt: serverTimestamp(), updatedAtMs: Date.now() });
+          await updateDoc(savedRef, {
+            ...replayMeta,
+            updatedAt: serverTimestamp(),
+            updatedAtMs: Date.now()
+          });
         } catch (replayError) {
           console.error("replay upload failed:", replayError);
+          try { await deleteDoc(savedRef); } catch(deleteError){ console.error(deleteError); }
+          throw replayError;
         }
       }
       clearReplaySelection();
@@ -2287,16 +2194,25 @@ function renderHistoryList(){
     if (p.resultTypeNum === 0) r.classList.add("res-win");
     right.appendChild(r);
 
-    if (p.replayPath || (p.replayStorage === "firestore" && Number(p.replayChunkCount) > 0)) {
+    const addReplayButton = () => {
+      if (right.querySelector("[data-replay-button='1']")) return;
       const replay = document.createElement("button");
       replay.className = "editbtn";
       replay.type = "button";
+      replay.dataset.replayButton = "1";
       replay.textContent = "リプレイ";
       replay.addEventListener("click", (e) => {
         e.stopPropagation();
         openReplay(p);
       });
-      right.appendChild(replay);
+      right.insertBefore(replay, right.querySelector(".editbtn"));
+    };
+    if (p.replayPath || (p.replayStorage === "firestore" && Number(p.replayChunkCount) > 0)) {
+      addReplayButton();
+    } else {
+      hasReplayForPlay(p).then(hasReplay => {
+        if (hasReplay) addReplayButton();
+      });
     }
     const edit = document.createElement("button");
     edit.className = "editbtn";
