@@ -17,7 +17,7 @@ button{font:inherit;font-weight:800;cursor:pointer}
 #counter{min-width:86px;text-align:right;font-size:12px;color:#666;font-weight:800}
 .viewer{max-width:1400px;margin:0 auto;padding:10px}
 .board{background:#f8eff4;border:1px solid #c9b8c0;min-height:820px;display:grid;grid-template-rows:1fr auto 1fr;overflow:hidden}
-.player{padding:10px;display:grid;grid-template-columns:190px 1fr;gap:10px;min-height:285px}
+.player{padding:10px;display:grid;grid-template-columns:170px minmax(0,1fr);gap:10px;min-height:260px}
 .player.top{border-bottom:1px solid rgba(0,0,0,.08)}
 .player.bottom{border-top:1px solid rgba(0,0,0,.08)}
 .playerInfo{background:var(--panel);border:1px solid var(--line);padding:9px}
@@ -27,11 +27,9 @@ button{font:inherit;font-weight:800;cursor:pointer}
 .res{background:#fff;border:1px solid var(--line);padding:6px;text-align:center}
 .res b{display:block;font-size:20px}
 .res span{font-size:10px;color:#666}
-.deckBox{margin-top:8px;display:flex;align-items:center;gap:7px}
-.cardBack{width:48px;height:68px;border:2px solid #73606b;background:#d8d0dd;display:grid;place-items:center;font-size:11px;font-weight:900}
-.deckCount{font-size:12px;font-weight:900}
-.zones{display:flex;flex-direction:column;gap:7px;min-width:0}
-.zone{background:var(--panel);border:1px solid var(--line);padding:6px;min-height:64px}
+.playerPlay{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:10px;min-width:0}
+.mainZones{display:flex;flex-direction:column;gap:8px;min-width:0}
+.zone{background:var(--panel);border:1px solid var(--line);padding:6px;min-height:76px}
 .zoneTitle{font-size:10px;color:var(--muted);font-weight:900;margin-bottom:4px}
 .cards{display:flex;gap:5px;align-items:flex-start;flex-wrap:wrap;min-height:54px}
 .card{width:68px;position:relative;flex:0 0 auto}
@@ -39,20 +37,35 @@ button{font:inherit;font-weight:800;cursor:pointer}
 .card .fallback{border:1px solid var(--line);font-size:9px;padding:3px;display:grid;place-items:center;text-align:center}
 .card.small{width:47px}
 .card.small img,.card.small .fallback{width:47px;height:66px}
-.card.facedown{width:96px;margin:13px 3px}
-.card.facedown img,.card.facedown .fallback{width:68px;height:96px;transform:rotate(90deg);filter:brightness(.34) grayscale(1)}
+.card.large{width:112px}
+.card.large img,.card.large .fallback{width:112px;height:158px}
+.card.facedown{width:88px;margin:8px 2px}
+.card.facedown img,.card.facedown .fallback{width:62px;height:88px;transform:rotate(90deg);filter:brightness(.3) grayscale(1)}
 .card.used img,.card.used .fallback{filter:brightness(.32) grayscale(1)}
-.center{background:#eee6e9;border-top:1px solid #c9b8c0;border-bottom:1px solid #c9b8c0;padding:10px;display:grid;grid-template-columns:1fr minmax(300px,560px) 1fr;gap:10px;align-items:center}
-.using{min-height:112px}
-.using .cards{justify-content:center}
-.turnBox{text-align:center}
-.turn{font-size:22px;font-weight:900}
-.action{font-size:16px;font-weight:900;margin-top:4px}
-.detail{font-size:11px;color:#666;margin-top:3px}
-.boardValues{display:flex;justify-content:center;gap:8px;margin-top:8px}
-.boardVal{background:#fff;border:1px solid #aaa;padding:5px 10px;font-weight:900;font-size:13px}
+.sideStacks{display:grid;grid-template-columns:72px minmax(0,1fr);grid-template-rows:82px 150px;gap:6px 8px;align-items:start}
+.deckStack{grid-column:1;grid-row:1;width:58px;height:78px;border:2px solid #695967;border-radius:4px;background:
+  repeating-linear-gradient(45deg,#655362 0 7px,#7a6674 7px 14px);
+  display:grid;place-items:center;color:#fff;font-size:22px;font-weight:900;box-shadow:2px 2px 0 rgba(0,0,0,.12)}
+.facedownStack{grid-column:2;grid-row:1;display:flex;align-items:flex-start;gap:0;overflow:visible;min-height:78px}
+.discardStack{grid-column:1 / 3;grid-row:2;position:relative;height:146px;overflow:visible}
+.discardStack .card{position:absolute;left:0}
+.center{background:#eee6e9;border-top:1px solid #c9b8c0;border-bottom:1px solid #c9b8c0;padding:10px;display:grid;grid-template-columns:170px 1fr 170px;gap:12px;align-items:center;min-height:355px}
+.centerResources{align-self:center;font-size:18px;font-weight:900;line-height:1.8;padding-left:22px}
+.centerReplay{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:320px}
+.using{height:140px;display:flex;align-items:center;justify-content:center}
+.using .cards{justify-content:center;min-height:0}
+.turn{font-size:26px;font-weight:900;line-height:1.1}
 #error{display:none;margin:40px auto;max-width:720px;padding:16px;background:#fff;border:1px solid #bbb;white-space:pre-wrap}
-@media(max-width:900px){.topbar{flex-wrap:wrap}#stepSlider{order:2;flex-basis:100%}.board{min-height:760px}.player{grid-template-columns:1fr}.center{grid-template-columns:1fr}.using{min-height:0}}
+@media(max-width:900px){
+  .topbar{flex-wrap:wrap}
+  #stepSlider{order:2;flex-basis:100%}
+  .player{grid-template-columns:1fr}
+  .playerPlay{grid-template-columns:1fr}
+  .sideStacks{grid-template-columns:72px 1fr}
+  .center{grid-template-columns:110px 1fr}
+  .centerReplay{grid-column:2}
+  .centerSpacer{display:none}
+}
 </style>
 </head>
 <body>
@@ -72,17 +85,16 @@ button{font:inherit;font-weight:800;cursor:pointer}
   <div class="board">
     <section id="topPlayer" class="player top"></section>
     <section class="center">
-      <div id="topUsing" class="using"></div>
-      <div class="turnBox">
-        <div id="turnText" class="turn"></div>
-        <div id="actionText" class="action"></div>
-        <div id="detailText" class="detail"></div>
-        <div class="boardValues">
-          <span id="distanceText" class="boardVal"></span>
-          <span id="dustText" class="boardVal"></span>
-        </div>
+      <div class="centerResources">
+        <div id="dustText"></div>
+        <div id="distanceText"></div>
       </div>
-      <div id="bottomUsing" class="using"></div>
+      <div class="centerReplay">
+        <div id="topUsing" class="using"></div>
+        <div id="turnText" class="turn"></div>
+        <div id="bottomUsing" class="using"></div>
+      </div>
+      <div class="centerSpacer"></div>
     </section>
     <section id="bottomPlayer" class="player bottom"></section>
   </div>
