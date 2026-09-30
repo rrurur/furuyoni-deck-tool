@@ -1,3 +1,15 @@
+const LEGACY_TO_CURRENT_ASSET = {
+  "na_04_tokoyo_o_n_2":"na_04_tokoyo_o_n_3",
+  "na_04_tokoyo_o_n_3":"na_04_tokoyo_o_n_2",
+  "na_04_tokoyo_a2_n_2":"na_04_tokoyo_a2_n_3",
+  "na_05_oboro_o_n_3":"na_05_oboro_o_n_4",
+  "na_05_oboro_o_n_4":"na_05_oboro_o_n_5",
+  "na_05_oboro_o_n_5":"na_05_oboro_o_n_6",
+  "na_05_oboro_o_n_6":"na_05_oboro_o_n_3",
+  "na_05_oboro_a1_n_3":"na_05_oboro_a1_n_4",
+  "na_08_hagane_a1_n_2":"na_08_hagane_a1_n_7"
+};
+
 const CHAR_ID_TO_BASE = {
   1:"yurina",2:"saine",3:"himika",4:"tokoyo",5:"oboro",6:"yukihi_a",7:"shinra",8:"hagane",
   9:"chikage",10:"kururu",11:"thallya",12:"raira",13:"utsuro",14:"honoka",15:"korunu",16:"yatsuha",
@@ -61,8 +73,10 @@ export function decodeReply(buffer){
 
 function cardCodeToPath(code){
   if(!code) return "";
-  let s=String(code).trim();
-  if(s.startsWith("re_")) s="na_"+s.slice(3);
+  let s=String(code).trim().toLowerCase().replaceAll("-","_");
+  if(s.startsWith("re_")) return `images/na_${s.slice(3)}.png`;
+  const base=s.replace(/_s\d+(?:_\d+)?$/i,"");
+  if(LEGACY_TO_CURRENT_ASSET[base]) return `images/${LEGACY_TO_CURRENT_ASSET[base]}.png`;
   return `images/${s}.png`;
 }
 
