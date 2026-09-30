@@ -518,29 +518,49 @@ function clearReplaySelection(){
   if (elReplayFile) elReplayFile.value = "";
   if (elReplayPreviewBtn) elReplayPreviewBtn.hidden = true;
 }
-function openReplayPreviewDb(){
-  return new Promise((resolve,reject)=>{
-    const req=indexedDB.open("furuyoni-deck-tool",1);
-    req.onupgradeneeded=()=>req.result.createObjectStore("replayPreview");
-    req.onsuccess=()=>resolve(req.result);
-    req.onerror=()=>reject(req.error);
-  });
-}
-async function storeReplayPreviewFile(file){
-  const db=await openReplayPreviewDb();
-  await new Promise((resolve,reject)=>{
-    const tx=db.transaction("replayPreview","readwrite");
-    tx.objectStore("replayPreview").put(file,"current");
-    tx.oncomplete=()=>resolve();
-    tx.onerror=()=>reject(tx.error);
-    tx.onabort=()=>reject(tx.error);
-  });
-}
 async function openSelectedReplayPreview(){
   const file=validateReplayFile(elReplayFile?.files?.[0]||null);
   if(!file) return;
-  await storeReplayPreviewFile(file);
-  window.open("./replay-preview.html","_blank","noopener");
+
+  const targetOrigin=new URL(TIMELINE_REPLAY_BASE).origin;
+  let popup=null;
+  let buffer=null;
+  let ready=false;
+
+  const cleanup=()=>window.removeEventListener("message",onReady);
+  const send=()=>{
+    if(!popup || popup.closed || !ready || !buffer) return;
+    cleanup();
+    popup.postMessage({
+      type:"furuyoni-replay-data",
+      name:String(file.name||"replay.reply"),
+      buffer
+    },targetOrigin,[buffer]);
+    buffer=null;
+  };
+  const onReady=(event)=>{
+    if(event.origin!==targetOrigin) return;
+    if(event.source!==popup) return;
+    if(event.data?.type!=="furuyoni-replay-ready") return;
+    ready=true;
+    send();
+  };
+
+  window.addEventListener("message",onReady);
+  popup=window.open(`${TIMELINE_REPLAY_BASE}?source=deck-tool`,"_blank");
+  if(!popup){
+    cleanup();
+    return;
+  }
+
+  try{
+    buffer=await file.arrayBuffer();
+    send();
+  }catch(error){
+    cleanup();
+    try{ popup.close(); }catch{}
+    throw error;
+  }
 }
 
 function validateReplayFile(file){
