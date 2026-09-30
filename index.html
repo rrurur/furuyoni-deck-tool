@@ -265,6 +265,13 @@
   }
   #deckName{ width:10em; padding:4px 6px; font-size:14px; border:1px solid #aaa; box-sizing:border-box; }
   #anonName{ width:6em;  padding:4px 6px; font-size:14px; border:1px solid #aaa; box-sizing:border-box; }
+  .replayAttachBtn{
+    display:inline-flex;align-items:center;justify-content:center;
+    padding:8px 12px;border-radius:6px;background:#4d5f73;color:#fff;
+    font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;
+  }
+  .replayAttachBtn:hover{ background:#394957; }
+  #replayFileLabel{ font-size:11px;color:#555;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
 
   .seg3{
     display:inline-flex;
@@ -539,6 +546,9 @@
         <button type="button" data-result="other">他</button>
       </div>
 
+      <label class="replayAttachBtn" for="replayFile">リプレイ選択</label>
+      <input id="replayFile" type="file" accept=".reply,application/octet-stream" hidden>
+      <span id="replayFileLabel">リプレイなし</span>
       <button id="saveBtn" type="button">保存</button>
     </div>
     <div id="saveStatus" aria-live="polite"></div>
