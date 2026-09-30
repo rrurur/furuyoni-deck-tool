@@ -544,6 +544,29 @@ function clearEditingState(){
 }
 function setSaveStatus(){}
 function timelineVisibilityNote(){ return ""; }
+function fillSlotsFromPaths(slots, paths){
+  slots.fill(null);
+  (paths || []).slice(0, 10).forEach((path, i) => { slots[i] = path || null; });
+}
+function tarotsFromNames(names){
+  return (names || []).map(name => tarotData.find(t => t.name === name)).filter(Boolean).slice(0, MAX_PICK);
+}
+async function applySelectedReplay(){
+  const file = validateReplayFile(elReplayFile?.files?.[0] || null);
+  if (!file) return;
+  const data = decodeReply(await file.arrayBuffer());
+  const imported = extractReplayFormData(data, tarotData);
+  mySelected = tarotsFromNames(imported.myTarotNames);
+  oppSelected = tarotsFromNames(imported.oppTarotNames);
+  fillSlotsFromPaths(deckSlots, imported.myDeckPaths);
+  fillSlotsFromPaths(oppDeckSlots, imported.oppDeckPaths);
+  deckDisplaySeason = CURRENT_SEASON;
+  setRecordKind(imported.resultKind);
+  clampMyPickToMode();
+  clampOppPickToMode();
+  persistMatchAndMyPicks();
+  renderAll();
+}
 function updateMatchUI(){
   if (!elMatchToggle) return;
   [...elMatchToggle.querySelectorAll(".pill")].forEach(p => {
@@ -580,6 +603,7 @@ function resetRunState(){
   if (elMemo) elMemo.value = "";
   oppSelected = [];
   deckSlots.fill(null);
+  oppDeckSlots.fill(null);
 
   if (elCardPreview){
     elCardPreview.src = "";
@@ -923,6 +947,83 @@ function renderCards(){
 }
 
 /* ---------------- デッキ ---------------- */
+function renderOpponentCards(){
+  if (!elOppCardContainer) return;
+  elOppCardContainer.innerHTML = "";
+  const targets = oppSelected.slice(0, 2);
+  targets.forEach(tarot => {
+    const row = document.createElement("div");
+    row.className = "card-row";
+    const normals = (tarot.cards || []).filter(p => !p.includes("_s_"));
+    const trumps = (tarot.cards || []).filter(p => p.includes("_s_"));
+    [...normals, ...trumps].forEach(cardPath => {
+      const img = document.createElement("img");
+      applyCardImage(img, cardPath, CURRENT_SEASON);
+      img.alt = cardPath;
+      if (oppDeckSlots.includes(cardPath)) img.classList.add("in-deck");
+      img.addEventListener("click", () => {
+        if (oppDeckSlots.includes(cardPath)) removeCardFromOpponentDeck(cardPath);
+        else addCardToOpponentDeck(cardPath);
+        renderOpponentDeck();
+        renderOpponentCards();
+      });
+      row.appendChild(img);
+    });
+    elOppCardContainer.appendChild(row);
+  });
+}
+function setupOpponentDeck(){
+  if (!elOppDeck) return;
+  elOppDeck.innerHTML = "";
+  for (let i=0;i<10;i++){
+    const slot=document.createElement("div");
+    slot.className="deck-slot";
+    slot.dataset.index=String(i);
+    slot.addEventListener("dragover", e=>e.preventDefault());
+    slot.addEventListener("drop", e=>{
+      e.preventDefault();
+      const from=parseInt(e.dataTransfer.getData("oppFromIndex"),10);
+      if (Number.isNaN(from)) return;
+      const fromIsTrump=from>=7, toIsTrump=i>=7;
+      if (fromIsTrump!==toIsTrump) return;
+      const tmp=oppDeckSlots[i]; oppDeckSlots[i]=oppDeckSlots[from]; oppDeckSlots[from]=tmp;
+      renderOpponentDeck(); renderOpponentCards();
+    });
+    elOppDeck.appendChild(slot);
+  }
+  renderOpponentDeck();
+}
+function renderOpponentDeck(){
+  if (!elOppDeck) return;
+  const slots=elOppDeck.querySelectorAll(".deck-slot");
+  slots.forEach((slotEl,i)=>{
+    slotEl.innerHTML="";
+    const cardPath=oppDeckSlots[i];
+    if(!cardPath) return;
+    const img=document.createElement("img");
+    applyCardImage(img, cardPath, deckDisplaySeason);
+    img.alt=cardPath;
+    img.draggable=true;
+    img.addEventListener("click",()=>{ removeCardFromOpponentDeck(cardPath); renderOpponentDeck(); renderOpponentCards(); });
+    img.addEventListener("dragstart",ev=>{ ev.dataTransfer.setData("oppFromIndex",String(i)); ev.dataTransfer.effectAllowed="move"; });
+    slotEl.appendChild(img);
+  });
+}
+function addCardToOpponentDeck(cardPath){
+  if (oppDeckSlots.includes(cardPath)) return;
+  const trump=isTrumpCard(cardPath);
+  const start=trump?7:0, end=trump?9:6;
+  for(let i=start;i<=end;i++){ if(!oppDeckSlots[i]){ oppDeckSlots[i]=cardPath; return; } }
+}
+function removeCardFromOpponentDeck(cardPath){
+  const i=oppDeckSlots.indexOf(cardPath);
+  if(i>=0) oppDeckSlots[i]=null;
+}
+function renderOpponentDeckEditor(){
+  renderOpponentCards();
+  renderOpponentDeck();
+}
+
 function setupDeck(){
   if (!elDeck) return;
   elDeck.innerHTML = "";
@@ -1286,6 +1387,7 @@ function beginEdit(play){
   if (elReplayFile) elReplayFile.value = "";
   updateReplayFileLabel(play.replayName || (play.replayPath ? "replay.reply" : ""));
   applyDeckFromStoredPlay(play);
+  fillSlotsFromPaths(oppDeckSlots, play.oppCardPaths || []);
 
   if (elCardPreview){
     elCardPreview.src = "";
@@ -1320,6 +1422,12 @@ async function saveDeck(){
     return (typeof id === "number") ? id : -1;
   });
   const cardPaths = deckSlots.map(path => path || "");
+  const oppCardIds = oppDeckSlots.map(p => {
+    if (!p) return -1;
+    const id = cardIdByPath.get(p);
+    return (typeof id === "number") ? id : -1;
+  });
+  const oppCardPaths = oppDeckSlots.map(path => path || "");
 
   const myTarotIdx = mySelected.map(t => tarotIndexByName.get(t.name)).filter(n => typeof n === "number");
   const oppTarotIdx = oppSelected.map(t => tarotIndexByName.get(t.name)).filter(n => typeof n === "number");
@@ -1339,6 +1447,8 @@ async function saveDeck(){
     oppTarotNames,
     cardIds,
     cardPaths,
+    oppCardIds,
+    oppCardPaths,
     updatedAtMs: Date.now()
   };
 
@@ -1370,7 +1480,9 @@ async function saveDeck(){
           deckName,
           memo,
           cardIds,
-          cardPaths
+          cardPaths,
+          oppCardIds,
+          oppCardPaths
         });
       }
       if (!saveLocalPlays(userPlays)) {
@@ -1398,6 +1510,8 @@ async function saveDeck(){
     oppTarotNames,
     cardIds,
     cardPaths,
+    oppCardIds,
+    oppCardPaths,
     updatedAt: serverTimestamp(),
     updatedAtMs: Date.now()
   };
@@ -2197,6 +2311,7 @@ function renderAll(){
 
   renderCards();
   renderDeck();
+  renderOpponentDeckEditor();
   renderRightStatsAndHistory();
 }
 
@@ -2247,7 +2362,14 @@ async function main(){
 
   if (elLoginBtn) elLoginBtn.addEventListener("click", doLogin);
   if (elSaveBtn) elSaveBtn.addEventListener("click", saveDeck);
-  if (elReplayFile) elReplayFile.addEventListener("change", () => updateReplayFileLabel(""));
+  if (elReplayFile) elReplayFile.addEventListener("change", () => {
+    applySelectedReplay().catch(error => console.error("replay import failed:", error));
+  });
+  if (elOppDeckToggle && elOppDeckArea) elOppDeckToggle.addEventListener("click", () => {
+    const open = elOppDeckArea.hidden;
+    elOppDeckArea.hidden = !open;
+    elOppDeckToggle.textContent = open ? "▼対戦相手のデッキ" : "▶対戦相手のデッキ";
+  });
 
   if (elResetBtn) elResetBtn.addEventListener("click", deckReset);
   if (elRearrangeBtn) elRearrangeBtn.addEventListener("click", deckRearrange);
@@ -2276,6 +2398,7 @@ async function main(){
 
   buildIdMaps();
   setupDeck();
+  setupOpponentDeck();
 
   matchType = normalizeMatchType(prefs.matchType);
   updateMatchUI();
