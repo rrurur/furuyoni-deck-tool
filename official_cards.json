@@ -1,0 +1,33 @@
+{
+  "meta":{"title":"桜降る代に決闘を 再演 カード名辞書","source":"https://furuyoni.sekiseiro.com/re/cardlist/","note":"再演(RE)の現在カード番号を正とし、旧NA番号の移動札はreplay-core.jsで補正する。"},
+  "megami":{
+    "01_yurina":{"name":"ユリナ","normal":["斬","一閃","柄打ち","居合","体捌き","圧気","気炎万丈"],"special":["月影落","浦波嵐","浮舟宿","天音揺波の底力"]},
+    "02_saine":{"name":"サイネ","normal":["八方振り","薙斬り","石突","見切り","圏域","衝音晶","無音壁"],"special":["律動弧戟","響鳴共振","音無砕氷","氷雨細音の果ての果て"]},
+    "03_himika":{"name":"ヒミカ","normal":["シュート","ラピッドファイア","リコイルバーン","フルバースト","バックステップ","バックドラフト","リローディング"],"special":["レッドバレット","クリムゾンゼロ","スカーレットイマジン","ヴァーミリオンフィールド"]},
+    "04_tokoyo":{"name":"トコヨ","normal":["梳流し","跳ね兎","雅打ち","詩舞","要返し","風舞台","晴舞台"],"special":["久遠ノ花","千歳ノ鳥","無窮ノ風","常世ノ月"]},
+    "05_oboro":{"name":"オボロ","normal":["鋼糸","影菱","分身の術","斬撃乱舞","忍歩","誘導","生体活性"],"special":["熊介","鳶影","虚魚","壬蔓"]},
+    "06_yukihi":{"name":"ユキヒ","normal":["しこみばり/ふくみばり","しこみび/ねこだまし","ふりはらい/たぐりよせ","ふりまわし/つきさし","かさまわし","ひきあし/もぐりこみ","えんむすび"],"special":["はらりゆき","ゆらりび","どろりうら","くるりみ"]},
+    "07_shinra":{"name":"シンラ","normal":["立論","反論","詭弁","引用","煽動","壮語","論破"],"special":["完全論破","皆式理解","天地反駁","森羅判証"]},
+    "08_hagane":{"name":"ハガネ","normal":["遠心撃","砂風塵","大地砕き","超反動","円舞錬","鐘鳴らし","引力場"],"special":["大天空クラッシュ","大破鐘メガロベル","大重力アトラクト","大山脈リスペクト"]},
+    "09_chikage":{"name":"チカゲ","normal":["飛苦無","毒針","遁術","暗器","毒霧","抜き足","泥濘"],"special":["滅灯の魂毒","叛旗の纏毒","流転の霞毒","闇昏千影の生きる道"],"poison":["麻痺毒","幻覚毒","弛緩毒","滅灯毒"]},
+    "10_kururu":{"name":"クルル","normal":["えれきてる","あくせらー","くるるーん","とるねーど","りげいなー","もじゅるー","りふれくた"],"special":["どれーんでびる","びっぐごーれむ","いんだすとりあ","神渉装置：枢式"]},
+    "11_thallya":{"name":"サリヤ","normal":["Burning Steam","Waving Edge","Shield Charge","Steam Cannon","Dual Action","Roaring","Turbo Switch"],"special":["Alpha-Edge","Omega-Burst","Thallya's Masterpiece","Julia's BlackBox"],"extra":["Form:YAKSHA","Form:NAGA","Form:GARUDA"]},
+    "12_raira":{"name":"ライラ","normal":["獣爪","風雷撃","流転爪","風走り","風雷の知恵","呼び声","空駆け"],"special":["雷螺風神爪","天雷召喚陣","風魔招来孔","円環輪廻旋"]},
+    "15_korunu":{"name":"コルヌ","normal":["雪刃","旋回刃","剣の舞","雪渡り","絶対零度","かじかみ","霜の茨"],"special":["コンルルヤンペ","レタルレラ","ウパシトゥム","ポルチャルトー"]},
+    "19_megumi":{"name":"メグミ","normal":["空閃","打擲","殻打ち","棹穿ち","葦","鳳仙花","野茨"],"special":["因果律の根","可能性の枝","結末の果実","瀧河希の掌"]}
+  },
+  "overrides":{"re_01_yurina_a1_n_1":"乱打","re_01_yurina_a1_n_6":"癇癪玉","re_01_yurina_a1_s_2":"不完全浦波嵐","re_11_thallya_a1_n_5":"Quick Change"},
+  "legacy_overrides":{
+    "na_01_yurina_o_n_1":"斬","na_01_yurina_o_n_2":"一閃","na_01_yurina_o_n_3":"柄打ち","na_01_yurina_o_n_4":"居合","na_01_yurina_o_n_5":"気迫","na_01_yurina_o_n_6":"圧気","na_01_yurina_o_n_7":"気炎万丈","na_01_yurina_o_s_1":"月影落","na_01_yurina_o_s_2":"浦波嵐",
+    "na_02_saine_o_n_1":"八方振り","na_02_saine_o_n_2":"薙斬り","na_02_saine_o_n_3":"石突","na_02_saine_o_n_4":"見切り","na_02_saine_o_n_5":"圏域","na_02_saine_o_n_6":"衝音晶","na_02_saine_o_n_7":"無音壁","na_02_saine_o_s_1":"律動弧戟","na_02_saine_o_s_2":"音無砕氷","na_02_saine_o_s_3":"氷雨細音の果ての果て","na_02_saine_o_s_4":"二重奏:弾奏氷瞑",
+    "na_04_tokoyo_o_n_1":"梳流し","na_04_tokoyo_o_n_2":"雅打ち","na_04_tokoyo_o_n_3":"跳ね兎","na_04_tokoyo_o_n_4":"詩舞","na_04_tokoyo_o_n_5":"要返し","na_04_tokoyo_o_n_6":"風舞台","na_04_tokoyo_o_s_1":"久遠ノ花","na_04_tokoyo_o_s_2":"千歳ノ鳥","na_04_tokoyo_o_s_3":"無窮ノ風",
+    "na_05_oboro_o_n_1":"鋼糸","na_05_oboro_o_n_2":"影菱","na_05_oboro_o_n_3":"斬撃乱舞","na_05_oboro_o_n_4":"忍歩","na_05_oboro_o_n_5":"誘導","na_05_oboro_o_n_6":"分身の術","na_05_oboro_o_n_7":"生体活性","na_05_oboro_o_s_1":"熊介","na_05_oboro_o_s_2":"鳶影","na_05_oboro_o_s_3":"虚魚","na_05_oboro_o_s_4":"壬蔓",
+    "na_07_shinra_o_n_1":"立論","na_07_shinra_o_n_2":"反論","na_07_shinra_o_n_3":"詭弁","na_07_shinra_o_n_4":"引用","na_07_shinra_o_n_5":"煽動","na_07_shinra_o_n_6":"壮語","na_07_shinra_o_n_7":"論破","na_07_shinra_o_s_1":"完全論破","na_07_shinra_o_s_2":"皆式理解","na_07_shinra_o_s_3":"森羅判証","na_07_shinra_o_s_4":"天地反駁",
+    "na_08_hagane_o_n_1":"遠心撃","na_08_hagane_o_n_2":"砂風塵","na_08_hagane_o_n_3":"大地砕き","na_08_hagane_o_n_4":"円舞錬","na_08_hagane_o_n_5":"鐘鳴らし","na_08_hagane_o_n_6":"引力場","na_08_hagane_o_s_1":"大天空クラッシュ","na_08_hagane_o_s_2":"大破鐘メガロベル","na_08_hagane_o_s_3":"大山脈リスペクト",
+    "na_09_chikage_o_n_1":"飛苦無","na_09_chikage_o_n_2":"毒針","na_09_chikage_o_n_3":"遁術","na_09_chikage_o_n_4":"首切り","na_09_chikage_o_n_5":"毒霧","na_09_chikage_o_n_6":"抜き足","na_09_chikage_o_n_7":"泥濘","na_09_chikage_o_s_1":"滅灯の魂毒","na_09_chikage_o_s_2":"叛旗の纏毒","na_09_chikage_o_s_3":"流転の霞毒","na_09_chikage_o_s_4":"闇昏千影の生きる道",
+    "na_10_kururu_o_n_1":"えれきてる","na_10_kururu_o_n_2":"あくせらー","na_10_kururu_o_n_3":"くるるーん","na_10_kururu_o_n_4":"とるねーど","na_10_kururu_o_n_5":"りげいなー","na_10_kururu_o_n_6":"もじゅるー","na_10_kururu_o_n_7":"りふれくた","na_10_kururu_o_s_1":"どれーんでびる","na_10_kururu_o_s_2":"びっぐごーれむ","na_10_kururu_o_s_3":"いんだすとりあ","na_10_kururu_o_s_4":"神渉装置：枢式",
+    "na_11_thallya_o_n_1":"Burning Steam","na_11_thallya_o_n_2":"Waving Edge","na_11_thallya_o_n_3":"Shield Charge","na_11_thallya_o_n_4":"Steam Cannon","na_11_thallya_o_n_5":"Stunt","na_11_thallya_o_n_6":"Roaring","na_11_thallya_o_n_7":"Turbo Switch","na_11_thallya_o_s_1":"Alpha-Edge","na_11_thallya_o_s_2":"Omega-Burst","na_11_thallya_o_s_3":"Thallya's Masterpiece",
+    "na_12_raira_o_n_1":"獣爪","na_12_raira_o_n_2":"風雷撃","na_12_raira_o_n_3":"流転爪",
+    "na_15_korunu_o_n_1":"雪刃","na_15_korunu_o_n_2":"旋回刃","na_15_korunu_o_n_3":"剣の舞","na_15_korunu_o_n_4":"雪渡り","na_15_korunu_o_n_5":"絶対零度","na_15_korunu_o_n_6":"かじかみ","na_15_korunu_o_n_7":"凍える手","na_15_korunu_o_s_1":"コンルルヤンペ","na_15_korunu_o_s_3":"ウパシトゥム","na_15_korunu_o_s_4":"ポルチャルトー"
+  }
+}
