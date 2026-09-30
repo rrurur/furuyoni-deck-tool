@@ -27,6 +27,11 @@ import {
   serverTimestamp,
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytes
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
 
 import { firebaseConfig, appCheckConfig } from "./firebaseConfig.js";
 
@@ -226,6 +231,9 @@ if (shouldEnableAppCheck()) {
 }
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
+const REPLAY_MAX_BYTES = 12 * 1024 * 1024;
+const TIMELINE_REPLAY_BASE = "https://furuyoni-diary-1918f.web.app/replay.html";
 
 /* ---------------- 永続化（ローカル） ---------------- */
 const LS_KEY = "decktool_prefs_v9";
@@ -330,6 +338,8 @@ const elAuthIdText = document.getElementById("authIdText");
 const elLoginBtn = document.getElementById("loginBtn");
 const elSaveBtn = document.getElementById("saveBtn");
 const elSaveStatus = document.getElementById("saveStatus");
+const elReplayFile = document.getElementById("replayFile");
+const elReplayFileLabel = document.getElementById("replayFileLabel");
 const elResetBtn = document.getElementById("resetBtn");
 const elRearrangeBtn = document.getElementById("rearrangeBtn");
 
@@ -497,10 +507,51 @@ function storedTarotIndexes(play, namesKey, indexesKey){
     .map(name => tarotIndexByName.get(name))
     .filter(index => typeof index === "number");
 }
+function updateReplayFileLabel(existingReplayName=""){
+  if (!elReplayFileLabel) return;
+  const selected = elReplayFile?.files?.[0];
+  if (selected) {
+    elReplayFileLabel.textContent = selected.name;
+    elReplayFileLabel.title = selected.name;
+  } else if (existingReplayName) {
+    elReplayFileLabel.textContent = `添付済み: ${existingReplayName}`;
+    elReplayFileLabel.title = existingReplayName;
+  } else {
+    elReplayFileLabel.textContent = "リプレイなし";
+    elReplayFileLabel.title = "";
+  }
+}
+function clearReplaySelection(){
+  if (elReplayFile) elReplayFile.value = "";
+  updateReplayFileLabel("");
+}
+function validateReplayFile(file){
+  if (!file) return null;
+  if (!String(file.name || "").toLowerCase().endsWith(".reply")) throw new Error("リプレイは .reply ファイルを選択してください。");
+  if (!file.size || file.size <= 0) throw new Error("空のリプレイファイルは添付できません。");
+  if (file.size >= REPLAY_MAX_BYTES) throw new Error("リプレイファイルが12MB以上のため添付できません。");
+  return file;
+}
+async function uploadReplayForDeck(deckId, file){
+  validateReplayFile(file);
+  const u = auth.currentUser;
+  if (!isCloudUser(u)) throw new Error("リプレイの公開にはGoogleログインが必要です。");
+  const path = `replays/${u.uid}/${deckId}.reply`;
+  await uploadBytes(storageRef(storage, path), file, {
+    contentType: "application/octet-stream",
+    customMetadata: { originalName: String(file.name || "replay.reply") }
+  });
+  return { replayPath:path, replayName:String(file.name || "replay.reply"), replaySize:Number(file.size || 0), replayContentType:"application/octet-stream", replayVersion:1 };
+}
+function openReplay(play){
+  if (!play?.id || !play?.replayPath) return;
+  window.open(`${TIMELINE_REPLAY_BASE}?deck=${encodeURIComponent(play.id)}`, "_blank", "noopener");
+}
 function clearEditingState(){
   editingPlayId = null;
   editingPlaySeason = null;
   deckDisplaySeason = CURRENT_SEASON;
+  clearReplaySelection();
 }
 function setSaveStatus(message="", kind=""){
   if (!elSaveStatus) return;
@@ -1263,6 +1314,8 @@ function beginEdit(play){
 
   if (elDeckName) elDeckName.value = play.deckName || "";
   if (elMemo) elMemo.value = play.memo || "";
+  if (elReplayFile) elReplayFile.value = "";
+  updateReplayFileLabel(play.replayName || (play.replayPath ? "replay.reply" : ""));
   applyDeckFromStoredPlay(play);
 
   if (elCardPreview){
@@ -1279,6 +1332,14 @@ function beginEdit(play){
 async function saveDeck(){
   setSaveStatus("保存中…", "");
   if (elSaveBtn) elSaveBtn.disabled = true;
+  let replayFile = null;
+  try {
+    replayFile = validateReplayFile(elReplayFile?.files?.[0] || null);
+  } catch (e) {
+    setSaveStatus(String(e?.message || e), "error");
+    if (elSaveBtn) elSaveBtn.disabled = false;
+    return;
+  }
 
   const deckName = (elDeckName ? elDeckName.value : "").trim();
   const memo = (elMemo ? elMemo.value : "").trim();
@@ -1374,21 +1435,39 @@ async function saveDeck(){
 
   try {
     if (editingPlayId) {
-      await updateDoc(doc(db, "decks", editingPlayId), cloudPayload);
+      const targetId = editingPlayId;
+      await updateDoc(doc(db, "decks", targetId), cloudPayload);
+      let replayNote = "";
+      if (replayFile) {
+        const replayMeta = await uploadReplayForDeck(targetId, replayFile);
+        await updateDoc(doc(db, "decks", targetId), { ...replayMeta, updatedAt: serverTimestamp(), updatedAtMs: Date.now() });
+        replayNote = " リプレイも更新しました。";
+      }
       clearEditingState();
       renderDeck();
       renderCards();
-      setSaveStatus(`投稿を更新しました。${timelineVisibilityNote(deckName, memo, cardPaths)}`, "ok");
+      setSaveStatus(`投稿を更新しました。${replayNote}${timelineVisibilityNote(deckName, memo, cardPaths)}`, "ok");
     } else {
       const savedRef = await addDoc(collection(db, "decks"), {
         ...cloudPayload,
         ownerUid: auth.currentUser.uid,
         createdAt: serverTimestamp(),
         createdAtMs: Date.now(),
-        likeCount: 0,  
-
+        likeCount: 0
       });
-      setSaveStatus(`投稿しました。ID: ${savedRef.id}.${timelineVisibilityNote(deckName, memo, cardPaths)}`, "ok");
+      let replayNote = "";
+      if (replayFile) {
+        try {
+          const replayMeta = await uploadReplayForDeck(savedRef.id, replayFile);
+          await updateDoc(savedRef, { ...replayMeta, updatedAt: serverTimestamp(), updatedAtMs: Date.now() });
+          replayNote = " リプレイを添付しました。";
+        } catch (replayError) {
+          console.error("replay upload failed:", replayError);
+          replayNote = " 投稿自体は成功しましたが、リプレイのアップロードに失敗しました。";
+        }
+      }
+      clearReplaySelection();
+      setSaveStatus(`投稿しました。ID: ${savedRef.id}.${replayNote}${timelineVisibilityNote(deckName, memo, cardPaths)}`, replayNote.includes("失敗") ? "warn" : "ok");
     }
   } catch (e) {
     console.error(e);
@@ -1429,7 +1508,11 @@ function rowFromDeckDoc(docSnap){
     deckName: typeof d.deckName === "string" ? d.deckName : "",
     memo: typeof d.memo === "string" ? d.memo : "",
     cardIds: Array.isArray(d.cardIds) ? d.cardIds.map(n => (typeof n==="number"? n : -1)) : Array(10).fill(-1),
-    cardPaths: Array.isArray(d.cardPaths) ? d.cardPaths.map(path => typeof path === "string" ? path : "") : null
+    cardPaths: Array.isArray(d.cardPaths) ? d.cardPaths.map(path => typeof path === "string" ? path : "") : null,
+    replayPath: typeof d.replayPath === "string" ? d.replayPath : "",
+    replayName: typeof d.replayName === "string" ? d.replayName : "",
+    replaySize: typeof d.replaySize === "number" ? d.replaySize : 0,
+    replayVersion: typeof d.replayVersion === "number" ? d.replayVersion : 0
   };
 }
 
@@ -2056,6 +2139,17 @@ function renderHistoryList(){
     if (p.resultTypeNum === 0) r.classList.add("res-win");
     right.appendChild(r);
 
+    if (p.replayPath) {
+      const replay = document.createElement("button");
+      replay.className = "editbtn";
+      replay.type = "button";
+      replay.textContent = "リプレイ";
+      replay.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openReplay(p);
+      });
+      right.appendChild(replay);
+    }
     const edit = document.createElement("button");
     edit.className = "editbtn";
     edit.type = "button";
@@ -2184,6 +2278,7 @@ async function main(){
 
   if (elLoginBtn) elLoginBtn.addEventListener("click", doLogin);
   if (elSaveBtn) elSaveBtn.addEventListener("click", saveDeck);
+  if (elReplayFile) elReplayFile.addEventListener("change", () => updateReplayFileLabel(""));
 
   if (elResetBtn) elResetBtn.addEventListener("click", deckReset);
   if (elRearrangeBtn) elRearrangeBtn.addEventListener("click", deckRearrange);
