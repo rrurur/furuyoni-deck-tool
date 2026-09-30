@@ -346,6 +346,7 @@ const elAuthIdText = document.getElementById("authIdText");
 const elLoginBtn = document.getElementById("loginBtn");
 const elSaveBtn = document.getElementById("saveBtn");
 const elReplayFile = document.getElementById("replayFile");
+const elReplayPreviewBtn = document.getElementById("replayPreviewBtn");
 const elResetBtn = document.getElementById("resetBtn");
 const elRearrangeBtn = document.getElementById("rearrangeBtn");
 
@@ -515,7 +516,33 @@ function storedTarotIndexes(play, namesKey, indexesKey){
 }
 function clearReplaySelection(){
   if (elReplayFile) elReplayFile.value = "";
+  if (elReplayPreviewBtn) elReplayPreviewBtn.hidden = true;
 }
+function openReplayPreviewDb(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open("furuyoni-deck-tool",1);
+    req.onupgradeneeded=()=>req.result.createObjectStore("replayPreview");
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+async function storeReplayPreviewFile(file){
+  const db=await openReplayPreviewDb();
+  await new Promise((resolve,reject)=>{
+    const tx=db.transaction("replayPreview","readwrite");
+    tx.objectStore("replayPreview").put(file,"current");
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error);
+    tx.onabort=()=>reject(tx.error);
+  });
+}
+async function openSelectedReplayPreview(){
+  const file=validateReplayFile(elReplayFile?.files?.[0]||null);
+  if(!file) return;
+  await storeReplayPreviewFile(file);
+  window.open("./replay-preview.html","_blank","noopener");
+}
+
 function validateReplayFile(file){
   if (!file) return null;
   if (!String(file.name || "").toLowerCase().endsWith(".reply")) throw new Error("リプレイは .reply ファイルを選択してください。");
@@ -2401,7 +2428,11 @@ async function main(){
   if (elLoginBtn) elLoginBtn.addEventListener("click", doLogin);
   if (elSaveBtn) elSaveBtn.addEventListener("click", saveDeck);
   if (elReplayFile) elReplayFile.addEventListener("change", () => {
+    if (elReplayPreviewBtn) elReplayPreviewBtn.hidden = !(elReplayFile.files?.[0]);
     applySelectedReplay().catch(error => console.error("replay import failed:", error));
+  });
+  if (elReplayPreviewBtn) elReplayPreviewBtn.addEventListener("click", () => {
+    openSelectedReplayPreview().catch(error => console.error("replay preview failed:", error));
   });
   if (elOppDeckToggle && elOppDeckArea) elOppDeckToggle.addEventListener("click", () => {
     const open = elOppDeckArea.hidden;

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ふるよに リプレイ</title>
+<style>
+:root{--bg:#f5edf1;--panel:#fff8fb;--line:#d2bbc5;--text:#222;--muted:#6e5160}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif}
+button{font:inherit;font-weight:800;cursor:pointer}
+.topbar{min-height:52px;background:#fff;border-bottom:1px solid rgba(0,0,0,.12);display:flex;align-items:center;gap:7px;padding:7px 10px;position:sticky;top:0;z-index:20}
+.topbar a{text-decoration:none;color:inherit;font-weight:900;margin-right:5px}
+.topbar button{height:32px;border:1px solid rgba(0,0,0,.16);background:#fff;border-radius:7px;padding:0 10px}
+.topbar button:disabled{opacity:.35;cursor:default}
+#stepSlider{min-width:180px;flex:1}
+#counter{min-width:86px;text-align:right;font-size:12px;color:#666;font-weight:800}
+.viewer{max-width:1400px;margin:0 auto;padding:10px}
+.board{background:#f8eff4;border:1px solid #c9b8c0;min-height:820px;display:grid;grid-template-rows:1fr auto 1fr;overflow:hidden}
+.player{padding:10px;display:grid;grid-template-columns:190px 1fr;gap:10px;min-height:285px}
+.player.top{border-bottom:1px solid rgba(0,0,0,.08)}
+.player.bottom{border-top:1px solid rgba(0,0,0,.08)}
+.playerInfo{background:var(--panel);border:1px solid var(--line);padding:9px}
+.playerName{font-weight:900;font-size:16px;margin-bottom:5px}
+.charas{font-size:12px;color:#555;margin-bottom:9px}
+.resGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.res{background:#fff;border:1px solid var(--line);padding:6px;text-align:center}
+.res b{display:block;font-size:20px}
+.res span{font-size:10px;color:#666}
+.deckBox{margin-top:8px;display:flex;align-items:center;gap:7px}
+.cardBack{width:48px;height:68px;border:2px solid #73606b;background:#d8d0dd;display:grid;place-items:center;font-size:11px;font-weight:900}
+.deckCount{font-size:12px;font-weight:900}
+.zones{display:flex;flex-direction:column;gap:7px;min-width:0}
+.zone{background:var(--panel);border:1px solid var(--line);padding:6px;min-height:64px}
+.zoneTitle{font-size:10px;color:var(--muted);font-weight:900;margin-bottom:4px}
+.cards{display:flex;gap:5px;align-items:flex-start;flex-wrap:wrap;min-height:54px}
+.card{width:68px;position:relative;flex:0 0 auto}
+.card img,.card .fallback{width:68px;height:96px;object-fit:contain;display:block;background:#fff}
+.card .fallback{border:1px solid var(--line);font-size:9px;padding:3px;display:grid;place-items:center;text-align:center}
+.card.small{width:47px}
+.card.small img,.card.small .fallback{width:47px;height:66px}
+.card.facedown{width:96px;margin:13px 3px}
+.card.facedown img,.card.facedown .fallback{width:68px;height:96px;transform:rotate(90deg);filter:brightness(.34) grayscale(1)}
+.card.used img,.card.used .fallback{filter:brightness(.32) grayscale(1)}
+.center{background:#eee6e9;border-top:1px solid #c9b8c0;border-bottom:1px solid #c9b8c0;padding:10px;display:grid;grid-template-columns:1fr minmax(300px,560px) 1fr;gap:10px;align-items:center}
+.using{min-height:112px}
+.using .cards{justify-content:center}
+.turnBox{text-align:center}
+.turn{font-size:22px;font-weight:900}
+.action{font-size:16px;font-weight:900;margin-top:4px}
+.detail{font-size:11px;color:#666;margin-top:3px}
+.boardValues{display:flex;justify-content:center;gap:8px;margin-top:8px}
+.boardVal{background:#fff;border:1px solid #aaa;padding:5px 10px;font-weight:900;font-size:13px}
+#error{display:none;margin:40px auto;max-width:720px;padding:16px;background:#fff;border:1px solid #bbb;white-space:pre-wrap}
+@media(max-width:900px){.topbar{flex-wrap:wrap}#stepSlider{order:2;flex-basis:100%}.board{min-height:760px}.player{grid-template-columns:1fr}.center{grid-template-columns:1fr}.using{min-height:0}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="./">← デッキ編集</a>
+  <button id="firstBtn" type="button">先頭</button>
+  <button id="prevBtn" type="button">← 戻る</button>
+  <button id="nextBtn" type="button">進む →</button>
+  <button id="back10Btn" type="button">10戻る</button>
+  <button id="forward10Btn" type="button">10進む</button>
+  <button id="lastBtn" type="button">最後</button>
+  <input id="stepSlider" type="range" min="0" max="0" value="0">
+  <span id="counter"></span>
+</div>
+<div id="error"></div>
+<main id="viewer" class="viewer">
+  <div class="board">
+    <section id="topPlayer" class="player top"></section>
+    <section class="center">
+      <div id="topUsing" class="using"></div>
+      <div class="turnBox">
+        <div id="turnText" class="turn"></div>
+        <div id="actionText" class="action"></div>
+        <div id="detailText" class="detail"></div>
+        <div class="boardValues">
+          <span id="distanceText" class="boardVal"></span>
+          <span id="dustText" class="boardVal"></span>
+        </div>
+      </div>
+      <div id="bottomUsing" class="using"></div>
+    </section>
+    <section id="bottomPlayer" class="player bottom"></section>
+  </div>
+</main>
+<script type="module" src="./replay-preview.js"></script>
+</body>
+</html>
