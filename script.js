@@ -542,8 +542,6 @@ function clearEditingState(){
   deckDisplaySeason = CURRENT_SEASON;
   clearReplaySelection();
 }
-function setSaveStatus(){}
-function timelineVisibilityNote(){ return ""; }
 function fillSlotsFromPaths(slots, paths){
   slots.fill(null);
   (paths || []).slice(0, 10).forEach((path, i) => { slots[i] = path || null; });
@@ -1385,7 +1383,6 @@ function beginEdit(play){
   if (elDeckName) elDeckName.value = play.deckName || "";
   if (elMemo) elMemo.value = play.memo || "";
   if (elReplayFile) elReplayFile.value = "";
-  updateReplayFileLabel(play.replayName || (play.replayPath ? "replay.reply" : ""));
   applyDeckFromStoredPlay(play);
   fillSlotsFromPaths(oppDeckSlots, play.oppCardPaths || []);
 
@@ -1401,13 +1398,12 @@ function beginEdit(play){
 
 /* ---------------- 保存（匿名はローカル、ログイン時はFirestore） ---------------- */
 async function saveDeck(){
-  setSaveStatus("保存中…", "");
   if (elSaveBtn) elSaveBtn.disabled = true;
   let replayFile = null;
   try {
     replayFile = validateReplayFile(elReplayFile?.files?.[0] || null);
   } catch (e) {
-    setSaveStatus(String(e?.message || e), "error");
+    console.error(e);
     if (elSaveBtn) elSaveBtn.disabled = false;
     return;
   }
@@ -1486,11 +1482,9 @@ async function saveDeck(){
         });
       }
       if (!saveLocalPlays(userPlays)) {
-        setSaveStatus("この端末への保存に失敗しました。ブラウザの保存容量や設定を確認してください。", "error");
         return;
       }
       renderRightStatsAndHistory();
-      setSaveStatus("この端末の履歴に保存しました（公開投稿ではありません）。公開投稿するにはログインしてください。", "warn");
     } finally {
       if (elSaveBtn) elSaveBtn.disabled = false;
     }
@@ -1520,16 +1514,13 @@ async function saveDeck(){
     if (editingPlayId) {
       const targetId = editingPlayId;
       await updateDoc(doc(db, "decks", targetId), cloudPayload);
-      let replayNote = "";
       if (replayFile) {
         const replayMeta = await uploadReplayForDeck(targetId, replayFile);
         await updateDoc(doc(db, "decks", targetId), { ...replayMeta, updatedAt: serverTimestamp(), updatedAtMs: Date.now() });
-        replayNote = " リプレイも更新しました。";
       }
       clearEditingState();
       renderDeck();
       renderCards();
-      setSaveStatus(`投稿を更新しました。${replayNote}${timelineVisibilityNote(deckName, memo, cardPaths)}`, "ok");
     } else {
       const savedRef = await addDoc(collection(db, "decks"), {
         ...cloudPayload,
@@ -1538,23 +1529,18 @@ async function saveDeck(){
         createdAtMs: Date.now(),
         likeCount: 0
       });
-      let replayNote = "";
       if (replayFile) {
         try {
           const replayMeta = await uploadReplayForDeck(savedRef.id, replayFile);
           await updateDoc(savedRef, { ...replayMeta, updatedAt: serverTimestamp(), updatedAtMs: Date.now() });
-          replayNote = " リプレイを添付しました。";
         } catch (replayError) {
           console.error("replay upload failed:", replayError);
-          replayNote = " 投稿自体は成功しましたが、リプレイのアップロードに失敗しました。";
         }
       }
       clearReplaySelection();
-      setSaveStatus(`投稿しました。ID: ${savedRef.id}.${replayNote}${timelineVisibilityNote(deckName, memo, cardPaths)}`, replayNote.includes("失敗") ? "warn" : "ok");
     }
   } catch (e) {
     console.error(e);
-    setSaveStatus(saveErrorMessage(e), "error");
     if (elSaveBtn) elSaveBtn.disabled = false;
     return;
   }
@@ -1592,6 +1578,8 @@ function rowFromDeckDoc(docSnap){
     memo: typeof d.memo === "string" ? d.memo : "",
     cardIds: Array.isArray(d.cardIds) ? d.cardIds.map(n => (typeof n==="number"? n : -1)) : Array(10).fill(-1),
     cardPaths: Array.isArray(d.cardPaths) ? d.cardPaths.map(path => typeof path === "string" ? path : "") : null,
+    oppCardIds: Array.isArray(d.oppCardIds) ? d.oppCardIds.map(n => (typeof n==="number"? n : -1)) : Array(10).fill(-1),
+    oppCardPaths: Array.isArray(d.oppCardPaths) ? d.oppCardPaths.map(path => typeof path === "string" ? path : "") : null,
     replayPath: typeof d.replayPath === "string" ? d.replayPath : "",
     replayName: typeof d.replayName === "string" ? d.replayName : "",
     replaySize: typeof d.replaySize === "number" ? d.replaySize : 0,
@@ -1617,7 +1605,9 @@ function cloneHistoryRows(rows){
     myTarotNames: Array.isArray(row.myTarotNames) ? row.myTarotNames.slice() : row.myTarotNames,
     oppTarotNames: Array.isArray(row.oppTarotNames) ? row.oppTarotNames.slice() : row.oppTarotNames,
     cardIds: Array.isArray(row.cardIds) ? row.cardIds.slice() : Array(10).fill(-1),
-    cardPaths: Array.isArray(row.cardPaths) ? row.cardPaths.slice() : row.cardPaths
+    cardPaths: Array.isArray(row.cardPaths) ? row.cardPaths.slice() : row.cardPaths,
+    oppCardIds: Array.isArray(row.oppCardIds) ? row.oppCardIds.slice() : Array(10).fill(-1),
+    oppCardPaths: Array.isArray(row.oppCardPaths) ? row.oppCardPaths.slice() : row.oppCardPaths
   }));
 }
 
