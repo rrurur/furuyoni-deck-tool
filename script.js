@@ -1499,6 +1499,116 @@ async function saveDeck(){
   if (elSaveBtn) elSaveBtn.disabled = true;
   let replayFile = null;
   try {
+    replayFile = validateReplayFile(elReplayFile?.files?.[0] || null);
+  } catch (e) {
+    console.error(e);
+    if (elSaveBtn) elSaveBtn.disabled = false;
+    return;
+  }
+
+  const deckName = (elDeckName ? elDeckName.value : "").trim();
+  const memo = (elMemo ? elMemo.value : "").trim();
+  const season = editingPlayId ? normalizeSeason(editingPlaySeason || CURRENT_SEASON) : CURRENT_SEASON;
+
+  const cardIds = deckSlots.map(p => {
+    if (!p) return -1;
+    const id = cardIdByPath.get(p);
+    return (typeof id === "number") ? id : -1;
+  });
+  const cardPaths = deckSlots.map(path => path || "");
+  const oppCardIds = oppDeckSlots.map(p => {
+    if (!p) return -1;
+    const id = cardIdByPath.get(p);
+    return (typeof id === "number") ? id : -1;
+  });
+  const oppCardPaths = oppDeckSlots.map(path => path || "");
+
+  const myTarotIdx = mySelected.map(t => tarotIndexByName.get(t.name)).filter(n => typeof n === "number");
+  const oppTarotIdx = oppSelected.map(t => tarotIndexByName.get(t.name)).filter(n => typeof n === "number");
+  const myTarotNames = mySelected.map(t => t.name);
+  const oppTarotNames = oppSelected.map(t => t.name);
+
+  const basePayload = {
+    matchType: matchTypeId(matchType),
+    resultType: resultTypeId(recordKind),
+    season,
+    deckName,
+    memo,
+    ownerHandle: normalizeHandle(prefs.handle),
+    myTarotIdx,
+    oppTarotIdx,
+    myTarotNames,
+    oppTarotNames,
+    cardIds,
+    cardPaths,
+    oppCardIds,
+    oppCardPaths,
+    updatedAtMs: Date.now()
+  };
+
+  const u = auth.currentUser;
+
+  // 匿名（未ログイン扱い）ならローカル保存
+  if (!isCloudUser(u)){
+    try {
+      const nowMs = Date.now();
+      if (editingPlayId){
+        const i = userPlays.findIndex(p => p.id === editingPlayId);
+        if (i >= 0){
+          userPlays[i] = { ...userPlays[i], ...basePayload };
+        }
+        clearEditingState();
+        renderDeck();
+        renderCards();
+      } else {
+        userPlays.unshift({
+          id: makeLocalId(),
+          createdAtMs: nowMs,
+          matchTypeNum: basePayload.matchType,
+          resultTypeNum: basePayload.resultType,
+          season,
+          myTarotIdx,
+          oppTarotIdx,
+          myTarotNames,
+          oppTarotNames,
+          deckName,
+          memo,
+          cardIds,
+          cardPaths,
+          oppCardIds,
+          oppCardPaths
+        });
+      }
+      if (!saveLocalPlays(userPlays)) {
+        return;
+      }
+      renderRightStatsAndHistory();
+    } finally {
+      if (elSaveBtn) elSaveBtn.disabled = false;
+    }
+    return;
+  }
+
+  // ログイン済みはFirestore
+  const cloudPayload = {
+    matchType: basePayload.matchType,
+    resultType: basePayload.resultType,
+    season,
+    deckName,
+    memo,
+    myTarotIdx,
+    oppTarotIdx,
+    myTarotNames,
+    oppTarotNames,
+    cardIds,
+    cardPaths,
+    oppCardIds,
+    oppCardPaths,
+    updatedAt: serverTimestamp(),
+    updatedAtMs: Date.now()
+  };
+
+  try {
     if (editingPlayId) {
       const targetId = editingPlayId;
       if (replayFile) {
