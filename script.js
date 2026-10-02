@@ -547,7 +547,7 @@ async function openSelectedReplayPreview(){
   };
 
   window.addEventListener("message",onReady);
-  popup=window.open(`${TIMELINE_REPLAY_BASE}?source=deck-tool`,"_blank");
+  popup=window.open(`${TIMELINE_REPLAY_BASE}?source=deck-tool`,"リプレイ");
   if(!popup){
     cleanup();
     return;
@@ -632,7 +632,7 @@ async function hasReplayForPlay(play){
 }
 function openReplay(play){
   if (!play?.id) return;
-  window.open(`${TIMELINE_REPLAY_BASE}?deck=${encodeURIComponent(play.id)}`, "_blank", "noopener");
+  window.open(`${TIMELINE_REPLAY_BASE}?deck=${encodeURIComponent(play.id)}`, "リプレイ");
 }
 function clearEditingState(){
   editingPlayId = null;
