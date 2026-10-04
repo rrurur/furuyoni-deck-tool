@@ -1615,6 +1615,10 @@ function beginEdit(play){
   if (elDeckName) elDeckName.value = play.deckName || "";
   if (elMemo) elMemo.value = play.memo || "";
   if (elReplayFile) elReplayFile.value = "";
+  pendingReplaySelectionMeta = (
+    Array.isArray(play.mySelectedTarotNames) && play.mySelectedTarotNames.length
+    && Array.isArray(play.oppSelectedTarotNames) && play.oppSelectedTarotNames.length
+  ) ? replaySelectionMeta(play) : null;
   applyDeckFromStoredPlay(play);
   fillSlotsFromPaths(oppDeckSlots, play.oppCardPaths || []);
 
