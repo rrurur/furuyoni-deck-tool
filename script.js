@@ -31,7 +31,8 @@ import {
 import {
   getStorage,
   ref as storageRef,
-  uploadBytes
+  uploadBytes,
+  getBytes
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
 
 import { firebaseConfig, appCheckConfig } from "./firebaseConfig.js";
@@ -317,6 +318,8 @@ let editingPlayId = null;  // nullなら通常、セットされている間は�
 let editingPlaySeason = null;
 let hoverSnapshot = null;  // ホバー前の左デッキ状態退避
 let handlePrompted = false;
+let pendingReplaySelectionMeta = null;
+const replaySelectionCache = new Map();
 
 /* ---------------- DOM ---------------- */
 const elMatchToggle = document.getElementById("matchToggle");
@@ -509,6 +512,20 @@ function storedTarots(play, namesKey, indexesKey){
     .map(name => tarotData.find(t => t.name === name))
     .filter(Boolean);
 }
+function selectedTarotNames(play,namesKey){
+  const key=namesKey==="myTarotNames" ? "mySelectedTarotNames" : "oppSelectedTarotNames";
+  const names=play?.[key];
+  return Array.isArray(names) ? names.filter(name=>typeof name==="string"&&name).slice(0,MAX_PICK) : [];
+}
+function orderedTarotsForDisplay(play,namesKey,indexesKey){
+  const candidates=storedTarots(play,namesKey,indexesKey).slice(0,MAX_PICK);
+  const selectedNames=selectedTarotNames(play,namesKey);
+  if(!selectedNames.length) return candidates.map(t=>({tarot:t,banned:false}));
+  const selectedSet=new Set(selectedNames);
+  const chosen=candidates.filter(t=>selectedSet.has(t.name)).map(t=>({tarot:t,banned:false}));
+  const banned=candidates.filter(t=>!selectedSet.has(t.name)).map(t=>({tarot:t,banned:true}));
+  return [...chosen,...banned];
+}
 function storedTarotIndexes(play, namesKey, indexesKey){
   return storedTarotNames(play, namesKey, indexesKey)
     .map(name => tarotIndexByName.get(name))
@@ -517,6 +534,7 @@ function storedTarotIndexes(play, namesKey, indexesKey){
 function clearReplaySelection(){
   if (elReplayFile) elReplayFile.value = "";
   if (elReplayPreviewBtn) elReplayPreviewBtn.hidden = true;
+  pendingReplaySelectionMeta = null;
 }
 async function openSelectedReplayPreview(){
   const file=validateReplayFile(elReplayFile?.files?.[0]||null);
@@ -630,6 +648,116 @@ async function hasReplayForPlay(play){
     return false;
   }
 }
+async function loadFirestoreReplayBytes(deckId,countHint=0){
+  const chunks=[];
+  let total=0;
+  const limitCount=Number(countHint)>0 ? Number(countHint) : 64;
+  for(let i=0;i<limitCount;i++){
+    const chunkId=String(i).padStart(4,"0");
+    const snap=await getDoc(doc(db,"decks",deckId,"replayChunks",chunkId));
+    if(!snap.exists()){
+      if(i===0) throw new Error("replay chunks not found");
+      break;
+    }
+    const value=snap.data()?.data;
+    const bytes=value?.toUint8Array ? value.toUint8Array() : null;
+    if(!bytes) throw new Error("invalid replay chunk");
+    chunks.push(bytes);
+    total+=bytes.length;
+    if(total>=REPLAY_MAX_BYTES) throw new Error("replay is too large");
+    if(Number(countHint)>0 && chunks.length>=Number(countHint)) break;
+  }
+  const merged=new Uint8Array(total);
+  let offset=0;
+  for(const bytes of chunks){ merged.set(bytes,offset); offset+=bytes.length; }
+  return merged;
+}
+async function loadReplayBytesForPlay(play){
+  const id=String(play?.id||"").trim();
+  if(!id) throw new Error("missing replay id");
+  const chunkCount=Number(play?.replayChunkCount)||0;
+  if(play?.replayStorage==="firestore" || chunkCount>0){
+    return await loadFirestoreReplayBytes(id,chunkCount);
+  }
+  const storedPath=String(play?.replayPath||"").trim();
+  if(storedPath){
+    return new Uint8Array(await getBytes(storageRef(storage,storedPath),REPLAY_MAX_BYTES));
+  }
+  try{
+    return await loadFirestoreReplayBytes(id,0);
+  }catch{}
+  const ownerUid=String(play?.ownerUid||"").trim();
+  if(ownerUid){
+    const fallback=`replays/${ownerUid}/${id}.reply`;
+    return new Uint8Array(await getBytes(storageRef(storage,fallback),REPLAY_MAX_BYTES));
+  }
+  throw new Error("replay data not found");
+}
+function replaySelectionMeta(imported){
+  return {
+    myTarotNames:Array.isArray(imported?.myTarotNames)?imported.myTarotNames.slice(0,MAX_PICK):[],
+    oppTarotNames:Array.isArray(imported?.oppTarotNames)?imported.oppTarotNames.slice(0,MAX_PICK):[],
+    mySelectedTarotNames:Array.isArray(imported?.mySelectedTarotNames)?imported.mySelectedTarotNames.slice(0,MAX_PICK):[],
+    oppSelectedTarotNames:Array.isArray(imported?.oppSelectedTarotNames)?imported.oppSelectedTarotNames.slice(0,MAX_PICK):[]
+  };
+}
+function applyReplaySelectionMeta(play,meta){
+  if(!play||!meta) return;
+  play.myTarotNames=meta.myTarotNames.slice();
+  play.oppTarotNames=meta.oppTarotNames.slice();
+  play.mySelectedTarotNames=meta.mySelectedTarotNames.slice();
+  play.oppSelectedTarotNames=meta.oppSelectedTarotNames.slice();
+  play.myTarotIdx=meta.myTarotNames.map(name=>tarotIndexByName.get(name)).filter(Number.isInteger);
+  play.oppTarotIdx=meta.oppTarotNames.map(name=>tarotIndexByName.get(name)).filter(Number.isInteger);
+}
+async function repairReplaySelection(play){
+  if(!play?.id) return null;
+  if(Array.isArray(play.mySelectedTarotNames)&&play.mySelectedTarotNames.length){
+    return replaySelectionMeta(play);
+  }
+  if(replaySelectionCache.has(play.id)) return replaySelectionCache.get(play.id);
+  const task=(async()=>{
+    const bytes=await loadReplayBytesForPlay(play);
+    const imported=extractReplayFormData(decodeReply(bytes),tarotData);
+    const meta=replaySelectionMeta(imported);
+    applyReplaySelectionMeta(play,meta);
+    const u=auth.currentUser;
+    if(isCloudUser(u) && String(play.ownerUid||"")===String(u.uid)){
+      await updateDoc(doc(db,"decks",play.id),{
+        myTarotNames:meta.myTarotNames,
+        oppTarotNames:meta.oppTarotNames,
+        myTarotIdx:play.myTarotIdx,
+        oppTarotIdx:play.oppTarotIdx,
+        mySelectedTarotNames:meta.mySelectedTarotNames,
+        oppSelectedTarotNames:meta.oppSelectedTarotNames
+      });
+    }
+    return meta;
+  })().catch(error=>{
+    console.warn("replay selection repair skipped:",play.id,error?.code||error);
+    return null;
+  });
+  replaySelectionCache.set(play.id,task);
+  return task;
+}
+async function repairExistingReplaySelections(){
+  const u=auth.currentUser;
+  if(!isCloudUser(u)) return;
+  const targets=userPlays.filter(play=>
+    String(play?.ownerUid||"")===String(u.uid)
+    && !(Array.isArray(play?.mySelectedTarotNames)&&play.mySelectedTarotNames.length)
+  );
+  if(!targets.length) return;
+  let changed=false;
+  for(let i=0;i<targets.length;i+=2){
+    const batch=await Promise.all(targets.slice(i,i+2).map(repairReplaySelection));
+    if(batch.some(Boolean)) changed=true;
+  }
+  if(changed){
+    clearFirestoreReadCache();
+    renderRightStatsAndHistory();
+  }
+}
 function openReplay(play){
   if (!play?.id) return;
   window.open(`${TIMELINE_REPLAY_BASE}?deck=${encodeURIComponent(play.id)}`, "リプレイ");
@@ -652,6 +780,7 @@ async function applySelectedReplay(){
   if (!file) return;
   const data = decodeReply(await file.arrayBuffer());
   const imported = extractReplayFormData(data, tarotData);
+  pendingReplaySelectionMeta = replaySelectionMeta(imported);
   mySelected = tarotsFromNames(imported.myTarotNames);
   oppSelected = tarotsFromNames(imported.oppTarotNames);
   fillSlotsFromPaths(deckSlots, imported.myDeckPaths);
@@ -875,6 +1004,7 @@ async function initAuth(){
 
     renderAll();
     persistMatchAndMyPicks();
+    repairExistingReplaySelections().catch(error=>console.warn("replay selection repair failed:",error));
   });
 }
 
@@ -1528,6 +1658,11 @@ async function saveDeck(){
   const myTarotNames = mySelected.map(t => t.name);
   const oppTarotNames = oppSelected.map(t => t.name);
 
+  const replaySelectionPayload = pendingReplaySelectionMeta ? {
+    mySelectedTarotNames: pendingReplaySelectionMeta.mySelectedTarotNames.slice(),
+    oppSelectedTarotNames: pendingReplaySelectionMeta.oppSelectedTarotNames.slice()
+  } : {};
+
   const basePayload = {
     matchType: matchTypeId(matchType),
     resultType: resultTypeId(recordKind),
@@ -1539,6 +1674,7 @@ async function saveDeck(){
     oppTarotIdx,
     myTarotNames,
     oppTarotNames,
+    ...replaySelectionPayload,
     cardIds,
     cardPaths,
     oppCardIds,
@@ -1571,6 +1707,7 @@ async function saveDeck(){
           oppTarotIdx,
           myTarotNames,
           oppTarotNames,
+          ...replaySelectionPayload,
           deckName,
           memo,
           cardIds,
@@ -1600,6 +1737,7 @@ async function saveDeck(){
     oppTarotIdx,
     myTarotNames,
     oppTarotNames,
+    ...replaySelectionPayload,
     cardIds,
     cardPaths,
     oppCardIds,
@@ -1684,6 +1822,8 @@ function rowFromDeckDoc(docSnap){
     oppTarotIdx: Array.isArray(d.oppTarotIdx) ? d.oppTarotIdx : [],
     myTarotNames: Array.isArray(d.myTarotNames) ? d.myTarotNames : null,
     oppTarotNames: Array.isArray(d.oppTarotNames) ? d.oppTarotNames : null,
+    mySelectedTarotNames: Array.isArray(d.mySelectedTarotNames) ? d.mySelectedTarotNames : null,
+    oppSelectedTarotNames: Array.isArray(d.oppSelectedTarotNames) ? d.oppSelectedTarotNames : null,
     deckName: typeof d.deckName === "string" ? d.deckName : "",
     memo: typeof d.memo === "string" ? d.memo : "",
     cardIds: Array.isArray(d.cardIds) ? d.cardIds.map(n => (typeof n==="number"? n : -1)) : Array(10).fill(-1),
@@ -1716,6 +1856,8 @@ function cloneHistoryRows(rows){
     oppTarotIdx: Array.isArray(row.oppTarotIdx) ? row.oppTarotIdx.slice() : [],
     myTarotNames: Array.isArray(row.myTarotNames) ? row.myTarotNames.slice() : row.myTarotNames,
     oppTarotNames: Array.isArray(row.oppTarotNames) ? row.oppTarotNames.slice() : row.oppTarotNames,
+    mySelectedTarotNames: Array.isArray(row.mySelectedTarotNames) ? row.mySelectedTarotNames.slice() : row.mySelectedTarotNames,
+    oppSelectedTarotNames: Array.isArray(row.oppSelectedTarotNames) ? row.oppSelectedTarotNames.slice() : row.oppSelectedTarotNames,
     cardIds: Array.isArray(row.cardIds) ? row.cardIds.slice() : Array(10).fill(-1),
     cardPaths: Array.isArray(row.cardPaths) ? row.cardPaths.slice() : row.cardPaths,
     oppCardIds: Array.isArray(row.oppCardIds) ? row.oppCardIds.slice() : Array(10).fill(-1),
@@ -2279,11 +2421,11 @@ function makeNamesSpanNoSpace(play, namesKey, indexesKey){
   const wrap = document.createElement("span");
   wrap.className = "names";
 
-  const arr = storedTarots(play, namesKey, indexesKey).slice(0,3);
-  for (let i=0;i<arr.length;i++){
-    const s = document.createElement("span");
-    s.textContent = displayName(arr[i]);
-    if (i === 2) s.classList.add("dim");
+  const entries=orderedTarotsForDisplay(play,namesKey,indexesKey);
+  for(const entry of entries){
+    const s=document.createElement("span");
+    s.textContent=displayName(entry.tarot);
+    if(entry.banned) s.classList.add("dim");
     wrap.appendChild(s);
   }
   return wrap;
