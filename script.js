@@ -2448,11 +2448,18 @@ function renderHistoryList(){
     const left = document.createElement("div");
     left.className = "hleft";
 
-    left.appendChild(makeNamesSpanNoSpace(p, "myTarotNames", "myTarotIdx"));
-    const hy = document.createElement("span");
-    hy.textContent = " - ";
-    left.appendChild(hy);
-    left.appendChild(makeNamesSpanNoSpace(p, "oppTarotNames", "oppTarotIdx"));
+    const renderNames=()=>{
+      left.replaceChildren();
+      left.appendChild(makeNamesSpanNoSpace(p, "myTarotNames", "myTarotIdx"));
+      const hy = document.createElement("span");
+      hy.textContent = " - ";
+      left.appendChild(hy);
+      left.appendChild(makeNamesSpanNoSpace(p, "oppTarotNames", "oppTarotIdx"));
+    };
+    renderNames();
+    if(!selectedTarotNames(p,"myTarotNames").length){
+      repairReplaySelection(p).then(meta=>{ if(meta) renderNames(); });
+    }
 
     const date = document.createElement("div");
     date.className = "hdate";
