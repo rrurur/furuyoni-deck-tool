@@ -111,11 +111,26 @@ function playerDeckPaths(data, playerId){
   return [...normals.slice(0,7),...specials.slice(0,3)];
 }
 
-function charIdsForPlayer(data, playerId, local){
+function candidateCharIdsForPlayer(data, playerId, local){
   const top=local ? data?.CharaIds : data?.OpponentCharaIds;
-  if(Array.isArray(top) && top.length) return top.slice(0,3).map(Number);
+  if(Array.isArray(top) && top.length) return top.slice(0,3).map(Number).filter(Number.isFinite);
   const pd=(data?.InitData?.PlayersData||[]).find(x=>Number(x.ID)===Number(playerId));
-  return Array.isArray(pd?.CharaIds) ? pd.CharaIds.slice(0,3).map(Number) : [];
+  return Array.isArray(pd?.CharaIds) ? pd.CharaIds.slice(0,3).map(Number).filter(Number.isFinite) : [];
+}
+
+function selectedCharIdsForPlayer(data, playerId){
+  const pd=(data?.InitData?.PlayersData||[]).find(x=>Number(x.ID)===Number(playerId));
+  return Array.isArray(pd?.CharaIds) ? pd.CharaIds.slice(0,3).map(Number).filter(Number.isFinite) : [];
+}
+
+function orderedCharSelection(data, playerId, local){
+  const candidates=candidateCharIdsForPlayer(data,playerId,local);
+  const selected=selectedCharIdsForPlayer(data,playerId);
+  if(!selected.length) return {candidates,selected:[],banned:[]};
+  const selectedSet=new Set(selected);
+  const kept=candidates.filter(id=>selectedSet.has(id));
+  const banned=candidates.filter(id=>!selectedSet.has(id));
+  return {candidates:[...kept,...banned],selected:kept,banned};
 }
 
 function baseCandidates(base, tarotData){
@@ -145,14 +160,34 @@ function resultKind(data){
   return "other";
 }
 
+function tarotNamesForIds(ids,deckPaths,tarotData){
+  return (ids||[])
+    .map(id=>inferTarotName(CHAR_ID_TO_BASE[id]||String(id),deckPaths,tarotData))
+    .filter(Boolean);
+}
+
 export function extractReplayFormData(data, tarotData){
   const localId=Number(data?.LocalPlayerId)||1;
   const oppId=localId===1?2:1;
   const myDeckPaths=playerDeckPaths(data,localId);
   const oppDeckPaths=playerDeckPaths(data,oppId);
-  const myIds=charIdsForPlayer(data,localId,true);
-  const oppIds=charIdsForPlayer(data,oppId,false);
-  const myTarotNames=myIds.map(id=>inferTarotName(CHAR_ID_TO_BASE[id]||String(id),myDeckPaths,tarotData)).filter(Boolean);
-  const oppTarotNames=oppIds.map(id=>inferTarotName(CHAR_ID_TO_BASE[id]||String(id),oppDeckPaths,tarotData)).filter(Boolean);
-  return {myTarotNames,oppTarotNames,myDeckPaths,oppDeckPaths,resultKind:resultKind(data)};
+  const mySelection=orderedCharSelection(data,localId,true);
+  const oppSelection=orderedCharSelection(data,oppId,false);
+
+  const myTarotNames=tarotNamesForIds(mySelection.candidates,myDeckPaths,tarotData);
+  const oppTarotNames=tarotNamesForIds(oppSelection.candidates,oppDeckPaths,tarotData);
+  const mySelectedTarotNames=tarotNamesForIds(mySelection.selected,myDeckPaths,tarotData);
+  const oppSelectedTarotNames=tarotNamesForIds(oppSelection.selected,oppDeckPaths,tarotData);
+
+  return {
+    myTarotNames,
+    oppTarotNames,
+    mySelectedTarotNames,
+    oppSelectedTarotNames,
+    myBannedCharIds:mySelection.banned,
+    oppBannedCharIds:oppSelection.banned,
+    myDeckPaths,
+    oppDeckPaths,
+    resultKind:resultKind(data)
+  };
 }
