@@ -712,7 +712,8 @@ function applyReplaySelectionMeta(play,meta){
 }
 async function repairReplaySelection(play){
   if(!play?.id) return null;
-  if(Array.isArray(play.mySelectedTarotNames)&&play.mySelectedTarotNames.length){
+  if(Array.isArray(play.mySelectedTarotNames)&&play.mySelectedTarotNames.length
+    && Array.isArray(play.oppSelectedTarotNames)&&play.oppSelectedTarotNames.length){
     return replaySelectionMeta(play);
   }
   if(replaySelectionCache.has(play.id)) return replaySelectionCache.get(play.id);
@@ -745,7 +746,10 @@ async function repairExistingReplaySelections(){
   if(!isCloudUser(u)) return;
   const targets=userPlays.filter(play=>
     String(play?.ownerUid||"")===String(u.uid)
-    && !(Array.isArray(play?.mySelectedTarotNames)&&play.mySelectedTarotNames.length)
+    && !(
+      Array.isArray(play?.mySelectedTarotNames)&&play.mySelectedTarotNames.length
+      && Array.isArray(play?.oppSelectedTarotNames)&&play.oppSelectedTarotNames.length
+    )
   );
   if(!targets.length) return;
   let changed=false;
