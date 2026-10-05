@@ -2136,6 +2136,8 @@ async function deletePlay(playId){
   }
 
   try{
+    const play=userPlays.find(p=>p.id===playId)||null;
+    if(play) await deleteReplayChunkSet(playId,play.replayStorage,play.replayChunkCount);
     await deleteDoc(doc(db, "decks", playId));
   }catch(e){
     console.error("delete failed:", e);
