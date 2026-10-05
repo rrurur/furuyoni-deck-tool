@@ -775,69 +775,6 @@ async function loadReplayBytesForPlay(play){
   if(decoded.length>=REPLAY_MAX_BYTES) throw new Error("replay is too large");
   return decoded;
 }
-async function migrateReplayCompression(play){
-  const u=auth.currentUser;
-  if(!isCloudUser(u)||!play?.id||String(play?.ownerUid||"")!==String(u.uid)) return false;
-  if(Number(play?.replayVersion)>=2 && replayChunkPrefix(play?.replayStorage)) return false;
-  if(!(await hasReplayForPlay(play))) return false;
-
-  const raw=await loadReplayBytesForPlay(play);
-  decodeReply(raw);
-  const encoded=await encodeReplayForStorage(raw);
-  if(!encoded.compressed) return false;
-
-  const prefix=makeReplayChunkPrefix();
-  const count=await writeReplayChunks(play.id,encoded.bytes,prefix,u.uid);
-  const nextMeta={
-    replayStorage:`firestore-gzip:${prefix}`,
-    replayPath:"",
-    replayName:String(play.replayName||"replay.reply"),
-    replaySize:raw.length,
-    replayContentType:encoded.contentType,
-    replayVersion:2,
-    replayChunkCount:count
-  };
-  try{
-    await updateDoc(doc(db,"decks",play.id),{
-      ...nextMeta,
-      updatedAt:serverTimestamp(),
-      updatedAtMs:Date.now()
-    });
-  }catch(error){
-    await deleteReplayChunkSet(play.id,nextMeta.replayStorage,nextMeta.replayChunkCount);
-    throw error;
-  }
-  await deleteReplayChunkSet(play.id,play.replayStorage,play.replayChunkCount);
-  const oldPath=String(play.replayPath||"").trim();
-  if(oldPath){
-    try{ await deleteObject(storageRef(storage,oldPath)); }
-    catch(error){ console.warn("legacy replay object cleanup skipped:",error?.code||error); }
-  }
-  Object.assign(play,nextMeta);
-  return true;
-}
-async function migrateExistingReplayCompression(){
-  const u=auth.currentUser;
-  if(!isCloudUser(u)||typeof CompressionStream!=="function") return;
-  const targets=userPlays.filter(play=>
-    String(play?.ownerUid||"")===String(u.uid)
-    && Number(play?.replayVersion)<2
-    && (String(play?.replayPath||"").trim() || play?.replayStorage==="firestore" || Number(play?.replayChunkCount)>0)
-  );
-  if(!targets.length) return;
-  let changed=false;
-  for(const play of targets){
-    try{
-      if(await migrateReplayCompression(play)) changed=true;
-    }catch(error){
-      console.warn("replay compression migration skipped:",play?.id,error?.code||error);
-    }
-  }
-  if(changed){
-    clearFirestoreReadCache();
-    renderRightStatsAndHistory();
-  }
-}
 function replaySelectionMeta(imported){
   return {
     myTarotNames:Array.isArray(imported?.myTarotNames)?imported.myTarotNames.slice(0,MAX_PICK):[],
