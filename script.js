@@ -1123,6 +1123,7 @@ async function initAuth(){
     renderAll();
     persistMatchAndMyPicks();
     repairExistingReplaySelections().catch(error=>console.warn("replay selection repair failed:",error));
+    migrateExistingReplayCompression().catch(error=>console.warn("replay compression migration failed:",error));
   });
 }
 
@@ -1872,13 +1873,19 @@ async function saveDeck(){
     if (editingPlayId) {
       const targetId = editingPlayId;
       if (replayFile) {
-        const replayMeta = await saveReplayForDeck(targetId, replayFile);
-        await updateDoc(doc(db, "decks", targetId), {
-          ...cloudPayload,
-          ...replayMeta,
-          updatedAt: serverTimestamp(),
-          updatedAtMs: Date.now()
-        });
+        const replayWrite = await saveReplayForDeck(targetId, replayFile);
+        try{
+          await updateDoc(doc(db, "decks", targetId), {
+            ...cloudPayload,
+            ...replayWrite.meta,
+            updatedAt: serverTimestamp(),
+            updatedAtMs: Date.now()
+          });
+          await replayWrite.commitCleanup();
+        }catch(error){
+          await replayWrite.rollbackCleanup();
+          throw error;
+        }
       } else {
         await updateDoc(doc(db, "decks", targetId), cloudPayload);
       }
@@ -1895,12 +1902,18 @@ async function saveDeck(){
       });
       if (replayFile) {
         try {
-          const replayMeta = await saveReplayForDeck(savedRef.id, replayFile);
-          await updateDoc(savedRef, {
-            ...replayMeta,
-            updatedAt: serverTimestamp(),
-            updatedAtMs: Date.now()
-          });
+          const replayWrite = await saveReplayForDeck(savedRef.id, replayFile);
+          try{
+            await updateDoc(savedRef, {
+              ...replayWrite.meta,
+              updatedAt: serverTimestamp(),
+              updatedAtMs: Date.now()
+            });
+            await replayWrite.commitCleanup();
+          }catch(error){
+            await replayWrite.rollbackCleanup();
+            throw error;
+          }
         } catch (replayError) {
           console.error("replay upload failed:", replayError);
           try { await deleteDoc(savedRef); } catch(deleteError){ console.error(deleteError); }
