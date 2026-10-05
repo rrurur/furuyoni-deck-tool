@@ -597,6 +597,15 @@ function setSaveStatus(message,kind=""){
   node.className=kind||"";
 }
 
+function replaySaveStageError(stage,error){
+  const message=String(error?.message||error||"unknown error");
+  const code=String(error?.code||"").trim();
+  const detail=code ? `${message} [${code}]` : message;
+  const wrapped=new Error(`${stage}: ${detail}`);
+  wrapped.code=error?.code;
+  return wrapped;
+}
+
 function validateReplayFile(file){
   if (!file) return null;
   if (!String(file.name || "").toLowerCase().endsWith(".reply")) throw new Error("リプレイは .reply ファイルを選択してください。");
@@ -728,7 +737,12 @@ async function saveReplayForDeck(deckId,file){
   }catch(error){
     console.warn("previous replay metadata read skipped:",error?.code||error);
   }
-  const meta=await uploadReplayToFirestore(deckId,file);
+  let meta;
+  try{
+    meta=await uploadReplayToFirestore(deckId,file);
+  }catch(error){
+    throw replaySaveStageError("圧縮リプレイ本体の書き込み",error);
+  }
   return {
     meta,
     async commitCleanup(){
@@ -1890,12 +1904,16 @@ async function saveDeck(){
       if (replayFile) {
         const replayWrite = await saveReplayForDeck(targetId, replayFile);
         try{
-          await updateDoc(doc(db, "decks", targetId), {
-            ...cloudPayload,
-            ...replayWrite.meta,
-            updatedAt: serverTimestamp(),
-            updatedAtMs: Date.now()
-          });
+          try{
+            await updateDoc(doc(db, "decks", targetId), {
+              ...cloudPayload,
+              ...replayWrite.meta,
+              updatedAt: serverTimestamp(),
+              updatedAtMs: Date.now()
+            });
+          }catch(error){
+            throw replaySaveStageError("既存記録のリプレイ情報更新",error);
+          }
           await replayWrite.commitCleanup();
         }catch(error){
           await replayWrite.rollbackCleanup();
@@ -1908,22 +1926,31 @@ async function saveDeck(){
       renderDeck();
       renderCards();
     } else {
-      const savedRef = await addDoc(collection(db, "decks"), {
-        ...cloudPayload,
-        ownerUid: auth.currentUser.uid,
-        createdAt: serverTimestamp(),
-        createdAtMs: Date.now(),
-        likeCount: 0
-      });
+      let savedRef;
+      try{
+        savedRef = await addDoc(collection(db, "decks"), {
+          ...cloudPayload,
+          ownerUid: auth.currentUser.uid,
+          createdAt: serverTimestamp(),
+          createdAtMs: Date.now(),
+          likeCount: 0
+        });
+      }catch(error){
+        throw replaySaveStageError("対戦記録本体の作成",error);
+      }
       if (replayFile) {
         try {
           const replayWrite = await saveReplayForDeck(savedRef.id, replayFile);
           try{
-            await updateDoc(savedRef, {
-              ...replayWrite.meta,
-              updatedAt: serverTimestamp(),
-              updatedAtMs: Date.now()
-            });
+            try{
+              await updateDoc(savedRef, {
+                ...replayWrite.meta,
+                updatedAt: serverTimestamp(),
+                updatedAtMs: Date.now()
+              });
+            }catch(error){
+              throw replaySaveStageError("新規記録のリプレイ情報確定",error);
+            }
             await replayWrite.commitCleanup();
           }catch(error){
             await replayWrite.rollbackCleanup();
