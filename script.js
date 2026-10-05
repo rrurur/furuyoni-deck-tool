@@ -988,27 +988,51 @@ function setupReplayMigrationTestControl(){
   if(button.dataset.bound==="1") return;
   button.dataset.bound="1";
   button.addEventListener("click",async()=>{
-    const target=replayMaintenanceTargets()[0];
-    if(!target){refreshState();return;}
-    const label=String(target.deckName||target.id);
-    const currentTime=fmtDateTime(historyTimeMs(target));
-    if(!confirm(`保存済みの既存履歴を1件整理します。\n${label}\n現在の履歴時刻: ${currentTime}\n\n新しく選択した.replyを履歴に追加する場合は、このボタンではなく「保存」を押してください。\n未圧縮なら安全確認付きで圧縮し、リプレイ内の対戦時刻も既存履歴へ反映します。続行しますか？`)) return;
+    const initialTargets=replayMaintenanceTargets();
+    const total=initialTargets.length;
+    if(!total){refreshState();return;}
+    if(!confirm(`保存済み旧リプレイ ${total}件を順番に整理します。\n\n各リプレイごとに、圧縮後のデータを読み戻して元データと完全一致することを確認してから切り替えます。\n1件でも失敗した場合はそこで停止し、失敗したリプレイの旧データは残します。\n\n続行しますか？`)) return;
+
     button.disabled=true;
-    state.textContent="整理中…";
+    let completed=0,compressed=0,timeOnly=0,totalRaw=0,totalStored=0;
+    let failed=null;
     try{
-      const result=await migrateOneExistingReplay(target);
+      while(true){
+        const target=replayMaintenanceTargets()[0];
+        if(!target) break;
+        const label=String(target.deckName||target.id);
+        state.textContent=`整理中 ${completed+1}/${total}: ${label}`;
+        try{
+          const result=await migrateOneExistingReplay(target);
+          completed++;
+          if(result.timeOnly){
+            timeOnly++;
+          }else{
+            compressed++;
+            totalRaw+=Number(result.rawBytes)||0;
+            totalStored+=Number(result.storedBytes)||0;
+          }
+        }catch(error){
+          failed={target,error};
+          break;
+        }
+      }
+
       clearFirestoreReadCache();
       await refreshUserPlays();
       renderRightStatsAndHistory();
       refreshState();
-      const timeText=fmtDateTime(result.replayTimeMs);
-      alert(result.timeOnly
-        ? `1件のリプレイ時刻を反映しました。\n${label}\n対戦時刻: ${timeText}\n\nこれは既存の履歴行を更新するため、新しい履歴行は増えません。`
-        : `1件の圧縮が完了しました。\n${label}\n${result.rawBytes.toLocaleString()} bytes → ${result.storedBytes.toLocaleString()} bytes\n対戦時刻: ${timeText}\n\nこれは既存の履歴行を更新するため、新しい履歴行は増えません。履歴の「リプレイ」から再生確認してください。`);
-    }catch(error){
-      console.error(error);
-      state.textContent="失敗";
-      alert(`既存リプレイの圧縮に失敗しました。\n${error?.message||String(error)}\n\n旧リプレイは切り替え前ならそのまま残ります。`);
+
+      if(failed){
+        const label=String(failed.target?.deckName||failed.target?.id||"不明");
+        alert(`旧リプレイの一括整理を途中で停止しました。\n\n完了: ${completed}/${total}件\n失敗: ${label}\n${failed.error?.message||String(failed.error)}\n\n失敗したリプレイは旧データのまま残しています。完了済みのものだけ整理済みです。`);
+      }else{
+        const sizeText=compressed>0
+          ? `\n圧縮対象: ${compressed}件\n${totalRaw.toLocaleString()} bytes → ${totalStored.toLocaleString()} bytes`
+          : "";
+        alert(`保存済み旧リプレイの整理が完了しました。\n\n完了: ${completed}件\n時刻反映のみ: ${timeOnly}件${sizeText}\n\n各リプレイは元データとの一致確認後に切り替えています。`);
+      }
+    }finally{
       refreshState();
     }
   });
