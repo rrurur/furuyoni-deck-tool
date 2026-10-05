@@ -653,10 +653,12 @@ async function uploadReplayToFirestore(deckId,file){
   if(!isCloudUser(u)) throw new Error("リプレイの公開にはGoogleログインが必要です。");
   const raw=new Uint8Array(await file.arrayBuffer());
   const encoded=await encodeReplayForStorage(raw);
-  const prefix=encoded.compressed ? makeReplayChunkPrefix() : "";
+  // Always write a new replay to its own prefixed chunk set before switching metadata.
+  // This keeps the old replay intact even when gzip is unavailable or not beneficial.
+  const prefix=makeReplayChunkPrefix();
   const count=await writeReplayChunks(deckId,encoded.bytes,prefix,u.uid);
   return {
-    replayStorage:encoded.compressed ? `firestore-gzip:${prefix}` : "firestore",
+    replayStorage:`firestore-gzip:${prefix}`,
     replayPath:"",
     replayName:String(file.name||"replay.reply"),
     replaySize:raw.length,
@@ -678,7 +680,11 @@ async function saveReplayForDeck(deckId,file){
     meta,
     async commitCleanup(){
       if(previous){
-        await deleteReplayChunkSet(deckId,previous.replayStorage,previous.replayChunkCount);
+        // Never delete the active/new chunk set. With prefixed writes these normally differ,
+        // but keep this guard as a hard safety condition for future format changes.
+        if(String(previous.replayStorage||"")!==String(meta.replayStorage||"")){
+          await deleteReplayChunkSet(deckId,previous.replayStorage,previous.replayChunkCount);
+        }
         const oldPath=String(previous.replayPath||"").trim();
         const newPath=String(meta.replayPath||"").trim();
         if(oldPath && oldPath!==newPath){
