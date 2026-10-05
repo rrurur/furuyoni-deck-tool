@@ -360,6 +360,7 @@ const elAuthIdText = document.getElementById("authIdText");
 const elLoginBtn = document.getElementById("loginBtn");
 const elSaveBtn = document.getElementById("saveBtn");
 const elReplayFile = document.getElementById("replayFile");
+const elReplaySelectionHint = document.getElementById("replaySelectionHint");
 const elReplayPreviewBtn = document.getElementById("replayPreviewBtn");
 const elResetBtn = document.getElementById("resetBtn");
 const elRearrangeBtn = document.getElementById("rearrangeBtn");
@@ -545,6 +546,7 @@ function storedTarotIndexes(play, namesKey, indexesKey){
 function clearReplaySelection(){
   if (elReplayFile) elReplayFile.value = "";
   if (elReplayPreviewBtn) elReplayPreviewBtn.hidden = true;
+  if (elReplaySelectionHint) elReplaySelectionHint.textContent = "";
   pendingReplaySelectionMeta = null;
   pendingReplayTimeMs = null;
 }
@@ -989,7 +991,8 @@ function setupReplayMigrationTestControl(){
     const target=replayMaintenanceTargets()[0];
     if(!target){refreshState();return;}
     const label=String(target.deckName||target.id);
-    if(!confirm(`既存リプレイを1件だけ整理します。\n${label}\n\n未圧縮なら安全確認付きで圧縮し、リプレイ内の対戦時刻も履歴へ反映します。続行しますか？`)) return;
+    const currentTime=fmtDateTime(historyTimeMs(target));
+    if(!confirm(`保存済みの既存履歴を1件整理します。\n${label}\n現在の履歴時刻: ${currentTime}\n\n新しく選択した.replyを履歴に追加する場合は、このボタンではなく「保存」を押してください。\n未圧縮なら安全確認付きで圧縮し、リプレイ内の対戦時刻も既存履歴へ反映します。続行しますか？`)) return;
     button.disabled=true;
     state.textContent="整理中…";
     try{
@@ -1103,6 +1106,11 @@ async function applySelectedReplay(){
   const imported = extractReplayFormData(data, tarotData);
   pendingReplaySelectionMeta = replaySelectionMeta(imported);
   pendingReplayTimeMs = replayTimestampMs(data);
+  if (elReplaySelectionHint) {
+    elReplaySelectionHint.textContent = pendingReplayTimeMs
+      ? `リプレイ時刻 ${fmtDateTime(pendingReplayTimeMs)} / 「保存」で履歴に追加`
+      : "「保存」で履歴に追加";
+  }
   mySelected = tarotsFromNames(imported.myTarotNames);
   oppSelected = tarotsFromNames(imported.oppTarotNames);
   fillSlotsFromPaths(deckSlots, imported.myDeckPaths);
