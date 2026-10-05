@@ -32,7 +32,8 @@ import {
   getStorage,
   ref as storageRef,
   uploadBytes,
-  getBytes
+  getBytes,
+  deleteObject
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
 
 import { firebaseConfig, appCheckConfig } from "./firebaseConfig.js";
@@ -676,7 +677,15 @@ async function saveReplayForDeck(deckId,file){
   return {
     meta,
     async commitCleanup(){
-      if(previous) await deleteReplayChunkSet(deckId,previous.replayStorage,previous.replayChunkCount);
+      if(previous){
+        await deleteReplayChunkSet(deckId,previous.replayStorage,previous.replayChunkCount);
+        const oldPath=String(previous.replayPath||"").trim();
+        const newPath=String(meta.replayPath||"").trim();
+        if(oldPath && oldPath!==newPath){
+          try{ await deleteObject(storageRef(storage,oldPath)); }
+          catch(error){ console.warn("old replay object cleanup skipped:",error?.code||error); }
+        }
+      }
     },
     async rollbackCleanup(){
       await deleteReplayChunkSet(deckId,meta.replayStorage,meta.replayChunkCount);
@@ -782,6 +791,11 @@ async function migrateReplayCompression(play){
     throw error;
   }
   await deleteReplayChunkSet(play.id,play.replayStorage,play.replayChunkCount);
+  const oldPath=String(play.replayPath||"").trim();
+  if(oldPath){
+    try{ await deleteObject(storageRef(storage,oldPath)); }
+    catch(error){ console.warn("legacy replay object cleanup skipped:",error?.code||error); }
+  }
   Object.assign(play,nextMeta);
   return true;
 }
@@ -1122,8 +1136,10 @@ async function initAuth(){
 
     renderAll();
     persistMatchAndMyPicks();
-    repairExistingReplaySelections().catch(error=>console.warn("replay selection repair failed:",error));
-    migrateExistingReplayCompression().catch(error=>console.warn("replay compression migration failed:",error));
+    repairExistingReplaySelections()
+      .catch(error=>console.warn("replay selection repair failed:",error))
+      .then(()=>migrateExistingReplayCompression())
+      .catch(error=>console.warn("replay compression migration failed:",error));
   });
 }
 
