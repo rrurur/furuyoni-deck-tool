@@ -623,16 +623,27 @@ async function uploadReplayForDeck(deckId, file){
 }
 async function writeReplayChunks(deckId,bytes,prefix,ownerUid){
   const count=Math.ceil(bytes.length/REPLAY_FIRESTORE_CHUNK_BYTES);
-  for(let i=0;i<count;i++){
-    const start=i*REPLAY_FIRESTORE_CHUNK_BYTES;
-    const end=Math.min(bytes.length,start+REPLAY_FIRESTORE_CHUNK_BYTES);
-    await setDoc(doc(db,"decks",deckId,"replayChunks",replayChunkId(prefix,i)),{
-      ownerUid,
-      index:i,
-      data:Bytes.fromUint8Array(bytes.slice(start,end))
-    });
+  let written=0;
+  try{
+    for(let i=0;i<count;i++){
+      const start=i*REPLAY_FIRESTORE_CHUNK_BYTES;
+      const end=Math.min(bytes.length,start+REPLAY_FIRESTORE_CHUNK_BYTES);
+      await setDoc(doc(db,"decks",deckId,"replayChunks",replayChunkId(prefix,i)),{
+        ownerUid,
+        index:i,
+        data:Bytes.fromUint8Array(bytes.slice(start,end))
+      });
+      written++;
+    }
+    return count;
+  }catch(error){
+    // A failed upload must not leave an unreferenced replacement set behind.
+    for(let i=0;i<written;i++){
+      try{ await deleteDoc(doc(db,"decks",deckId,"replayChunks",replayChunkId(prefix,i))); }
+      catch(cleanupError){ console.warn("partial replay cleanup skipped:",deckId,i,cleanupError?.code||cleanupError); }
+    }
+    throw error;
   }
-  return count;
 }
 async function deleteReplayChunkSet(deckId,replayStorage,replayChunkCount){
   const count=Number(replayChunkCount)||0;
@@ -1142,10 +1153,9 @@ async function initAuth(){
 
     renderAll();
     persistMatchAndMyPicks();
-    repairExistingReplaySelections()
-      .catch(error=>console.warn("replay selection repair failed:",error))
-      .then(()=>migrateExistingReplayCompression())
-      .catch(error=>console.warn("replay compression migration failed:",error));
+    // Existing replays are intentionally not migrated automatically.
+    // First roll out and verify new compressed saves; migrate legacy data only in an explicit later step.
+    repairExistingReplaySelections().catch(error=>console.warn("replay selection repair failed:",error));
   });
 }
 
@@ -2158,8 +2168,8 @@ async function deletePlay(playId){
   }
 
   try{
-    const play=userPlays.find(p=>p.id===playId)||null;
-    if(play) await deleteReplayChunkSet(playId,play.replayStorage,play.replayChunkCount);
+    // Keep the established delete behavior here. Replay-chunk garbage collection is
+    // handled separately so a failed parent delete cannot leave a visible deck with its replay removed.
     await deleteDoc(doc(db, "decks", playId));
   }catch(e){
     console.error("delete failed:", e);
