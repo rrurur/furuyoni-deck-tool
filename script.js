@@ -590,6 +590,13 @@ async function openSelectedReplayPreview(){
   }
 }
 
+function setSaveStatus(message,kind=""){
+  const node=document.getElementById("saveStatus");
+  if(!node) return;
+  node.textContent=message||"";
+  node.className=kind||"";
+}
+
 function validateReplayFile(file){
   if (!file) return null;
   if (!String(file.name || "").toLowerCase().endsWith(".reply")) throw new Error("リプレイは .reply ファイルを選択してください。");
@@ -1754,11 +1761,14 @@ function beginEdit(play){
 /* ---------------- 保存（匿名はローカル、ログイン時はFirestore） ---------------- */
 async function saveDeck(){
   if (elSaveBtn) elSaveBtn.disabled = true;
+  setSaveStatus("保存中…");
   let replayFile = null;
   try {
     replayFile = validateReplayFile(elReplayFile?.files?.[0] || null);
   } catch (e) {
     console.error(e);
+    setSaveStatus("保存失敗","error");
+    alert(e?.message||String(e));
     if (elSaveBtn) elSaveBtn.disabled = false;
     return;
   }
@@ -1847,6 +1857,7 @@ async function saveDeck(){
         return;
       }
       renderRightStatsAndHistory();
+      setSaveStatus("保存しました","ok");
     } finally {
       if (elSaveBtn) elSaveBtn.disabled = false;
     }
@@ -1928,6 +1939,8 @@ async function saveDeck(){
     }
   } catch (e) {
     console.error(e);
+    setSaveStatus("保存失敗","error");
+    alert(`保存に失敗しました。\n${e?.message||String(e)}`);
     if (elSaveBtn) elSaveBtn.disabled = false;
     return;
   }
@@ -1935,6 +1948,7 @@ async function saveDeck(){
   clearFirestoreReadCache();
   await refreshUserPlays();
   renderRightStatsAndHistory();
+  setSaveStatus(REPLAY_GZIP_TEST_MODE ? "保存しました（gzipテスト）" : "保存しました","ok");
   if (elSaveBtn) elSaveBtn.disabled = false;
 }
 

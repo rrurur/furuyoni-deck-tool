@@ -483,6 +483,13 @@
     cursor:pointer;
   }
   .delbtn:hover{ background:#005fa3; }
+  #saveStatus{
+    font-size:11px;
+    color:#666;
+    min-width:72px;
+  }
+  #saveStatus.error{ color:#b4192f; font-weight:700; }
+  #saveStatus.ok{ color:#187a36; font-weight:700; }
 .spacer{ min-height:1px; }
 </style>
 </head>
@@ -549,6 +556,7 @@
       <input id="replayFile" type="file" accept=".reply,application/octet-stream" hidden>
       <button id="replayPreviewBtn" type="button" hidden>リプレイ</button>
       <button id="saveBtn" type="button">保存</button>
+      <span id="saveStatus" aria-live="polite"></span>
     </div>
 
     <div id="deckRow">
