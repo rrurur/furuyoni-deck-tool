@@ -989,9 +989,9 @@ function setupReplayMigrationTestControl(){
     const target=replayMaintenanceTargets()[0];
     if(!target){refreshState();return;}
     const label=String(target.deckName||target.id);
-    if(!confirm(`既存リプレイを1件だけ圧縮します。\n${label}\n\n元データと復元データが一致した場合だけ保存先を切り替えます。続行しますか？`)) return;
+    if(!confirm(`既存リプレイを1件だけ整理します。\n${label}\n\n未圧縮なら安全確認付きで圧縮し、リプレイ内の対戦時刻も履歴へ反映します。続行しますか？`)) return;
     button.disabled=true;
-    state.textContent="圧縮中…";
+    state.textContent="整理中…";
     try{
       const result=await migrateOneExistingReplay(target);
       clearFirestoreReadCache();
@@ -2043,6 +2043,7 @@ async function saveDeck(){
           myTarotNames,
           oppTarotNames,
           ...replaySelectionPayload,
+          ...replayTimePayload,
           deckName,
           memo,
           cardIds,
