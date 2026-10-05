@@ -245,6 +245,7 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 const REPLAY_MAX_BYTES = 12 * 1024 * 1024;
 const REPLAY_FIRESTORE_CHUNK_BYTES = 700 * 1024;
+const REPLAY_GZIP_TEST_MODE = new URLSearchParams(location.search).get("replayGzipTest") === "1";
 const TIMELINE_REPLAY_BASE = "https://furuyoni-diary-1918f.web.app/replay.html";
 
 /* ---------------- 永続化（ローカル） ---------------- */
@@ -621,6 +622,32 @@ async function uploadReplayForDeck(deckId, file){
     replayChunkCount:0
   };
 }
+async function uploadReplayToFirestoreLegacy(deckId,file){
+  validateReplayFile(file);
+  const u=auth.currentUser;
+  if(!isCloudUser(u)) throw new Error("リプレイの公開にはGoogleログインが必要です。");
+  const bytes=new Uint8Array(await file.arrayBuffer());
+  const count=Math.ceil(bytes.length/REPLAY_FIRESTORE_CHUNK_BYTES);
+  for(let i=0;i<count;i++){
+    const start=i*REPLAY_FIRESTORE_CHUNK_BYTES;
+    const end=Math.min(bytes.length,start+REPLAY_FIRESTORE_CHUNK_BYTES);
+    await setDoc(doc(db,"decks",deckId,"replayChunks",String(i).padStart(4,"0")),{
+      ownerUid:u.uid,
+      index:i,
+      data:Bytes.fromUint8Array(bytes.slice(start,end))
+    });
+  }
+  return {
+    replayStorage:"firestore",
+    replayPath:"",
+    replayName:String(file.name||"replay.reply"),
+    replaySize:bytes.length,
+    replayContentType:"application/octet-stream",
+    replayVersion:1,
+    replayChunkCount:count
+  };
+}
+
 async function writeReplayChunks(deckId,bytes,prefix,ownerUid){
   const count=Math.ceil(bytes.length/REPLAY_FIRESTORE_CHUNK_BYTES);
   let written=0;
@@ -679,6 +706,14 @@ async function uploadReplayToFirestore(deckId,file){
   };
 }
 async function saveReplayForDeck(deckId,file){
+  if(!REPLAY_GZIP_TEST_MODE){
+    const meta=await uploadReplayToFirestoreLegacy(deckId,file);
+    return {
+      meta,
+      async commitCleanup(){},
+      async rollbackCleanup(){}
+    };
+  }
   let previous=null;
   try{
     const snap=await getDoc(doc(db,"decks",deckId));
