@@ -360,6 +360,7 @@ const elAuthIdText = document.getElementById("authIdText");
 const elLoginBtn = document.getElementById("loginBtn");
 const elSaveBtn = document.getElementById("saveBtn");
 const elReplayFile = document.getElementById("replayFile");
+const elReplaySelectionHint = document.getElementById("replaySelectionHint");
 const elReplayPreviewBtn = document.getElementById("replayPreviewBtn");
 const elResetBtn = document.getElementById("resetBtn");
 const elRearrangeBtn = document.getElementById("rearrangeBtn");
@@ -545,6 +546,7 @@ function storedTarotIndexes(play, namesKey, indexesKey){
 function clearReplaySelection(){
   if (elReplayFile) elReplayFile.value = "";
   if (elReplayPreviewBtn) elReplayPreviewBtn.hidden = true;
+  if (elReplaySelectionHint) elReplaySelectionHint.textContent = "";
   pendingReplaySelectionMeta = null;
   pendingReplayTimeMs = null;
 }
@@ -1103,6 +1105,11 @@ async function applySelectedReplay(){
   const imported = extractReplayFormData(data, tarotData);
   pendingReplaySelectionMeta = replaySelectionMeta(imported);
   pendingReplayTimeMs = replayTimestampMs(data);
+  if (elReplaySelectionHint) {
+    elReplaySelectionHint.textContent = pendingReplayTimeMs
+      ? `リプレイ時刻 ${fmtDateTime(pendingReplayTimeMs)} / 「保存」で履歴に追加`
+      : "「保存」で履歴に追加";
+  }
   mySelected = tarotsFromNames(imported.myTarotNames);
   oppSelected = tarotsFromNames(imported.oppTarotNames);
   fillSlotsFromPaths(deckSlots, imported.myDeckPaths);
