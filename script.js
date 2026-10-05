@@ -927,35 +927,37 @@ async function migrateOneExistingReplay(play){
   return {rawBytes:raw.length,storedBytes:encoded.bytes.length};
 }
 function setupReplayMigrationTestControl(){
-  if(!REPLAY_GZIP_MIGRATE_MODE || !isCloudUser(auth.currentUser)) return;
-  if(document.getElementById("replayGzipMigrateBtn")) return;
-  const bar=document.getElementById("authBar");
-  if(!bar) return;
-  const button=document.createElement("button");
-  button.id="replayGzipMigrateBtn";
-  button.type="button";
-  button.textContent="旧リプレイ1件を圧縮";
-  button.title="既存Version 1リプレイを1件だけ安全確認付きでgzipへ移行";
-  const state=document.createElement("span");
-  state.id="replayGzipMigrateState";
+  const button=document.getElementById("replayGzipMigrateBtn");
+  const state=document.getElementById("replayGzipMigrateState");
+  if(!button||!state) return;
+
+  if(!REPLAY_GZIP_MIGRATE_MODE || !isCloudUser(auth.currentUser)){
+    button.hidden=true;
+    state.hidden=true;
+    return;
+  }
+
+  button.hidden=false;
+  state.hidden=false;
   state.style.fontSize="11px";
   state.style.marginLeft="6px";
-  bar.append(button,state);
 
   const refreshState=()=>{
     const count=legacyReplayMigrationTargets().length;
-    state.textContent=` 未圧縮 ${count}件`;
+    state.textContent=`未圧縮 ${count}件`;
     button.disabled=count===0;
   };
   refreshState();
 
+  if(button.dataset.bound==="1") return;
+  button.dataset.bound="1";
   button.addEventListener("click",async()=>{
     const target=legacyReplayMigrationTargets()[0];
     if(!target){refreshState();return;}
     const label=String(target.deckName||target.id);
     if(!confirm(`既存リプレイを1件だけ圧縮します。\n${label}\n\n元データと復元データが一致した場合だけ保存先を切り替えます。続行しますか？`)) return;
     button.disabled=true;
-    state.textContent=" 圧縮中…";
+    state.textContent="圧縮中…";
     try{
       const result=await migrateOneExistingReplay(target);
       clearFirestoreReadCache();
@@ -965,7 +967,7 @@ function setupReplayMigrationTestControl(){
       alert(`1件の圧縮が完了しました。\n${label}\n${result.rawBytes.toLocaleString()} bytes → ${result.storedBytes.toLocaleString()} bytes\n\n履歴の「リプレイ」から再生確認してください。`);
     }catch(error){
       console.error(error);
-      state.textContent=" 失敗";
+      state.textContent="失敗";
       alert(`既存リプレイの圧縮に失敗しました。\n${error?.message||String(error)}\n\n旧リプレイは切り替え前ならそのまま残ります。`);
       refreshState();
     }
