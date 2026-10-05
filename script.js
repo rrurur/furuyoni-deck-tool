@@ -245,7 +245,7 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 const REPLAY_MAX_BYTES = 12 * 1024 * 1024;
 const REPLAY_FIRESTORE_CHUNK_BYTES = 700 * 1024;
-const REPLAY_GZIP_TEST_MODE = new URLSearchParams(location.search).get("replayGzipTest") === "1";
+const REPLAY_GZIP_ENABLED = new URLSearchParams(location.search).get("replayGzip") !== "0";
 const TIMELINE_REPLAY_BASE = "https://furuyoni-diary-1918f.web.app/replay.html";
 
 /* ---------------- 永続化（ローカル） ---------------- */
@@ -722,7 +722,7 @@ async function uploadReplayToFirestore(deckId,file){
   };
 }
 async function saveReplayForDeck(deckId,file){
-  if(!REPLAY_GZIP_TEST_MODE){
+  if(!REPLAY_GZIP_ENABLED){
     const meta=await uploadReplayToFirestoreLegacy(deckId,file);
     return {
       meta,
@@ -1975,7 +1975,7 @@ async function saveDeck(){
   clearFirestoreReadCache();
   await refreshUserPlays();
   renderRightStatsAndHistory();
-  setSaveStatus(REPLAY_GZIP_TEST_MODE ? "保存しました（gzipテスト）" : "保存しました","ok");
+  setSaveStatus("保存しました","ok");
   if (elSaveBtn) elSaveBtn.disabled = false;
 }
 
