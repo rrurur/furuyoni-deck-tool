@@ -329,6 +329,7 @@ let editingPlaySeason = null;
 let hoverSnapshot = null;  // ホバー前の左デッキ状態退避
 let handlePrompted = false;
 let pendingReplaySelectionMeta = null;
+let pendingReplayTimeMs = null;
 const replaySelectionCache = new Map();
 
 /* ---------------- DOM ---------------- */
@@ -545,6 +546,16 @@ function clearReplaySelection(){
   if (elReplayFile) elReplayFile.value = "";
   if (elReplayPreviewBtn) elReplayPreviewBtn.hidden = true;
   pendingReplaySelectionMeta = null;
+  pendingReplayTimeMs = null;
+}
+function replayTimestampMs(data){
+  const seconds=Number(data?.Time);
+  if(!Number.isFinite(seconds) || seconds<=0) return null;
+  const ms=Math.trunc(seconds*1000);
+  return Number.isFinite(ms) && ms>0 ? ms : null;
+}
+function historyTimeMs(play){
+  return Number(play?.replayTimeMs)>0 ? Number(play.replayTimeMs) : (Number(play?.createdAtMs)||0);
 }
 async function openSelectedReplayPreview(){
   const file=validateReplayFile(elReplayFile?.files?.[0]||null);
@@ -838,18 +849,24 @@ function replayBytesEqual(a,b){
   for(let i=0;i<a.length;i++) if(a[i]!==b[i]) return false;
   return true;
 }
-function legacyReplayMigrationTargets(){
+function replayMaintenanceTargets(){
   const u=auth.currentUser;
   if(!isCloudUser(u)) return [];
-  return userPlays.filter(play=>
+  const rows=userPlays.filter(play=>
     String(play?.ownerUid||"")===String(u.uid)
-    && Number(play?.replayVersion)<2
     && (
       String(play?.replayPath||"").trim()
       || play?.replayStorage==="firestore"
+      || replayChunkPrefix(play?.replayStorage)
       || Number(play?.replayChunkCount)>0
     )
+    && (Number(play?.replayVersion)<2 || Number(play?.replayTimeMs)<=0)
   );
+  return rows.sort((a,b)=>{
+    const aTimeOnly=Number(a?.replayVersion)>=2 && Number(a?.replayTimeMs)<=0 ? 0 : 1;
+    const bTimeOnly=Number(b?.replayVersion)>=2 && Number(b?.replayTimeMs)<=0 ? 0 : 1;
+    return aTimeOnly-bTimeOnly || historyTimeMs(b)-historyTimeMs(a);
+  });
 }
 async function migrateOneExistingReplay(play){
   const u=auth.currentUser;
@@ -857,7 +874,20 @@ async function migrateOneExistingReplay(play){
   if(!play?.id || String(play.ownerUid||"")!==String(u.uid)) throw new Error("自分のリプレイではありません。");
 
   const raw=await loadReplayBytesForPlay(play);
-  decodeReply(raw);
+  const decoded=decodeReply(raw);
+  const replayTimeMs=replayTimestampMs(decoded);
+  if(!replayTimeMs) throw new Error("リプレイ内の対戦時刻を取得できませんでした。");
+
+  if(Number(play.replayVersion)>=2 && replayChunkPrefix(play.replayStorage)){
+    await updateDoc(doc(db,"decks",play.id),{
+      replayTimeMs,
+      updatedAt:serverTimestamp(),
+      updatedAtMs:Date.now()
+    });
+    play.replayTimeMs=replayTimeMs;
+    return {rawBytes:raw.length,storedBytes:null,timeOnly:true,replayTimeMs};
+  }
+
   const encoded=await encodeReplayForStorage(raw);
   if(!encoded.compressed) throw new Error("このリプレイは圧縮しても小さくならないため変更しませんでした。");
 
@@ -868,7 +898,8 @@ async function migrateOneExistingReplay(play){
     replaySize:Number(play.replaySize)||raw.length,
     replayContentType:String(play.replayContentType||"application/octet-stream"),
     replayVersion:Number(play.replayVersion)||1,
-    replayChunkCount:Number(play.replayChunkCount)||0
+    replayChunkCount:Number(play.replayChunkCount)||0,
+    replayTimeMs:Number(play.replayTimeMs)||0
   };
   const prefix=makeReplayChunkPrefix();
   const count=await writeReplayChunks(play.id,encoded.bytes,prefix,u.uid);
@@ -879,7 +910,8 @@ async function migrateOneExistingReplay(play){
     replaySize:raw.length,
     replayContentType:encoded.contentType,
     replayVersion:2,
-    replayChunkCount:count
+    replayChunkCount:count,
+    replayTimeMs
   };
 
   try{
@@ -898,7 +930,8 @@ async function migrateOneExistingReplay(play){
     if(!check.exists()
       || String(d.replayStorage||"")!==nextMeta.replayStorage
       || Number(d.replayVersion)!==2
-      || Number(d.replayChunkCount)!==count){
+      || Number(d.replayChunkCount)!==count
+      || Number(d.replayTimeMs)!==replayTimeMs){
       try{
         await updateDoc(doc(db,"decks",play.id),{
           ...oldMeta,
@@ -924,8 +957,9 @@ async function migrateOneExistingReplay(play){
   }
 
   Object.assign(play,nextMeta);
-  return {rawBytes:raw.length,storedBytes:encoded.bytes.length};
+  return {rawBytes:raw.length,storedBytes:encoded.bytes.length,timeOnly:false,replayTimeMs};
 }
+
 function setupReplayMigrationTestControl(){
   const button=document.getElementById("replayGzipMigrateBtn");
   const state=document.getElementById("replayGzipMigrateState");
@@ -943,8 +977,8 @@ function setupReplayMigrationTestControl(){
   state.style.marginLeft="6px";
 
   const refreshState=()=>{
-    const count=legacyReplayMigrationTargets().length;
-    state.textContent=`未圧縮 ${count}件`;
+    const count=replayMaintenanceTargets().length;
+    state.textContent=`未整理 ${count}件`;
     button.disabled=count===0;
   };
   refreshState();
@@ -952,19 +986,22 @@ function setupReplayMigrationTestControl(){
   if(button.dataset.bound==="1") return;
   button.dataset.bound="1";
   button.addEventListener("click",async()=>{
-    const target=legacyReplayMigrationTargets()[0];
+    const target=replayMaintenanceTargets()[0];
     if(!target){refreshState();return;}
     const label=String(target.deckName||target.id);
-    if(!confirm(`既存リプレイを1件だけ圧縮します。\n${label}\n\n元データと復元データが一致した場合だけ保存先を切り替えます。続行しますか？`)) return;
+    if(!confirm(`既存リプレイを1件だけ整理します。\n${label}\n\n未圧縮なら安全確認付きで圧縮し、リプレイ内の対戦時刻も履歴へ反映します。続行しますか？`)) return;
     button.disabled=true;
-    state.textContent="圧縮中…";
+    state.textContent="整理中…";
     try{
       const result=await migrateOneExistingReplay(target);
       clearFirestoreReadCache();
       await refreshUserPlays();
       renderRightStatsAndHistory();
       refreshState();
-      alert(`1件の圧縮が完了しました。\n${label}\n${result.rawBytes.toLocaleString()} bytes → ${result.storedBytes.toLocaleString()} bytes\n\n履歴の「リプレイ」から再生確認してください。`);
+      const timeText=fmtDateTime(result.replayTimeMs);
+      alert(result.timeOnly
+        ? `1件のリプレイ時刻を反映しました。\n${label}\n対戦時刻: ${timeText}\n\nこれは既存の履歴行を更新するため、新しい履歴行は増えません。`
+        : `1件の圧縮が完了しました。\n${label}\n${result.rawBytes.toLocaleString()} bytes → ${result.storedBytes.toLocaleString()} bytes\n対戦時刻: ${timeText}\n\nこれは既存の履歴行を更新するため、新しい履歴行は増えません。履歴の「リプレイ」から再生確認してください。`);
     }catch(error){
       console.error(error);
       state.textContent="失敗";
@@ -1065,6 +1102,7 @@ async function applySelectedReplay(){
   const data = decodeReply(await file.arrayBuffer());
   const imported = extractReplayFormData(data, tarotData);
   pendingReplaySelectionMeta = replaySelectionMeta(imported);
+  pendingReplayTimeMs = replayTimestampMs(data);
   mySelected = tarotsFromNames(imported.myTarotNames);
   oppSelected = tarotsFromNames(imported.oppTarotNames);
   fillSlotsFromPaths(deckSlots, imported.myDeckPaths);
@@ -1250,7 +1288,7 @@ async function initAuth(){
       clampMyPickToMode();
 
       resetRunState();
-      userPlays = loadLocalPlays().map(normalizeStoredPlay).filter(Boolean).slice().sort((a,b)=>(b.createdAtMs||0)-(a.createdAtMs||0));
+      userPlays = loadLocalPlays().map(normalizeStoredPlay).filter(Boolean).slice().sort((a,b)=>historyTimeMs(b)-historyTimeMs(a));
       renderAll();
       return;
     }
@@ -1902,6 +1940,7 @@ function beginEdit(play){
     Array.isArray(play.mySelectedTarotNames) && play.mySelectedTarotNames.length
     && Array.isArray(play.oppSelectedTarotNames) && play.oppSelectedTarotNames.length
   ) ? replaySelectionMeta(play) : null;
+  pendingReplayTimeMs = Number(play.replayTimeMs)>0 ? Number(play.replayTimeMs) : null;
   applyDeckFromStoredPlay(play);
   fillSlotsFromPaths(oppDeckSlots, play.oppCardPaths || []);
 
@@ -1956,6 +1995,7 @@ async function saveDeck(){
     mySelectedTarotNames: pendingReplaySelectionMeta.mySelectedTarotNames.slice(),
     oppSelectedTarotNames: pendingReplaySelectionMeta.oppSelectedTarotNames.slice()
   } : {};
+  const replayTimePayload = Number(pendingReplayTimeMs)>0 ? { replayTimeMs:Number(pendingReplayTimeMs) } : {};
 
   const basePayload = {
     matchType: matchTypeId(matchType),
@@ -1969,6 +2009,7 @@ async function saveDeck(){
     myTarotNames,
     oppTarotNames,
     ...replaySelectionPayload,
+    ...replayTimePayload,
     cardIds,
     cardPaths,
     oppCardIds,
@@ -2002,6 +2043,7 @@ async function saveDeck(){
           myTarotNames,
           oppTarotNames,
           ...replaySelectionPayload,
+          ...replayTimePayload,
           deckName,
           memo,
           cardIds,
@@ -2033,6 +2075,7 @@ async function saveDeck(){
     myTarotNames,
     oppTarotNames,
     ...replaySelectionPayload,
+    ...replayTimePayload,
     cardIds,
     cardPaths,
     oppCardIds,
@@ -2158,7 +2201,8 @@ function rowFromDeckDoc(docSnap){
     replayName: typeof d.replayName === "string" ? d.replayName : "",
     replaySize: typeof d.replaySize === "number" ? d.replaySize : 0,
     replayVersion: typeof d.replayVersion === "number" ? d.replayVersion : 0,
-    replayChunkCount: typeof d.replayChunkCount === "number" ? d.replayChunkCount : 0
+    replayChunkCount: typeof d.replayChunkCount === "number" ? d.replayChunkCount : 0,
+    replayTimeMs: typeof d.replayTimeMs === "number" ? d.replayTimeMs : 0
   };
 }
 
@@ -2169,7 +2213,7 @@ function deckRowsFromSnapshot(snapshot){
 }
 
 function sortHistoryRowsDesc(rows){
-  return rows.sort((a,b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+  return rows.sort((a,b) => historyTimeMs(b)-historyTimeMs(a));
 }
 
 function cloneHistoryRows(rows){
@@ -2184,7 +2228,8 @@ function cloneHistoryRows(rows){
     cardIds: Array.isArray(row.cardIds) ? row.cardIds.slice() : Array(10).fill(-1),
     cardPaths: Array.isArray(row.cardPaths) ? row.cardPaths.slice() : row.cardPaths,
     oppCardIds: Array.isArray(row.oppCardIds) ? row.oppCardIds.slice() : Array(10).fill(-1),
-    oppCardPaths: Array.isArray(row.oppCardPaths) ? row.oppCardPaths.slice() : row.oppCardPaths
+    oppCardPaths: Array.isArray(row.oppCardPaths) ? row.oppCardPaths.slice() : row.oppCardPaths,
+    replayTimeMs: Number(row.replayTimeMs)||0
   }));
 }
 
@@ -2287,7 +2332,7 @@ async function refreshUserPlays(){
   if (!isCloudUser(u)){
     const localRows = loadLocalPlays().slice();
     const autoRows = await fetchAutoReplayRows();
-    userPlays = [...localRows, ...autoRows].sort((a,b) => (b.createdAtMs||0)-(a.createdAtMs||0));
+    userPlays = [...localRows, ...autoRows].sort((a,b) => historyTimeMs(b)-historyTimeMs(a));
     return;
   }
 
@@ -2532,9 +2577,9 @@ function drawHistoryChart(){
     const endT = Date.now();
 
     const plays = playsRaw
-      .filter(p => (p.createdAtMs || 0) >= startT && (p.createdAtMs || 0) <= endT)
+      .filter(p => historyTimeMs(p) >= startT && historyTimeMs(p) <= endT)
       .slice()
-      .sort((a,b) => (a.createdAtMs||0) - (b.createdAtMs||0));
+      .sort((a,b) => historyTimeMs(a)-historyTimeMs(b));
 
     ctx.fillStyle = "rgba(0,0,0,0.75)";
     ctx.font = "12px system-ui";
@@ -2628,17 +2673,17 @@ function drawHistoryChart(){
   const dur = periodToMs(period);
 
   const plays = playsRaw
-    .filter(p => (p.createdAtMs || 0) > 0)
+    .filter(p => historyTimeMs(p) > 0)
     .slice()
-    .sort((a,b) => (a.createdAtMs||0) - (b.createdAtMs||0));
+    .sort((a,b) => historyTimeMs(a)-historyTimeMs(b));
 
   // ★変更：「all」は “最初の投稿〜最後の投稿” にする（nowで終わらせない）
   let endT = now;
-  let startT = dur ? (now - dur) : (plays.length ? plays[0].createdAtMs : now);
+  let startT = dur ? (now - dur) : (plays.length ? historyTimeMs(plays[0]) : now);
 
   if (!dur) {
-    const first = plays.length ? (plays[0].createdAtMs || now) : now;
-    const last  = plays.length ? (plays[plays.length - 1].createdAtMs || now) : now;
+    const first = plays.length ? (historyTimeMs(plays[0]) || now) : now;
+    const last  = plays.length ? (historyTimeMs(plays[plays.length - 1]) || now) : now;
     startT = first;
     endT   = last;
   }
@@ -2692,7 +2737,7 @@ function drawHistoryChart(){
   let wins = 0, losses = 0;
   const pts = [];
   for (const p of plays) {
-    const t = p.createdAtMs || 0;
+    const t = historyTimeMs(p);
     if (t < startT || t > endT) continue;
 
     if (p.resultTypeNum === 0) wins++;
@@ -2788,7 +2833,7 @@ function renderHistoryList(){
 
     const date = document.createElement("div");
     date.className = "hdate";
-    date.textContent = fmtDateTime(p.createdAtMs);
+    date.textContent = fmtDateTime(historyTimeMs(p));
 
     const right = document.createElement("div");
     right.className = "hright";
