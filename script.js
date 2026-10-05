@@ -246,6 +246,7 @@ const storage = getStorage(app);
 const REPLAY_MAX_BYTES = 12 * 1024 * 1024;
 const REPLAY_FIRESTORE_CHUNK_BYTES = 700 * 1024;
 const REPLAY_GZIP_ENABLED = new URLSearchParams(location.search).get("replayGzip") !== "0";
+const REPLAY_GZIP_MIGRATE_MODE = new URLSearchParams(location.search).get("replayGzipMigrate") === "1";
 const TIMELINE_REPLAY_BASE = "https://furuyoni-diary-1918f.web.app/replay.html";
 
 /* ---------------- 永続化（ローカル） ---------------- */
@@ -831,6 +832,145 @@ async function loadReplayBytesForPlay(play){
   if(decoded.length>=REPLAY_MAX_BYTES) throw new Error("replay is too large");
   return decoded;
 }
+
+function replayBytesEqual(a,b){
+  if(!(a instanceof Uint8Array) || !(b instanceof Uint8Array) || a.length!==b.length) return false;
+  for(let i=0;i<a.length;i++) if(a[i]!==b[i]) return false;
+  return true;
+}
+function legacyReplayMigrationTargets(){
+  const u=auth.currentUser;
+  if(!isCloudUser(u)) return [];
+  return userPlays.filter(play=>
+    String(play?.ownerUid||"")===String(u.uid)
+    && Number(play?.replayVersion)<2
+    && (
+      String(play?.replayPath||"").trim()
+      || play?.replayStorage==="firestore"
+      || Number(play?.replayChunkCount)>0
+    )
+  );
+}
+async function migrateOneExistingReplay(play){
+  const u=auth.currentUser;
+  if(!isCloudUser(u)) throw new Error("Googleログインが必要です。");
+  if(!play?.id || String(play.ownerUid||"")!==String(u.uid)) throw new Error("自分のリプレイではありません。");
+
+  const raw=await loadReplayBytesForPlay(play);
+  decodeReply(raw);
+  const encoded=await encodeReplayForStorage(raw);
+  if(!encoded.compressed) throw new Error("このリプレイは圧縮しても小さくならないため変更しませんでした。");
+
+  const oldMeta={
+    replayStorage:String(play.replayStorage||""),
+    replayPath:String(play.replayPath||""),
+    replayName:String(play.replayName||"replay.reply"),
+    replaySize:Number(play.replaySize)||raw.length,
+    replayContentType:String(play.replayContentType||"application/octet-stream"),
+    replayVersion:Number(play.replayVersion)||1,
+    replayChunkCount:Number(play.replayChunkCount)||0
+  };
+  const prefix=makeReplayChunkPrefix();
+  const count=await writeReplayChunks(play.id,encoded.bytes,prefix,u.uid);
+  const nextMeta={
+    replayStorage:`firestore-gzip:${prefix}`,
+    replayPath:"",
+    replayName:oldMeta.replayName,
+    replaySize:raw.length,
+    replayContentType:encoded.contentType,
+    replayVersion:2,
+    replayChunkCount:count
+  };
+
+  try{
+    const stored=await loadFirestoreReplayBytes(play.id,count,prefix);
+    const restored=await decodeStoredReplayBytes(stored,2);
+    if(!replayBytesEqual(raw,restored)) throw new Error("圧縮後の復元データが元リプレイと一致しません。");
+
+    await updateDoc(doc(db,"decks",play.id),{
+      ...nextMeta,
+      updatedAt:serverTimestamp(),
+      updatedAtMs:Date.now()
+    });
+
+    const check=await getDoc(doc(db,"decks",play.id));
+    const d=check.data()||{};
+    if(!check.exists()
+      || String(d.replayStorage||"")!==nextMeta.replayStorage
+      || Number(d.replayVersion)!==2
+      || Number(d.replayChunkCount)!==count){
+      try{
+        await updateDoc(doc(db,"decks",play.id),{
+          ...oldMeta,
+          updatedAt:serverTimestamp(),
+          updatedAtMs:Date.now()
+        });
+      }catch(rollbackError){
+        console.error("replay metadata rollback failed:",rollbackError);
+      }
+      throw new Error("保存先切替の検証に失敗したため旧リプレイ設定へ戻しました。");
+    }
+  }catch(error){
+    await deleteReplayChunkSet(play.id,nextMeta.replayStorage,nextMeta.replayChunkCount);
+    throw error;
+  }
+
+  if(oldMeta.replayStorage!==nextMeta.replayStorage){
+    await deleteReplayChunkSet(play.id,oldMeta.replayStorage,oldMeta.replayChunkCount);
+  }
+  if(oldMeta.replayPath){
+    try{ await deleteObject(storageRef(storage,oldMeta.replayPath)); }
+    catch(error){ console.warn("legacy replay object cleanup skipped:",error?.code||error); }
+  }
+
+  Object.assign(play,nextMeta);
+  return {rawBytes:raw.length,storedBytes:encoded.bytes.length};
+}
+function setupReplayMigrationTestControl(){
+  if(!REPLAY_GZIP_MIGRATE_MODE || !isCloudUser(auth.currentUser)) return;
+  if(document.getElementById("replayGzipMigrateBtn")) return;
+  const bar=document.getElementById("authBar");
+  if(!bar) return;
+  const button=document.createElement("button");
+  button.id="replayGzipMigrateBtn";
+  button.type="button";
+  button.textContent="旧リプレイ1件を圧縮";
+  button.title="既存Version 1リプレイを1件だけ安全確認付きでgzipへ移行";
+  const state=document.createElement("span");
+  state.id="replayGzipMigrateState";
+  state.style.fontSize="11px";
+  state.style.marginLeft="6px";
+  bar.append(button,state);
+
+  const refreshState=()=>{
+    const count=legacyReplayMigrationTargets().length;
+    state.textContent=` 未圧縮 ${count}件`;
+    button.disabled=count===0;
+  };
+  refreshState();
+
+  button.addEventListener("click",async()=>{
+    const target=legacyReplayMigrationTargets()[0];
+    if(!target){refreshState();return;}
+    const label=String(target.deckName||target.id);
+    if(!confirm(`既存リプレイを1件だけ圧縮します。\n${label}\n\n元データと復元データが一致した場合だけ保存先を切り替えます。続行しますか？`)) return;
+    button.disabled=true;
+    state.textContent=" 圧縮中…";
+    try{
+      const result=await migrateOneExistingReplay(target);
+      clearFirestoreReadCache();
+      await refreshUserPlays();
+      renderRightStatsAndHistory();
+      refreshState();
+      alert(`1件の圧縮が完了しました。\n${label}\n${result.rawBytes.toLocaleString()} bytes → ${result.storedBytes.toLocaleString()} bytes\n\n履歴の「リプレイ」から再生確認してください。`);
+    }catch(error){
+      console.error(error);
+      state.textContent=" 失敗";
+      alert(`既存リプレイの圧縮に失敗しました。\n${error?.message||String(error)}\n\n旧リプレイは切り替え前ならそのまま残ります。`);
+      refreshState();
+    }
+  });
+}
 function replaySelectionMeta(imported){
   return {
     myTarotNames:Array.isArray(imported?.myTarotNames)?imported.myTarotNames.slice(0,MAX_PICK):[],
@@ -1146,6 +1286,7 @@ async function initAuth(){
 
     renderAll();
     persistMatchAndMyPicks();
+    setupReplayMigrationTestControl();
     // Existing replays are intentionally not migrated automatically.
     // First roll out and verify new compressed saves; migrate legacy data only in an explicit later step.
     repairExistingReplaySelections().catch(error=>console.warn("replay selection repair failed:",error));
