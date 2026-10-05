@@ -37,6 +37,13 @@ import {
 
 import { firebaseConfig, appCheckConfig } from "./firebaseConfig.js";
 import { decodeReply, extractReplayFormData } from "./replay-import.js";
+import {
+  encodeReplayForStorage,
+  decodeStoredReplayBytes,
+  makeReplayChunkPrefix,
+  replayChunkPrefix,
+  replayChunkId
+} from "./replay-storage-codec.js";
 
 /* （未使用でもOK：将来の保存先用） */
 const baseFolder = "S10-1";
@@ -590,56 +597,97 @@ function validateReplayFile(file){
 }
 async function uploadReplayForDeck(deckId, file){
   validateReplayFile(file);
-  const u = auth.currentUser;
-  if (!isCloudUser(u)) throw new Error("リプレイの公開にはGoogleログインが必要です。");
-  const path = `replays/${u.uid}/${deckId}.reply`;
-  await uploadBytes(storageRef(storage, path), file, {
-    contentType: "application/octet-stream",
-    customMetadata: { originalName: String(file.name || "replay.reply") }
+  const u=auth.currentUser;
+  if(!isCloudUser(u)) throw new Error("リプレイの公開にはGoogleログインが必要です。");
+  const raw=new Uint8Array(await file.arrayBuffer());
+  const encoded=await encodeReplayForStorage(raw);
+  const path=`replays/${u.uid}/${deckId}.reply`;
+  await uploadBytes(storageRef(storage,path),encoded.bytes,{
+    contentType:encoded.contentType,
+    customMetadata:{
+      originalName:String(file.name||"replay.reply"),
+      replayVersion:String(encoded.version),
+      originalSize:String(raw.length)
+    }
   });
   return {
     replayStorage:"storage",
     replayPath:path,
-    replayName:String(file.name || "replay.reply"),
-    replaySize:Number(file.size || 0),
-    replayContentType:"application/octet-stream",
-    replayVersion:1,
+    replayName:String(file.name||"replay.reply"),
+    replaySize:raw.length,
+    replayContentType:encoded.contentType,
+    replayVersion:encoded.version,
     replayChunkCount:0
   };
 }
-async function uploadReplayToFirestore(deckId, file){
-  validateReplayFile(file);
-  const u = auth.currentUser;
-  if (!isCloudUser(u)) throw new Error("リプレイの公開にはGoogleログインが必要です。");
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  const count = Math.ceil(bytes.length / REPLAY_FIRESTORE_CHUNK_BYTES);
+async function writeReplayChunks(deckId,bytes,prefix,ownerUid){
+  const count=Math.ceil(bytes.length/REPLAY_FIRESTORE_CHUNK_BYTES);
   for(let i=0;i<count;i++){
     const start=i*REPLAY_FIRESTORE_CHUNK_BYTES;
     const end=Math.min(bytes.length,start+REPLAY_FIRESTORE_CHUNK_BYTES);
-    const chunkId=String(i).padStart(4,"0");
-    await setDoc(doc(db,"decks",deckId,"replayChunks",chunkId),{
-      ownerUid:u.uid,
+    await setDoc(doc(db,"decks",deckId,"replayChunks",replayChunkId(prefix,i)),{
+      ownerUid,
       index:i,
       data:Bytes.fromUint8Array(bytes.slice(start,end))
     });
   }
+  return count;
+}
+async function deleteReplayChunkSet(deckId,replayStorage,replayChunkCount){
+  const count=Number(replayChunkCount)||0;
+  if(count<=0) return;
+  const prefix=replayChunkPrefix(replayStorage);
+  if(String(replayStorage||"")!=="firestore" && !prefix) return;
+  for(let i=0;i<count;i++){
+    try{
+      await deleteDoc(doc(db,"decks",deckId,"replayChunks",replayChunkId(prefix,i)));
+    }catch(error){
+      console.warn("replay chunk cleanup skipped:",deckId,i,error?.code||error);
+    }
+  }
+}
+async function uploadReplayToFirestore(deckId,file){
+  validateReplayFile(file);
+  const u=auth.currentUser;
+  if(!isCloudUser(u)) throw new Error("リプレイの公開にはGoogleログインが必要です。");
+  const raw=new Uint8Array(await file.arrayBuffer());
+  const encoded=await encodeReplayForStorage(raw);
+  const prefix=encoded.compressed ? makeReplayChunkPrefix() : "";
+  const count=await writeReplayChunks(deckId,encoded.bytes,prefix,u.uid);
   return {
-    replayStorage:"firestore",
+    replayStorage:encoded.compressed ? `firestore-gzip:${prefix}` : "firestore",
     replayPath:"",
-    replayName:String(file.name || "replay.reply"),
-    replaySize:Number(file.size || 0),
-    replayContentType:"application/octet-stream",
-    replayVersion:1,
+    replayName:String(file.name||"replay.reply"),
+    replaySize:raw.length,
+    replayContentType:encoded.contentType,
+    replayVersion:encoded.version,
     replayChunkCount:count
   };
 }
 async function saveReplayForDeck(deckId,file){
-  return await uploadReplayToFirestore(deckId,file);
+  let previous=null;
+  try{
+    const snap=await getDoc(doc(db,"decks",deckId));
+    if(snap.exists()) previous=snap.data()||null;
+  }catch(error){
+    console.warn("previous replay metadata read skipped:",error?.code||error);
+  }
+  const meta=await uploadReplayToFirestore(deckId,file);
+  return {
+    meta,
+    async commitCleanup(){
+      if(previous) await deleteReplayChunkSet(deckId,previous.replayStorage,previous.replayChunkCount);
+    },
+    async rollbackCleanup(){
+      await deleteReplayChunkSet(deckId,meta.replayStorage,meta.replayChunkCount);
+    }
+  };
 }
 async function hasReplayForPlay(play){
   if(!play?.id) return false;
   if(String(play?.replayPath||"").trim()) return true;
-  if(play?.replayStorage==="firestore" && Number(play?.replayChunkCount)>0) return true;
+  const prefix=replayChunkPrefix(play?.replayStorage);
+  if((play?.replayStorage==="firestore"||prefix) && Number(play?.replayChunkCount)>0) return true;
   try{
     const chunk0=await getDoc(doc(db,"decks",play.id,"replayChunks","0000"));
     return chunk0.exists();
@@ -648,13 +696,12 @@ async function hasReplayForPlay(play){
     return false;
   }
 }
-async function loadFirestoreReplayBytes(deckId,countHint=0){
+async function loadFirestoreReplayBytes(deckId,countHint=0,prefix=""){
   const chunks=[];
   let total=0;
   const limitCount=Number(countHint)>0 ? Number(countHint) : 64;
   for(let i=0;i<limitCount;i++){
-    const chunkId=String(i).padStart(4,"0");
-    const snap=await getDoc(doc(db,"decks",deckId,"replayChunks",chunkId));
+    const snap=await getDoc(doc(db,"decks",deckId,"replayChunks",replayChunkId(prefix,i)));
     if(!snap.exists()){
       if(i===0) throw new Error("replay chunks not found");
       break;
@@ -676,22 +723,89 @@ async function loadReplayBytesForPlay(play){
   const id=String(play?.id||"").trim();
   if(!id) throw new Error("missing replay id");
   const chunkCount=Number(play?.replayChunkCount)||0;
-  if(play?.replayStorage==="firestore" || chunkCount>0){
-    return await loadFirestoreReplayBytes(id,chunkCount);
+  const prefix=replayChunkPrefix(play?.replayStorage);
+  let storedBytes=null;
+  if(play?.replayStorage==="firestore" || prefix || chunkCount>0){
+    storedBytes=await loadFirestoreReplayBytes(id,chunkCount,prefix);
+  }else{
+    const storedPath=String(play?.replayPath||"").trim();
+    if(storedPath){
+      storedBytes=new Uint8Array(await getBytes(storageRef(storage,storedPath),REPLAY_MAX_BYTES));
+    }else{
+      try{
+        storedBytes=await loadFirestoreReplayBytes(id,0,"");
+      }catch{}
+      if(!storedBytes){
+        const ownerUid=String(play?.ownerUid||"").trim();
+        if(ownerUid){
+          const fallback=`replays/${ownerUid}/${id}.reply`;
+          storedBytes=new Uint8Array(await getBytes(storageRef(storage,fallback),REPLAY_MAX_BYTES));
+        }
+      }
+    }
   }
-  const storedPath=String(play?.replayPath||"").trim();
-  if(storedPath){
-    return new Uint8Array(await getBytes(storageRef(storage,storedPath),REPLAY_MAX_BYTES));
-  }
+  if(!storedBytes) throw new Error("replay data not found");
+  const decoded=await decodeStoredReplayBytes(storedBytes,play?.replayVersion);
+  if(decoded.length>=REPLAY_MAX_BYTES) throw new Error("replay is too large");
+  return decoded;
+}
+async function migrateReplayCompression(play){
+  const u=auth.currentUser;
+  if(!isCloudUser(u)||!play?.id||String(play?.ownerUid||"")!==String(u.uid)) return false;
+  if(Number(play?.replayVersion)>=2 && replayChunkPrefix(play?.replayStorage)) return false;
+  if(!(await hasReplayForPlay(play))) return false;
+
+  const raw=await loadReplayBytesForPlay(play);
+  decodeReply(raw);
+  const encoded=await encodeReplayForStorage(raw);
+  if(!encoded.compressed) return false;
+
+  const prefix=makeReplayChunkPrefix();
+  const count=await writeReplayChunks(play.id,encoded.bytes,prefix,u.uid);
+  const nextMeta={
+    replayStorage:`firestore-gzip:${prefix}`,
+    replayPath:"",
+    replayName:String(play.replayName||"replay.reply"),
+    replaySize:raw.length,
+    replayContentType:encoded.contentType,
+    replayVersion:2,
+    replayChunkCount:count
+  };
   try{
-    return await loadFirestoreReplayBytes(id,0);
-  }catch{}
-  const ownerUid=String(play?.ownerUid||"").trim();
-  if(ownerUid){
-    const fallback=`replays/${ownerUid}/${id}.reply`;
-    return new Uint8Array(await getBytes(storageRef(storage,fallback),REPLAY_MAX_BYTES));
+    await updateDoc(doc(db,"decks",play.id),{
+      ...nextMeta,
+      updatedAt:serverTimestamp(),
+      updatedAtMs:Date.now()
+    });
+  }catch(error){
+    await deleteReplayChunkSet(play.id,nextMeta.replayStorage,nextMeta.replayChunkCount);
+    throw error;
   }
-  throw new Error("replay data not found");
+  await deleteReplayChunkSet(play.id,play.replayStorage,play.replayChunkCount);
+  Object.assign(play,nextMeta);
+  return true;
+}
+async function migrateExistingReplayCompression(){
+  const u=auth.currentUser;
+  if(!isCloudUser(u)||typeof CompressionStream!=="function") return;
+  const targets=userPlays.filter(play=>
+    String(play?.ownerUid||"")===String(u.uid)
+    && Number(play?.replayVersion)<2
+    && (String(play?.replayPath||"").trim() || play?.replayStorage==="firestore" || Number(play?.replayChunkCount)>0)
+  );
+  if(!targets.length) return;
+  let changed=false;
+  for(const play of targets){
+    try{
+      if(await migrateReplayCompression(play)) changed=true;
+    }catch(error){
+      console.warn("replay compression migration skipped:",play?.id,error?.code||error);
+    }
+  }
+  if(changed){
+    clearFirestoreReadCache();
+    renderRightStatsAndHistory();
+  }
 }
 function replaySelectionMeta(imported){
   return {
