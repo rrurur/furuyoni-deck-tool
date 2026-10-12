@@ -339,6 +339,19 @@ function eventText(e,st){
   if(e?.auraDamage!=null||e?.lifeDamage!=null)pieces.push(String(e.auraDamage??"-")+"/"+String(e.lifeDamage??"-"));
   return pieces.join(" / ");
 }
+function readableHistoryAction(entry){
+  const action=entry?.action||{},rule=String(action.rule||""),label=String(action.label||"初期局面");
+  if(rule==="turn-main-enhancement-choice"){
+    const m=/^(?:enhance:)?d(\d+):a(\d+)$/.exec(String(action.choice||""));
+    if(m)return "付与：ダスト"+Number(m[1])+"・オーラ"+Number(m[2]);
+  }
+  if(action.choiceCardId && /p[12][ns]\d+/.test(String(action.choiceCardId))){
+    const pid=Number(entry.actor)||1;
+    const slug=cardOf(entry.after,pid,action.choiceCardId);
+    if(slug)return label.replace(String(action.choiceCardId),cardName(slug));
+  }
+  return label;
+}
 function pendingAttackDisplay(rows,selected,st){
   const responseRules=new Set(["turn-attack-respond","turn-attack-pass","turn-attack-damage","turn-response-effect-choice","turn-use-response"]);
   if(!responseRules.has(String(rows[selected]?.action?.rule||"")))return null;
@@ -365,7 +378,7 @@ function render(){
   const rawTurn=Number(entry.turn)||0;
   $("position").textContent="間合 "+st.distance+"　ダスト "+st.dust;
   $("moveTitle").textContent=(rawTurn?"T"+Math.ceil(rawTurn/2)+"／"+(rawTurn%2?"先行":"後攻"):"初期局面")+
-    "　"+String(entry.action?.label||"マリガン");
+    "　"+(entry.action?readableHistoryAction(entry):"マリガン");
   const source=entry.action?.cardId,cardId=String(source??""),pid=cardId.startsWith("p1")?1:2;
   $("currentCard").replaceChildren();
   const attacking=pendingAttackDisplay(rows,stepIndex,st);
@@ -389,7 +402,7 @@ function render(){
   $("history").replaceChildren();
   rows.forEach((row,i)=>{
     const btn=document.createElement("button");btn.type="button";btn.className="stepLink"+(i===stepIndex?" current":"");
-    btn.textContent=i+" | "+(row.turn?"T"+Math.ceil(row.turn/2)+" ":"")+String(row.action?.label||"初期局面");
+    btn.textContent=i+" | "+(row.turn?"T"+Math.ceil(row.turn/2)+" ":"")+readableHistoryAction(row);
     btn.addEventListener("click",()=>{stopReplay();stepIndex=i;render()});$("history").append(btn);
   });
   $("history").querySelector(".current")?.scrollIntoView({block:"nearest"});
