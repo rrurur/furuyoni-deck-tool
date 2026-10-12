@@ -3396,6 +3396,7 @@ export class CoreTurnSandboxEnvironment{
     this.pendingDraws=0;
     this.pendingEnhancementDiscards=[];
     this.pendingEnhancementDiscardSelected=null;
+    this.pendingEnhancementDiscardOwner=null;
     this.pendingEnhancementTickPlayers=[];
     this.enhancementTickOwner=null;
     this.skipFirstStartEnhancementRest=false;
@@ -9221,7 +9222,7 @@ export class CoreTurnSandboxEnvironment{
     if(beforeReconstruct.stop||this.done) return;
   }
   _resolveRegisteredEnhancementDiscard(cardId,events){
-    const pid=this.enhancementTickOwner||this.turnPlayer;
+    const pid=this.pendingEnhancementDiscardOwner||this.enhancementTickOwner||this.turnPlayer;
     const slug=stateCardSlug(this.state,pid,cardId);
     const rule=this.cardRuleRegistry?.get(slug);
     const effect=rule?.enhancementDiscard;
@@ -9349,7 +9350,7 @@ export class CoreTurnSandboxEnvironment{
     return {handled:false,pending:false};
   }
   _advanceEnhancementDiscardQueue(events){
-    const pid=this.enhancementTickOwner||this.turnPlayer;
+    const pid=this.pendingEnhancementDiscardOwner||this.enhancementTickOwner||this.turnPlayer;
     while(this.pendingEnhancementDiscards.length){
       if(this.pendingEnhancementDiscards.length>1 && this.pendingEnhancementDiscardSelected==null){
         this.pendingCardDecision={
@@ -9400,6 +9401,7 @@ export class CoreTurnSandboxEnvironment{
       if(this.done) return;
       this.pendingEnhancementDiscards.shift();
     }
+    this.pendingEnhancementDiscardOwner=null;
     this._continueStartAfterEnhancements(events);
   }
   _enterMainPhase(events){
@@ -9462,6 +9464,7 @@ export class CoreTurnSandboxEnvironment{
     const afterTick=this._ruleHook("afterEnhancementDefaultTick",{events,tickPlan:clone(tickPlan),applied:clone(applied)});
     if(afterTick.stop||this.done) return;
     if(applied.expired.length){
+      this.pendingEnhancementDiscardOwner=pid;
       this.pendingEnhancementDiscards=clone(applied.expired);
       this._advanceEnhancementDiscardQueue(events);
       return;
