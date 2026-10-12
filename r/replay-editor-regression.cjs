@@ -12,8 +12,8 @@ const api=new Function(core.replace(/\bexport\s+/g,"")+"\nreturn {createDefaultC
 const requiredIds=[...html.matchAll(/id="([^"]+)"/g)].map(x=>x[1]);
 assert.equal(requiredIds.length,new Set(requiredIds).size,"Duplicate HTML IDs");
 for(const m of main.matchAll(/\$\("([^"]+)"\)/g))assert(requiredIds.includes(m[1]),"Unmatched UI node "+m[1]);
-for(const item of ["mulliganPane","basicToolbar","mulliganCards1","mulliganCards2","revealOpponent"])assert(requiredIds.includes(item));
-for(const selector of [".playerLayout",".resourceDock",".dropArea",".mulliganCard",".pendingFoldDrop"])assert(css.includes(selector),selector);
+for(const item of ["mulliganPane","basicToolbar","mulliganCards1","mulliganCards2","revealOpponent","reconstructPanel","enhancePlacement","attackDecision","fullPowerChoice","enhanceConfirm","responsePass","phaseEnd"])assert(requiredIds.includes(item));
+for(const selector of [".playerLayout",".resourceDock",".dropArea",".mulliganCard",".pendingFoldDrop",".deckBack",".smallCard.zoneFacedown",".resourceStat.flare .resourceNum",".resourceStat.life .resourceNum"])assert(css.includes(selector),selector);
 const page=fs.readFileSync(path.join(root,"..","index.html"),"utf8");
 assert(!page.includes("eye-261012-q1.html"),"A development-only entrance leaked to public index");
 class ClassList{
@@ -37,7 +37,8 @@ function mount(){
  const document={getElementById:id=>nodes.get(id),createElement:tag=>new Node(tag),body:new Node("body")};
  const stored=new Map(),localStorage={getItem:k=>stored.get(k)||null,setItem:(k,v)=>stored.set(k,v)};
  const fn=new Function("createDefaultCardRuleRegistry","CoreTurnSandboxEnvironment","runCoreTurnSandbox","BaselineCoreTurnAgent","document","window","localStorage","setInterval","clearInterval","URL","Blob",
-   main.replace(/^import [^\n]*\n/g,"")+"\nreturn {setPreset,prepareMulligan,confirmMulligan,mulliganState:()=>mulliganSession,engineState:()=>engine,gameState:()=>game,stepIndexState:()=>stepIndex,clickBasic,foldCard,branchAt,makeDropZone,saveBranch,stored,openBranch,pendingAttackDisplay};");
+   main.replace(/^import [^\n]*\n/g,"")+"\nreturn {setPreset,prepareMulligan,confirmMulligan,mulliganState:()=>mulliganSession,engineState:()=>engine,gameState:()=>game,stepIndexState:()=>stepIndex,clickBasic,foldCard,branchAt,makeDropZone,saveBranch,stored,openBranch,pendingAttackDisplay,parseEnhanceAction,useCard,
+     injectFixture:(env)=>{game={config:{chosen:[{n:[],s:[]},{n:[],s:[]}],first:1,seed:99},initial:env.initialState,opts:env.options,openingState:env.openingState,history:clone(env.history),done:false,winner:null,doneReason:""};engine=env;mode="manual";stepIndex=env.history.length;render();}};");
  const app=fn(api.createDefaultCardRuleRegistry,api.CoreTurnSandboxEnvironment,api.runCoreTurnSandbox,api.BaselineCoreTurnAgent,
    document,{addEventListener(){}},localStorage,()=>1,()=>{},{createObjectURL(){},revokeObjectURL(){}},class BlobStub{});
  app.setPreset(1);app.setPreset(2);
@@ -98,5 +99,59 @@ function mount(){
  app.clickBasic(1);
  assert.equal(env.history.length,before+2,"Focus button must auto-select standard mode and advance");
  assert.equal(env.state.p1_focus,focus-1);
+}
+// Contextual enhancement decision uses "enhance:d#:a#" wire keys, not raw d#:a#.
+assert.equal(main.includes('$("phaseStandard")'),false,"Do not show explicit standard/fullpower mode buttons");
+{
+ const {app,nodes}=mount();
+ assert.equal(app.parseEnhanceAction({rule:"turn-main-enhancement-choice",choice:"enhance:d2:a0"}).dust,2);
+ const state={distance:7,dust:2};
+ for(const pid of [1,2]){
+   const p="p"+pid+"_";
+   for(const zone of ["hand","deck","discard","facedown","special","enhancement","using","outside"])state[p+zone]=[];
+   state[p+"card_status"]={};state[p+"special_status"]={};
+   Object.assign(state,{[p+"life"]:10,[p+"aura"]:3,[p+"flare"]:0,[p+"focus"]:0,[p+"freeze"]:0,[p+"chara_ids"]:pid===1?[4,8]:[1,2]});
+ }
+ state.p1_hand=["p1n0"];
+ state.p1_card_status.p1n0={Slug:"re_04_tokoyo_o_n_7",MainType:3,SubType:0,IsSpecial:false,Charge:0,TokenCharges:{}};
+ const env=new api.CoreTurnSandboxEnvironment(state,{startingPlayer:1,openingSetup:false,turnsTaken:{1:1,2:1},randomizeHiddenDecks:false,maxTurns:12});
+ env.step(env.legalActions().find(x=>x.rule==="turn-main-standard"));
+ env.step(env.legalActions().find(x=>x.rule==="turn-use-card"&&x.cardId==="p1n0"));
+ app.injectFixture(env);
+ assert.equal(nodes.get("enhancePlacement").classList.contains("hidden"),false);
+ assert.equal(nodes.get("enhanceDust").textContent,"2","Must default to maximum available dust");
+ assert.equal(nodes.get("enhanceAura").textContent,"0");
+ nodes.get("enhanceLessDust").listeners.click();
+ assert.equal(nodes.get("enhanceDust").textContent,"1");
+ nodes.get("enhanceConfirm").listeners.click();
+ assert.equal(env.state.dust,1);
+ assert.equal(env.state.p1_aura,2);
+}
+{
+ const {app,nodes}=mount();
+ app.prepareMulligan("ai");app.confirmMulligan();
+ const g=app.gameState(),idx=g.history.findIndex(x=>x.action?.rule==="turn-reconstruct");
+ assert(idx>=0,"Fixture must contain a reconstruction");
+ app.branchAt(idx,"manual");
+ assert.equal(nodes.get("reconstructPanel").classList.contains("hidden"),false);
+ const before=app.engineState().history.length;
+ nodes.get("reconstructNo").listeners.click();
+ assert.equal(app.engineState().history.length,before+1);
+}
+{
+ const {app,nodes}=mount();
+ const state={distance:5,dust:0};
+ for(const pid of [1,2]){
+   const p="p"+pid+"_";
+   for(const zone of ["hand","deck","discard","facedown","special","enhancement","using","outside"])state[p+zone]=[];
+   state[p+"card_status"]={};state[p+"special_status"]={};
+   Object.assign(state,{[p+"life"]:10,[p+"aura"]:3,[p+"flare"]:0,[p+"focus"]:0,[p+"freeze"]:0,[p+"chara_ids"]:pid===1?[15,1]:[1,2]});
+ }
+ state.p1_hand=["p1n0"];state.p1_card_status.p1n0={Slug:"re_15_korunu_o_n_5",MainType:2,SubType:1,IsSpecial:false,Charge:0,TokenCharges:{}};
+ const env=new api.CoreTurnSandboxEnvironment(state,{startingPlayer:1,openingSetup:false,turnsTaken:{1:1,2:1},randomizeHiddenDecks:false,maxTurns:12});
+ app.injectFixture(env);app.useCard(1,"p1n0");
+ assert.equal(nodes.get("fullPowerChoice").classList.contains("hidden"),false,"Only fullPowerize text opens a mode choice");
+ nodes.get("fullPowerNormal").listeners.click();
+ assert(env.history.some(x=>x.action.rule==="turn-main-standard"),"Normal Korunu card selects standard action implicitly");
 }
 console.log("PASS replay editor: manual mulligan, focus and facedown basics, drag play, saved branch and private placement");
