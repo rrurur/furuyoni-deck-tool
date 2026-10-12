@@ -3396,6 +3396,8 @@ export class CoreTurnSandboxEnvironment{
     this.pendingDraws=0;
     this.pendingEnhancementDiscards=[];
     this.pendingEnhancementDiscardSelected=null;
+    this.pendingEnhancementTickPlayers=[];
+    this.enhancementTickOwner=null;
     this.pendingCardDecision=null;
     this.pendingAttack=null;
     this.attackStack=[];
@@ -9203,12 +9205,17 @@ export class CoreTurnSandboxEnvironment{
   }
 
   _continueStartAfterEnhancements(events){
+    if(this.pendingEnhancementTickPlayers?.length){
+      this._processNextStartEnhancementTick(events);
+      return;
+    }
+    this.enhancementTickOwner=null;
     this.phase="start-reconstruct";
     const beforeReconstruct=this._ruleHook("beforeReconstructionChoice",{events});
     if(beforeReconstruct.stop||this.done) return;
   }
   _resolveRegisteredEnhancementDiscard(cardId,events){
-    const pid=this.turnPlayer;
+    const pid=this.enhancementTickOwner||this.turnPlayer;
     const slug=stateCardSlug(this.state,pid,cardId);
     const rule=this.cardRuleRegistry?.get(slug);
     const effect=rule?.enhancementDiscard;
@@ -9336,7 +9343,7 @@ export class CoreTurnSandboxEnvironment{
     return {handled:false,pending:false};
   }
   _advanceEnhancementDiscardQueue(events){
-    const pid=this.turnPlayer;
+    const pid=this.enhancementTickOwner||this.turnPlayer;
     while(this.pendingEnhancementDiscards.length){
       if(this.pendingEnhancementDiscards.length>1 && this.pendingEnhancementDiscardSelected==null){
         this.pendingCardDecision={
@@ -9526,7 +9533,16 @@ export class CoreTurnSandboxEnvironment{
     this._gainFocus(pid,1,events,"開始フェイズ");
     const afterFocus=this._ruleHook("afterFocusGain",{events});
     if(afterFocus.stop||this.done) return;
-    if(hasActiveEnhancement(this.state,pid)){
+    // All active enhancement counters advance at the beginning of EACH player's turn.
+    // Resolve current player's tick before the opponent's, retaining async discard choices.
+    this.pendingEnhancementTickPlayers=[pid,pid===1?2:1];
+    this._processNextStartEnhancementTick(events);
+  }
+  _processNextStartEnhancementTick(events){
+    while(this.pendingEnhancementTickPlayers?.length){
+      const pid=this.pendingEnhancementTickPlayers.shift();
+      this.enhancementTickOwner=pid;
+      if(!hasActiveEnhancement(this.state,pid))continue;
       const tickPlan=planStandardEnhancementTick(this.state,pid);
       if(tickPlan.unsupported.length){
         const special=this._ruleHook("handleEnhancementDefaultTick",{events,tickPlan:clone(tickPlan)});
@@ -9552,6 +9568,7 @@ export class CoreTurnSandboxEnvironment{
         return;
       }
     }
+
     this._continueStartAfterEnhancements(events);
   }
   _resolveEndPhaseRecharge(playerId,events){
