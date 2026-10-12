@@ -1,0 +1,73 @@
+/* Shared interaction contract, v2. This stylesheet is the source of truth for
+   all future interactive Furuyoni replay/editor pages, not for public navigation. */
+:root{--game-blue:#4477ab;--game-soft:#ecf4fc;--game-edge:#b8cadb}
+.wrap{max-width:1480px}
+.replayLayout{grid-template-columns:minmax(760px,1fr) 265px;gap:12px}
+.replayLayout>.board{min-width:0;display:grid;grid-template-rows:auto auto auto;gap:8px}
+.side{padding:12px 14px;border:1px solid var(--edge);background:var(--white)}
+.side.active{background:var(--game-soft);border-color:var(--game-blue);box-shadow:inset 3px 0 0 var(--game-blue)}
+.sideTitle{font-size:15px;margin-bottom:8px}
+.playerLayout{display:grid;grid-template-columns:minmax(210px,1.65fr) minmax(140px,1fr) minmax(120px,.85fr) minmax(165px,.9fr);gap:10px;align-items:stretch}
+.handDock,.discardDock,.facedownDock,.resourceDock{border:1px solid #e0e7ef;border-radius:8px;padding:7px;min-width:0;background:rgba(255,255,255,.73)}
+.handDock{min-height:188px;display:flex;flex-direction:column}
+.handDock .zoneCards{flex-wrap:nowrap;min-height:110px;gap:5px}
+.handDock .specialInHand{margin-top:auto;padding-top:7px;border-top:1px solid #e9eef4}
+.handDock .specialInHand .zoneCards{min-height:45px}
+.discardDock{display:flex;flex-direction:column;gap:6px}
+.discardDock .zoneCards{min-height:42px}
+.facedownDock{position:relative;display:flex;flex-direction:column;gap:6px}
+.facedownDock .zoneCards{min-height:95px}
+.dropArea{border:2px dashed var(--game-edge);border-radius:7px;padding:7px;min-height:74px;background:var(--game-soft);display:flex;align-items:center;justify-content:center;gap:6px;flex-direction:column;color:#476987;font-size:12px;font-weight:800;transition:background .1s,border-color .1s}
+.dropArea.facedown{min-height:86px}
+.dropArea.dragOver{background:#d5e8fb;border-color:#3973ab}
+.dropArea.disabledDrop{opacity:.45;border-style:dotted}
+.dropArea .dropHint{font-size:11px;font-weight:500;line-height:1.2;text-align:center}
+.resourceDock{display:flex;flex-direction:column;justify-content:flex-end;gap:6px}
+.resourceGrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.resourceStat{background:#f1f6fb;border:1px solid #dde8f3;border-radius:7px;text-align:center;padding:8px 3px;min-width:0}
+.resourceStat .resourceName{display:block;font-size:10px;font-weight:750;color:#587084}
+.resourceStat .resourceNum{display:block;font-size:27px;font-weight:900;line-height:1.2;font-variant-numeric:tabular-nums;color:#2c557f}
+.resourceStat.life .resourceNum{color:#b34658}
+.resourceStat.aura .resourceNum{color:#366d95}
+.resourceStat.flare .resourceNum{color:#ae7b2e}
+.resourceStat.focus .resourceNum{color:#326b55}
+.resourceExtra{font-size:11px;color:var(--muted);text-align:right}
+.zoneHeading{font-size:11px;letter-spacing:.02em;color:#617383;margin:1px 0 4px}
+.zoneCards{display:flex;gap:4px;flex-wrap:wrap;min-height:32px;align-items:flex-start}
+.smallCard{width:61px;min-height:87px;cursor:default;flex:0 0 61px;overflow:visible}
+.smallCard img{width:59px;height:84px;object-fit:contain}
+.smallCard[draggable="true"]{cursor:grab}
+.smallCard[draggable="true"]:active{cursor:grabbing}
+.smallCard.cardPlayable{border-color:#92b4d6;box-shadow:0 0 0 1px #c3d9ed}
+.smallCard.cardClickable{cursor:pointer}
+.smallCard.cardClickable:hover{border-color:var(--game-blue)}
+.smallCard .fallback{font-size:9px;line-height:1.3}
+.cardStackMini .zoneCards{max-height:120px;overflow:auto}
+.centerboard{padding:14px 20px;min-height:116px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.distance{font-size:24px}
+#currentCard .smallCard{width:72px;min-height:100px}
+#currentCard .smallCard img{height:96px;width:69px}
+.eventLog{max-height:130px;overflow:auto;font-size:12px}
+.mainControlBar{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:8px;margin:9px 0 5px;padding:7px 8px;background:#edf3f9;border:1px solid #d0e0ec;border-radius:8px}
+.actionCluster{display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+.actionCaption{font-weight:800;font-size:11px;color:#476782;padding:0 3px}
+.actionCluster button{padding:7px 11px;border-color:#becfe0;min-width:58px;background:#fff}
+.actionCluster button.available{border-color:var(--game-blue);background:#e5f2ff}
+.actionCluster button.pending{outline:2px solid #3c77b2}
+.operationHint{font-size:12px;color:#40698d;min-height:24px;padding:3px 6px}
+.advancedActions{margin-top:7px;border-top:1px solid #e0e6ed;padding-top:8px}
+.advancedActions summary{font-size:12px;cursor:pointer;color:#57718a}
+.advancedActions select{margin:8px 0;max-width:100%}
+.advancedActions button{width:100%}
+.mulliganCards{display:flex;gap:12px;flex-wrap:wrap;min-height:175px;align-items:start}
+.mulliganCard{width:112px;min-height:164px;background:#fafcfe;border:2px solid #d3dee8;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:7px;cursor:pointer}
+.mulliganCard img{height:131px;max-width:98px;object-fit:contain}
+.mulliganCard.selected{background:#dceeff;border-color:#326fa7;box-shadow:0 0 0 2px #9ac1e7}
+.mulliganCard .cardName{font-size:11px;font-weight:800}
+.mulliganCards .secretHand{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.mulliganCards .secretHand img{height:132px}
+.mulliganCards .placeholder{font-size:13px;color:var(--muted)}
+.editCol>.panel{padding:10px;margin-bottom:2px}
+.stepList{max-height:330px}
+@media(max-width:1130px){.replayLayout{grid-template-columns:minmax(0,1fr)}.playerLayout{grid-template-columns:minmax(160px,1.8fr) minmax(120px,1fr) minmax(120px,1fr) minmax(145px,1fr)}}
+@media(max-width:690px){.playerLayout{grid-template-columns:minmax(180px,2fr) minmax(125px,1fr);gap:7px}.resourceDock{grid-column:2;grid-row:2}.facedownDock{grid-column:1;grid-row:2}.mainControlBar{position:static}.resourceStat .resourceNum{font-size:25px}.smallCard{width:54px;flex-basis:54px}.smallCard img{width:52px;height:74px}}
