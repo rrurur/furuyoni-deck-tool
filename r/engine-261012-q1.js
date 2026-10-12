@@ -3267,6 +3267,7 @@ export class CoreTurnSandboxEnvironment{
       chanceSeed:Number(options.chanceSeed)||246813579,
       randomizeHiddenDecks:options.randomizeHiddenDecks!==false,
       openingSetup:options.openingSetup===true,
+      openingMulliganChoices:options.openingMulliganChoices==null?null:clone(options.openingMulliganChoices),
       openingMulliganRate:Math.max(0,Math.min(1,Number.isFinite(Number(options.openingMulliganRate))?Number(options.openingMulliganRate):0.35)),
       opponentBeliefMode:String(options.opponentBeliefMode||"decklist-known"),
       opponentBeliefPriors:clone(options.opponentBeliefPriors||{}),
@@ -3337,7 +3338,9 @@ export class CoreTurnSandboxEnvironment{
       for(const pid of players){
         const handKey=`p${pid}_hand`,deckKey=`p${pid}_deck`;
         const before=arr(this.state[handKey]);
-        const returned=before.filter(()=>this.random()<this.options.openingMulliganRate);
+        const selected=this.options.openingMulliganChoices?.[pid] ?? this.options.openingMulliganChoices?.[String(pid)];
+        const keepSelected=Array.isArray(selected)?new Set(selected.map(String)):null;
+        const returned=keepSelected?before.filter(cardId=>keepSelected.has(String(cardId))):before.filter(()=>this.random()<this.options.openingMulliganRate);
         const returnedSet=new Set(returned.map(String));
         this.state[handKey]=before.filter(cardId=>!returnedSet.has(String(cardId)));
         this.state[deckKey]=arr(this.state[deckKey]);
