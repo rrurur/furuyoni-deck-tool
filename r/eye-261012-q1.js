@@ -570,7 +570,7 @@ function stored(){
 function refreshSaved(){
   if(!game)return;
   const previous=$("savedBranches").value;$("savedBranches").replaceChildren();
-  for(const node of stored()){const opt=document.createElement("option");opt.value=node.id;opt.textContent=node.id+" / "+node.actions.length+"手";$("savedBranches").append(opt);}
+  for(const node of stored()){const opt=document.createElement("option");opt.value=node.id;opt.textContent=(node.config?.mulliganChoices==null?"旧対戦 / ":"")+node.id+" / "+node.actions.length+"手";$("savedBranches").append(opt);}
   if([...$("savedBranches").options].some(x=>x.value===previous))$("savedBranches").value=previous;
 }
 function saveBranch(){
@@ -627,7 +627,8 @@ async function importBranches(file){
 function feedbackKey(){return KEY+":reviews:"+signature(game);}
 function feedbackLoad(){
   const read=(key)=>{try{const data=JSON.parse(localStorage.getItem(key)||"{}");return data&&typeof data==="object"&&!Array.isArray(data)?data:{};}catch{return {}}};
-  return {...read(KEY+":reviews:"+legacySignature(game)),...read(feedbackKey())};
+  const legacy=game?.config?.mulliganChoices==null?read(KEY+":reviews:"+legacySignature(game)):{};
+  return {...legacy,...read(feedbackKey())};
 }
 function loadCurrentReview(){
   if(!game)return;
