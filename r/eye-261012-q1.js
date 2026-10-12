@@ -203,7 +203,7 @@ function confirmMulligan(){
     }
     mulliganSession=null;stepIndex=0;setView();reviews={};
     if(kind==="human")advanceAI();
-    stepIndex=game.history.length;render();
+    stepIndex=kind==="ai"?0:game.history.length;render();
   }catch(error){$("mulliganError").textContent=String(error.message||error);}
 }
 function beginAIMatch(){prepareMulligan("ai");}
