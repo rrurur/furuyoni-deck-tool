@@ -511,7 +511,7 @@ function synchronizeFromEngine(){
 function commitAction(action){
   if(!engine||!action)throw Error("実行可能な行動がありません");
   engine.step(action);
-  pendingFoldCard=null;pendingBasic=null;
+  pendingFoldCard=null;pendingBasic=null;pendingFullPowerCard=null;enhanceSelectedKey=null;
   $("playError").textContent="";
   setHint("基本動作はボタン、カードは手札から使用欄へドラッグ。伏せ札へのドラッグ後は基本動作を選択してください。");
   synchronizeFromEngine();
@@ -589,28 +589,39 @@ function foldCard(pid,id){
   setHint("「"+cardName(slug)+"」を伏せる札に指定しました。上の基本動作ボタンを押すと伏せ札に移して実行します。");
   render();
 }
-function useCard(pid,id){
+function useCard(pid,id,requestedMode=null){
   if(!canControl(pid))return;
   if(!(engine.state["p"+pid+"_hand"]||[]).includes(id)&&
      !(engine.state["p"+pid+"_special"]||[]).includes(id)){
-    $("playError").textContent="手札または切札から使用してください。";return;
+    $("playError").textContent="手札・切札から使用してください。";return;
   }
   const slug=cardOf(engine.state,pid,id),rule=reg.get(slug)?.mainUse;
-  if(!rule){$("playError").textContent="使用できないカードです。";return;}
   const legal=legalForControl();
-  let move=legal.find(a=>["turn-use-card","turn-attack-respond"].includes(a.rule)&&String(a.cardId)===id);
-  const phaseRule=rule.fullPower?"turn-main-fullpower":"turn-main-standard";
-  const phase=legal.find(a=>a.rule===phaseRule);
+  const response=legal.find(a=>a.rule==="turn-attack-respond"&&String(a.cardId)===String(id));
+  if(response){try{commitAction(response)}catch(e){$("playError").textContent=String(e.message||e)}return;}
+  if(!rule){$("playError").textContent="使用できないカードです。";return;}
+  if(rule.fullPowerize&&requestedMode==null&&legal.some(a=>["turn-main-standard","turn-main-fullpower"].includes(a.rule))){
+    pendingFullPowerCard=id;
+    $("playError").textContent="";
+    render();
+    return;
+  }
+  const desiredMode=requestedMode==="fullpower"?"turn-main-fullpower":
+    requestedMode==="standard"?"turn-main-standard":
+    rule.fullPower?"turn-main-fullpower":"turn-main-standard";
+  let action=legal.find(a=>a.rule==="turn-use-card"&&String(a.cardId)===String(id));
+  const phase=legal.find(a=>a.rule===desiredMode);
   try{
-    if(!move &&phase){
-      const candidate=previewWithPhase(phase,a=>a.rule==="turn-use-card"&&String(a.cardId)===id);
+    if(!action&&phase){
+      const candidate=previewWithPhase(phase,a=>a.rule==="turn-use-card"&&String(a.cardId)===String(id));
       if(candidate){
         engine.step(phase);
-        move=engine.legalActions().find(a=>a.rule==="turn-use-card"&&String(a.cardId)===id);
+        action=engine.legalActions().find(a=>a.rule==="turn-use-card"&&String(a.cardId)===String(id));
       }
     }
-    if(!move){$("playError").textContent="「"+cardName(slug)+"」は現在使用できません（間合・コスト・行動種類を確認）。";return;}
-    commitAction(move);
+    if(!action){$("playError").textContent="「"+cardName(slug)+"」は今は使用できません（間合・コスト・フェイズを確認）。";return;}
+    pendingFullPowerCard=null;
+    commitAction(action);
   }catch(e){$("playError").textContent=String(e.message||e);}
 }
 function chooseMove(){
@@ -762,9 +773,43 @@ $("autoReplay").addEventListener("click",()=>{
 $("branchManual").addEventListener("click",()=>branchAt(stepIndex,"manual"));
 $("branchHumanAI").addEventListener("click",()=>branchAt(stepIndex,"human"));
 $("performAction").addEventListener("click",chooseMove);
-$("phaseStandard").addEventListener("click",()=>playPhase("turn-main-standard"));
-$("phaseFull").addEventListener("click",()=>playPhase("turn-main-fullpower"));
-$("phaseEnd").addEventListener("click",()=>playPhase("sandbox-end-turn"));
+$("phaseEnd").addEventListener("click",()=>{
+  const legal=legalForControl();
+  try{
+    let end=legal.find(a=>a.rule==="sandbox-end-turn");
+    if(!end){
+      const standard=legal.find(a=>a.rule==="turn-main-standard");
+      if(!standard||!previewWithPhase(standard,a=>a.rule==="sandbox-end-turn"))return;
+      engine.step(standard);end=engine.legalActions().find(a=>a.rule==="sandbox-end-turn");
+    }
+    if(end)commitAction(end);
+  }catch(e){$("playError").textContent=String(e.message||e);}
+});
+for(const [id,rule] of [["reconstructYes","turn-reconstruct"],["reconstructNo","turn-skip-reconstruct"],["responsePass","turn-attack-pass"]]){
+  $(id).addEventListener("click",()=>{
+    const a=legalForControl().find(x=>x.rule===rule);
+    if(a)try{commitAction(a)}catch(e){$("playError").textContent=String(e.message||e)}
+  });
+}
+for(const [id,mode] of [["fullPowerNormal","standard"],["fullPowerUse","fullpower"]]){
+  $(id).addEventListener("click",()=>{
+    if(pendingFullPowerCard&&engine)useCard(engine.currentPlayer(),pendingFullPowerCard,mode);
+  });
+}
+$("fullPowerCancel").addEventListener("click",()=>{pendingFullPowerCard=null;render()});
+function enhancedChoices(){return legalForControl().map(parseEnhanceAction).filter(Boolean).sort((a,b)=>a.dust-b.dust)}
+$("enhanceLessDust").addEventListener("click",()=>{
+  const arr=enhancedChoices(),i=arr.findIndex(x=>x.action.choice===enhanceSelectedKey);
+  if(i>0){enhanceSelectedKey=arr[i-1].action.choice;refreshActions()}
+});
+$("enhanceMoreDust").addEventListener("click",()=>{
+  const arr=enhancedChoices(),i=arr.findIndex(x=>x.action.choice===enhanceSelectedKey);
+  if(i>=0&&i<arr.length-1){enhanceSelectedKey=arr[i+1].action.choice;refreshActions()}
+});
+$("enhanceConfirm").addEventListener("click",()=>{
+  const choice=enhancedChoices().find(x=>x.action.choice===enhanceSelectedKey)?.action;
+  if(choice)try{commitAction(choice)}catch(e){$("playError").textContent=String(e.message||e)}
+});
 for(const [id,choice] of [["damageAura","aura"],["damageLife","life"]]){
   $(id).addEventListener("click",()=>{
     const move=legalForControl().find(a=>a.rule==="turn-attack-damage"&&a.damageChoice===choice);
