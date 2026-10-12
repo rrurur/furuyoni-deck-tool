@@ -234,6 +234,7 @@ function makeSmallCard(state,pid,id,{mask=false,used=false,enh=false,zone=""}={}
       if(charge){const t=document.createElement("div");t.className="charge";t.textContent="● "+charge;span.append(t);}
     }
   }
+  if(zone==="hand"&&pendingFoldCard===id)span.classList.add("pendingCost");
   const interactive=!mask&&canControl(pid)&&["hand","special"].includes(zone);
   if(interactive){
     span.draggable=true;span.classList.add("cardPlayable","cardClickable");
@@ -262,6 +263,12 @@ function makeDropZone(pid,type){
   const title=document.createElement("span");title.textContent=type==="play"?"ここへドラッグして使用":"ここへドラッグして伏せる";box.append(title);
   const hint=document.createElement("span");hint.className="dropHint";
   hint.textContent=type==="play"?"通常札・切札を使う":"伏せる札を選び、基本動作を実行";box.append(hint);
+  if(type==="fold"&&pendingFoldCard&&engine?.state?.["p"+pid+"_card_status"]?.[pendingFoldCard]){
+    const slug=cardOf(engine.state,pid,pendingFoldCard);
+    title.textContent="伏せる予定："+cardName(slug);
+    const note=document.createElement("span");note.className="dropHint";note.textContent="基本動作ボタンを押して確定";box.append(note);
+    box.classList.add("pendingFoldDrop");
+  }
   box.addEventListener("dragover",e=>{
     if(!canControl(pid))return;e.preventDefault();if(e.dataTransfer)e.dataTransfer.dropEffect="move";
     box.classList.add("dragOver");
@@ -485,7 +492,7 @@ function foldCard(pid,id){
   pendingFoldCard=id;$("playError").textContent="";
   const slug=cardOf(engine.state,pid,id);
   setHint("「"+cardName(slug)+"」を伏せる札に指定しました。上の基本動作ボタンを押すと伏せ札に移して実行します。");
-  refreshActions();
+  render();
 }
 function useCard(pid,id){
   if(!canControl(pid))return;
