@@ -213,10 +213,17 @@ function cardOf(state,pid,id){
   const slug=state["p"+pid+"_card_status"]?.[String(id)]?.Slug;
   return slug||"";
 }
-function makeSmallCard(state,pid,id,{mask=false,used=false,enh=false}={}){
-  const span=document.createElement("div");span.className="smallCard"+(used?" used":"");
+function canControl(pid){
+  return !!engine&&!engine.done&&engine.currentPlayer()===pid&&
+    (mode==="manual"||(mode==="human"&&pid===human))&&
+    stepIndex===game.history.length;
+}
+function makeSmallCard(state,pid,id,{mask=false,used=false,enh=false,zone=""}={}){
+  const span=document.createElement("div");
+  span.className="smallCard"+(used?" used":"");
   if(mask){
-    const img=document.createElement("img");img.alt="非公開";img.src="https://furuyoni-diary-1918f.web.app/assets/replay/images/cardback_normal.png";span.append(img);
+    const img=document.createElement("img");img.alt="非公開";
+    img.src="https://furuyoni-diary-1918f.web.app/assets/replay/images/cardback_normal.png";span.append(img);
   }else{
     const slug=cardOf(state,pid,id);
     if(slug)span.append(imgCard(slug,true));
@@ -227,30 +234,89 @@ function makeSmallCard(state,pid,id,{mask=false,used=false,enh=false}={}){
       if(charge){const t=document.createElement("div");t.className="charge";t.textContent="● "+charge;span.append(t);}
     }
   }
+  const interactive=!mask&&canControl(pid)&&["hand","special"].includes(zone);
+  if(interactive){
+    span.draggable=true;span.classList.add("cardPlayable","cardClickable");
+    span.title=(span.title||"")+"：使用欄へドラッグ（クリックでも使用）";
+    span.addEventListener("dragstart",e=>{
+      e.dataTransfer?.setData("text/plain",pid+":"+id);
+      if(e.dataTransfer)e.dataTransfer.effectAllowed="move";
+    });
+    span.addEventListener("click",()=>useCard(pid,id));
+  }
   return span;
 }
-function addZone(target,name,ids,state,pid,{mask=false,enh=false,special=false}={}){
-  const label=document.createElement("div");label.className="zoneHeading";label.textContent=name+" "+ids.length;target.append(label);
+function addZone(target,name,ids,state,pid,{mask=false,enh=false,special=false,zone=""}={}){
+  const label=document.createElement("div");label.className="zoneHeading";
+  label.textContent=name+" "+ids.length;target.append(label);
   const area=document.createElement("div");area.className="zoneCards";
-  for(const id of ids){const used=special&&Number(state["p"+pid+"_special_status"]?.[String(id)]||0)===2;
-    area.append(makeSmallCard(state,pid,id,{mask:mask&&!used,used,enh}));}
-  target.append(area);
+  for(const id of ids){
+    const used=special&&Number(state["p"+pid+"_special_status"]?.[String(id)]||0)===2;
+    area.append(makeSmallCard(state,pid,id,{mask:mask&&!used,used,enh,zone}));
+  }
+  target.append(area);return area;
+}
+function makeDropZone(pid,type){
+  const box=document.createElement("div");box.className="dropArea "+(type==="fold"?"facedown":"");
+  if(!canControl(pid))box.classList.add("disabledDrop");
+  const title=document.createElement("span");title.textContent=type==="play"?"ここへドラッグして使用":"ここへドラッグして伏せる";box.append(title);
+  const hint=document.createElement("span");hint.className="dropHint";
+  hint.textContent=type==="play"?"通常札・切札を使う":"伏せる札を選び、基本動作を実行";box.append(hint);
+  box.addEventListener("dragover",e=>{
+    if(!canControl(pid))return;e.preventDefault();if(e.dataTransfer)e.dataTransfer.dropEffect="move";
+    box.classList.add("dragOver");
+  });
+  box.addEventListener("dragleave",()=>box.classList.remove("dragOver"));
+  box.addEventListener("drop",e=>{
+    e.preventDefault();box.classList.remove("dragOver");
+    const payload=e.dataTransfer?.getData("text/plain")||"";
+    const [sourcePid,cardId]=payload.split(":");
+    if(Number(sourcePid)!==pid||!cardId)return;
+    if(type==="play")useCard(pid,cardId);
+    else foldCard(pid,cardId);
+  });
+  return box;
 }
 function sideBoard(target,st,pid,current,hidden=false){
   target.replaceChildren();target.classList.toggle("active",current===pid);
   const head=document.createElement("div");head.className="sideTitle";
   head.textContent=(pid===1?"扇槌（トコヨ・ハガネ）":"刀薙（ユリナ・サイネ）");
-  const res=document.createElement("div");res.className="res";
-  for(const [k,name] of [["life","ライフ"],["aura","オーラ"],["focus","集中"],["flare","フレア"],["freeze","凍結"]]){
-    const t=document.createElement("span");t.textContent=name+" "+Number(st["p"+pid+"_"+k]||0);res.append(t);
+  const turnInfo=document.createElement("span");turnInfo.className="counts";
+  turnInfo.textContent=current===pid?"行動中":"";
+  head.append(turnInfo);target.append(head);
+  const layout=document.createElement("div");layout.className="playerLayout";
+  const hand=document.createElement("div");hand.className="handDock";
+  addZone(hand,"手札",st["p"+pid+"_hand"]||[],st,pid,{mask:hidden,zone:"hand"});
+  const special=document.createElement("div");special.className="specialInHand";
+  addZone(special,"切札",st["p"+pid+"_special"]||[],st,pid,{mask:hidden,special:true,zone:"special"});
+  hand.append(special);
+  const discard=document.createElement("div");discard.className="discardDock";
+  discard.append(makeDropZone(pid,"play"));
+  const discardGroup=document.createElement("div");discardGroup.className="cardStackMini";
+  addZone(discardGroup,"捨て札",st["p"+pid+"_discard"]||[],st,pid,{zone:"discard"});
+  discard.append(discardGroup);
+  const enhancement=document.createElement("div");enhancement.className="cardStackMini";
+  addZone(enhancement,"展開中",st["p"+pid+"_enhancement"]||[],st,pid,{enh:true,zone:"enhancement"});
+  discard.append(enhancement);
+  const facedown=document.createElement("div");facedown.className="facedownDock";
+  facedown.append(makeDropZone(pid,"fold"));
+  addZone(facedown,"伏せ札",st["p"+pid+"_facedown"]||[],st,pid,{mask:hidden,zone:"facedown"});
+  const deck=document.createElement("div");deck.className="zoneHeading";
+  deck.textContent="山札 "+(st["p"+pid+"_deck"]||[]).length+" 枚";
+  facedown.append(deck);
+  const resources=document.createElement("div");resources.className="resourceDock";
+  const resourceGrid=document.createElement("div");resourceGrid.className="resourceGrid";
+  for(const [key,name] of [["life","ライフ"],["aura","オーラ"],["flare","フレア"],["focus","集中力"]]){
+    const item=document.createElement("div");item.className="resourceStat "+key;
+    const label=document.createElement("span");label.className="resourceName";label.textContent=name;
+    const value=document.createElement("strong");value.className="resourceNum";value.textContent=String(Number(st["p"+pid+"_"+key]||0));
+    item.append(label,value);resourceGrid.append(item);
   }
-  target.append(head,res);
-  addZone(target,"手札",st["p"+pid+"_hand"]||[],st,pid,{mask:hidden});
-  addZone(target,"切札",st["p"+pid+"_special"]||[],st,pid,{mask:hidden,special:true});
-  addZone(target,"展開中",st["p"+pid+"_enhancement"]||[],st,pid,{enh:true});
-  addZone(target,"捨て札",st["p"+pid+"_discard"]||[],st,pid,{});
-  addZone(target,"伏せ札",st["p"+pid+"_facedown"]||[],st,pid,{mask:hidden});
-  const deck=document.createElement("div");deck.className="zoneHeading";deck.textContent="山札 "+(st["p"+pid+"_deck"]||[]).length+"枚";target.append(deck);
+  resources.append(resourceGrid);
+  const freeze=document.createElement("div");freeze.className="resourceExtra";
+  freeze.textContent="凍結 "+Number(st["p"+pid+"_freeze"]||0);resources.append(freeze);
+  layout.append(hand,discard,facedown,resources);
+  target.append(layout);
 }
 function eventText(e,st){
   const pieces=[String(e?.kind||e||"")];
