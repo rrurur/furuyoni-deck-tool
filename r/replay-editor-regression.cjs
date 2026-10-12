@@ -12,7 +12,7 @@ const api=new Function(core.replace(/\bexport\s+/g,"")+"\nreturn {createDefaultC
 const requiredIds=[...html.matchAll(/id="([^"]+)"/g)].map(x=>x[1]);
 assert.equal(requiredIds.length,new Set(requiredIds).size,"Duplicate HTML IDs");
 for(const m of main.matchAll(/\$\("([^"]+)"\)/g))assert(requiredIds.includes(m[1]),"Unmatched UI node "+m[1]);
-for(const item of ["mulliganPane","basicToolbar","mulliganCards1","mulliganCards2","revealOpponent","reconstructPanel","enhancePlacement","attackDecision","fullPowerChoice","enhanceConfirm","responsePass","phaseEnd"])assert(requiredIds.includes(item));
+for(const item of ["mulliganPane","basicToolbar","mulliganCards1","mulliganCards2","revealOpponent","reconstructPanel","enhancePlacement","attackDecision","fullPowerChoice","enhanceConfirm","responsePass","phaseEnd","deckBottomChoice","deckBottomOptions","deckBottomDone"])assert(requiredIds.includes(item));
 for(const selector of [".playerLayout",".resourceDock",".dropArea",".mulliganCard",".pendingFoldDrop",".deckBack",".smallCard.zoneFacedown",".resourceStat.flare .resourceNum",".resourceStat.life .resourceNum"])assert(css.includes(selector),selector);
 const page=fs.readFileSync(path.join(root,"..","index.html"),"utf8");
 assert(!page.includes("eye-261012-q1.html"),"A development-only entrance leaked to public index");
@@ -37,7 +37,7 @@ function mount(){
  const document={getElementById:id=>nodes.get(id),createElement:tag=>new Node(tag),body:new Node("body")};
  const stored=new Map(),localStorage={getItem:k=>stored.get(k)||null,setItem:(k,v)=>stored.set(k,v)};
  const fn=new Function("createDefaultCardRuleRegistry","CoreTurnSandboxEnvironment","runCoreTurnSandbox","BaselineCoreTurnAgent","document","window","localStorage","setInterval","clearInterval","URL","Blob",
-   main.replace(/^import [^\n]*\n/g,"")+"\nreturn {setPreset,prepareMulligan,confirmMulligan,mulliganState:()=>mulliganSession,engineState:()=>engine,gameState:()=>game,stepIndexState:()=>stepIndex,clickBasic,foldCard,branchAt,makeDropZone,saveBranch,stored,openBranch,pendingAttackDisplay,parseEnhanceAction,useCard,injectFixture:(env)=>{game={config:{chosen:[{n:[],s:[]},{n:[],s:[]}],first:1,seed:99},initial:env.initialState,opts:env.options,openingState:env.openingState,history:clone(env.history),done:false,winner:null,doneReason:null};engine=env;mode='manual';stepIndex=env.history.length;render();}};");
+   main.replace(/^import [^\n]*\n/g,"")+"\nreturn {setPreset,prepareMulligan,confirmMulligan,mulliganState:()=>mulliganSession,engineState:()=>engine,gameState:()=>game,stepIndexState:()=>stepIndex,clickBasic,foldCard,branchAt,seekStep,makeDropZone,saveBranch,stored,openBranch,pendingAttackDisplay,parseEnhanceAction,useCard,injectFixture:(env)=>{game={config:{chosen:[{n:[],s:[]},{n:[],s:[]}],first:1,seed:99},initial:env.initialState,opts:env.options,openingState:env.openingState,history:clone(env.history),done:false,winner:null,doneReason:null};engine=env;mode='manual';stepIndex=env.history.length;render();}};");
  const app=fn(api.createDefaultCardRuleRegistry,api.CoreTurnSandboxEnvironment,api.runCoreTurnSandbox,api.BaselineCoreTurnAgent,
    document,{addEventListener(){}},localStorage,()=>1,()=>{},{createObjectURL(){},revokeObjectURL(){}},class BlobStub{});
  app.setPreset(1);app.setPreset(2);
@@ -178,4 +178,67 @@ assert(css.includes(".resourceStat.flare .resourceNum{color:#bf324b}")&&css.incl
 assert(!html.includes('id="phaseStandard"')&&!html.includes('id="phaseFull"'),"Do not expose global standard/fullpower selectors");
 assert(html.includes('id="enhanceLessDust"')&&html.includes('id="enhanceMoreDust"')&&html.includes('id="enhanceConfirm"'),"Enhancement Japanese arrow chooser missing");
 
-console.log("PASS replay editor: manual mulligan, focus and facedown basics, drag play, saved branch and private placement");
+// Returning zero or one card with 要返し must be possible in the central board.
+{
+ const state={distance:4,dust:3};
+ for(const pid of [1,2]){
+   const p="p"+pid+"_";
+   for(const zone of ["hand","deck","discard","facedown","special","enhancement","using","outside"])state[p+zone]=[];
+   state[p+"card_status"]={};state[p+"special_status"]={};
+   Object.assign(state,{[p+"life"]:10,[p+"aura"]:3,[p+"flare"]:0,[p+"focus"]:0,[p+"freeze"]:0,
+     [p+"chara_ids"]:pid===1?[4,8]:[1,2]});
+ }
+ state.p1_hand=["p1n0"];state.p1_discard=["p1n1","p1n2"];
+ for(const [id,slug] of Object.entries({p1n0:"re_04_tokoyo_o_n_5",p1n1:"re_04_tokoyo_o_n_3",p1n2:"re_08_hagane_o_n_2"}))
+   state.p1_card_status[id]={Slug:slug,MainType:2,SubType:0,IsSpecial:false,Charge:0,TokenCharges:{}};
+ function fixture(){
+   const env=new api.CoreTurnSandboxEnvironment(state,{startingPlayer:1,openingSetup:false,turnsTaken:{1:1,2:1},randomizeHiddenDecks:false,maxTurns:12});
+   env.step(env.legalActions().find(x=>x.rule==="turn-main-fullpower"));
+   env.step(env.legalActions().find(x=>x.rule==="turn-use-card"&&x.cardId==="p1n0"));
+   return env;
+ }
+ {
+   const {app,nodes}=mount(),env=fixture();
+   app.injectFixture(env);
+   assert.equal(nodes.get("deckBottomChoice").classList.contains("hidden"),false);
+   assert.equal(nodes.get("deckBottomOptions").children.length,2);
+   assert.equal(nodes.get("legalAction").options.length,0,"Do not hide bottom choices in advanced selector");
+   nodes.get("deckBottomOptions").children[0].listeners.click();
+   assert.equal(env.state.p1_deck.length,1,"One chosen card should move to deck bottom");
+   assert.equal(nodes.get("deckBottomOptions").children.length,1);
+   nodes.get("deckBottomDone").listeners.click();
+   assert.equal(env.state.p1_deck.length,1,"Done must not move any extra card");
+   assert.equal(nodes.get("deckBottomChoice").classList.contains("hidden"),true);
+ }
+ {
+   const {app,nodes}=mount(),env=fixture();
+   app.injectFixture(env);
+   nodes.get("deckBottomDone").listeners.click();
+   assert.equal(env.state.p1_deck.length,0,"Zero-return option must be legal");
+   assert.equal(env.state.p1_discard.length>=2,true,"Unselected cards must remain in discard");
+ }
+ {
+   const {app,nodes}=mount(),env=fixture();
+   app.injectFixture(env);
+   nodes.get("deckBottomOptions").children[0].listeners.click();
+   nodes.get("deckBottomOptions").children[0].listeners.click();
+   assert.equal(env.state.p1_deck.length,2,"Two cards should return without another prompt");
+ }
+}
+{
+ const {app,nodes}=mount();
+ app.prepareMulligan("ai");app.confirmMulligan();
+ const originalActions=app.gameState().history.length;
+ assert(originalActions>5);
+ app.seekStep(0);
+ assert.equal(app.stepIndexState(),0);
+ assert.equal(app.gameState().history.length,originalActions,"Rewinding alone must retain future");
+ assert.equal(nodes.get("phaseEnd").disabled,false);
+ nodes.get("phaseEnd").listeners.click();
+ assert(app.gameState().history.length<originalActions,"A newly selected action must fork at rewind point");
+ const source=app.stored().find(x=>x.actions.length===originalActions);
+ assert(source,"Original replay must be auto-preserved among saved branches");
+ app.openBranch(source);
+ assert.equal(app.gameState().history.length,originalActions,"Original replay must restore");
+}
+console.log("PASS replay editor: rewind-branch, optional 要返し return, mulligan, basics, drag play and saved source");
