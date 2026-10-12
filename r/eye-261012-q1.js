@@ -711,7 +711,7 @@ function seekStep(step){
     const env=new CoreTurnSandboxEnvironment(game.initial,game.opts);
     if(JSON.stringify(env.openingState)!==JSON.stringify(game.openingState))throw Error("初期局面を再現できません");
     for(const row of game.history.slice(0,target))env.step(row.action);
-    if(JSON.stringify(env.state)!==JSON.stringify(stepRows()[target].after))throw Error("指定局面の状態に一致しません");
+    if(target>0 && JSON.stringify(env.state)!==JSON.stringify(stepRows()[target].after))throw Error("指定局面の状態に一致しません");
     engine=env;stepIndex=target;
     if(mode==="replay")mode="manual";
     pendingFoldCard=null;pendingBasic=null;pendingFullPowerCard=null;enhanceSelectedKey=null;
