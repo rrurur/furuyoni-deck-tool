@@ -294,7 +294,7 @@ function sideBoard(target,st,pid,current,hidden=false){
   head.append(turnInfo);target.append(head);
   const layout=document.createElement("div");layout.className="playerLayout";
   const hand=document.createElement("div");hand.className="handDock";
-  addZone(hand,"手札",st["p"+pid+"_hand"]||[],st,pid,{mask:hidden,zone:"hand"});
+  addZone(hand,"手札",(st["p"+pid+"_hand"]||[]).filter(id=>!(canControl(pid)&&pendingFoldCard===id)),st,pid,{mask:hidden,zone:"hand"});
   const special=document.createElement("div");special.className="specialInHand";
   addZone(special,"切札",st["p"+pid+"_special"]||[],st,pid,{mask:hidden,special:true,zone:"special"});
   hand.append(special);
@@ -308,7 +308,9 @@ function sideBoard(target,st,pid,current,hidden=false){
   discard.append(enhancement);
   const facedown=document.createElement("div");facedown.className="facedownDock";
   facedown.append(makeDropZone(pid,"fold"));
-  addZone(facedown,"伏せ札",st["p"+pid+"_facedown"]||[],st,pid,{mask:hidden,zone:"facedown"});
+  const facedownIds=[...(st["p"+pid+"_facedown"]||[])];
+  if(canControl(pid)&&pendingFoldCard)facedownIds.push(pendingFoldCard);
+  addZone(facedown,"伏せ札",facedownIds,st,pid,{mask:true,zone:"facedown"});
   const deck=document.createElement("div");deck.className="zoneHeading";
   deck.className="deckBack";
   const back=document.createElement("img");back.src="https://furuyoni-diary-1918f.web.app/assets/replay/images/cardback_normal.png";back.alt="山札の裏面";deck.append(back);
@@ -408,6 +410,16 @@ function describeAction(action){
     const pid=engine.currentPlayer(),slug=cardOf(engine.state,pid,action.cost.cardId);
     label+="（"+cardName(slug)+"を伏せる）";
   }else if(action.cost?.type==="focus")label+="（集中力）";
+  if(action.rule==="turn-main-enhancement-choice"){
+    const found=/^d(\d+):a(\d+)$/.exec(String(action.choice||""));
+    if(found)label="付与：ダスト"+Number(found[1])+"・オーラ"+Number(found[2]);
+  }
+  if(action.rule==="turn-use-card"&&action.cardId!=null){
+    const slug=cardOf(engine.state,engine.currentPlayer(),action.cardId);label="カード使用："+cardName(slug);
+  }
+  if(action.rule==="turn-attack-respond"&&action.cardId!=null){
+    const slug=cardOf(engine.state,engine.currentPlayer(),action.cardId);label="対応："+cardName(slug);
+  }
   return label;
 }
 function refreshActions(){
