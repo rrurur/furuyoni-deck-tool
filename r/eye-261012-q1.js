@@ -396,6 +396,10 @@ function refreshActions(){
     const button=$(id),can=legal.some(x=>x.rule===rule);button.disabled=!can;
     button.classList.toggle("available",can);
   }
+  for(const [id,choice] of [["damageAura","aura"],["damageLife","life"]]){
+    const button=$(id),available=legal.some(a=>a.rule==="turn-attack-damage"&&a.damageChoice===choice);
+    button.disabled=!available;button.classList.toggle("available",available);
+  }
   for(const button of $("basicToolbar").querySelectorAll("button[data-basic]")){
     const kind=Number(button.dataset.basic);
     const available=legal.some(a=>a.rule==="core-standard-basic"&&Number(a.basicAction)===kind)||
@@ -503,7 +507,7 @@ function useCard(pid,id){
   const slug=cardOf(engine.state,pid,id),rule=reg.get(slug)?.mainUse;
   if(!rule){$("playError").textContent="使用できないカードです。";return;}
   const legal=legalForControl();
-  let move=legal.find(a=>a.rule==="turn-use-card"&&String(a.cardId)===id);
+  let move=legal.find(a=>["turn-use-card","turn-attack-respond"].includes(a.rule)&&String(a.cardId)===id);
   const phaseRule=rule.fullPower?"turn-main-fullpower":"turn-main-standard";
   const phase=legal.find(a=>a.rule===phaseRule);
   try{
@@ -670,6 +674,13 @@ $("performAction").addEventListener("click",chooseMove);
 $("phaseStandard").addEventListener("click",()=>playPhase("turn-main-standard"));
 $("phaseFull").addEventListener("click",()=>playPhase("turn-main-fullpower"));
 $("phaseEnd").addEventListener("click",()=>playPhase("sandbox-end-turn"));
+for(const [id,choice] of [["damageAura","aura"],["damageLife","life"]]){
+  $(id).addEventListener("click",()=>{
+    const move=legalForControl().find(a=>a.rule==="turn-attack-damage"&&a.damageChoice===choice);
+    if(move)try{commitAction(move)}catch(e){$("playError").textContent=String(e.message||e);}
+  });
+}
+
 for(const button of $("basicToolbar").querySelectorAll("button[data-basic]")){
   button.addEventListener("click",()=>clickBasic(Number(button.dataset.basic)));
 }
