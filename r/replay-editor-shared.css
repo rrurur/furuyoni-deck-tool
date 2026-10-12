@@ -71,3 +71,6 @@
 .stepList{max-height:330px}
 @media(max-width:1130px){.replayLayout{grid-template-columns:minmax(0,1fr)}.playerLayout{grid-template-columns:minmax(160px,1.8fr) minmax(120px,1fr) minmax(120px,1fr) minmax(145px,1fr)}}
 @media(max-width:690px){.playerLayout{grid-template-columns:minmax(180px,2fr) minmax(125px,1fr);gap:7px}.resourceDock{grid-column:2;grid-row:2}.facedownDock{grid-column:1;grid-row:2}.mainControlBar{position:static}.resourceStat .resourceNum{font-size:25px}.smallCard{width:54px;flex-basis:54px}.smallCard img{width:52px;height:74px}}
+
+.smallCard.pendingCost{opacity:.38;outline:2px dashed #608bb6;outline-offset:2px}
+.dropArea.pendingFoldDrop{border-color:#3973ab;background:#e0effc;min-height:95px;color:#245a86}
