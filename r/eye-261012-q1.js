@@ -361,29 +361,161 @@ function render(){
   loadCurrentReview();
   refreshSaved();
 }
+function legalForControl(){
+  if(!engine||engine.done||stepIndex!==game.history.length)return [];
+  if(mode==="human"&&engine.currentPlayer()!==human)return [];
+  if(mode!=="human"&&mode!=="manual")return [];
+  return engine.legalActions();
+}
+function setHint(message){$("operationHint").textContent=message;}
+function describeAction(action){
+  let label=String(action.label||action.kind||action.rule||"");
+  if(action.cost?.type==="facedown"&&action.cost.cardId!=null){
+    const pid=engine.currentPlayer(),slug=cardOf(engine.state,pid,action.cost.cardId);
+    label+="（"+cardName(slug)+"を伏せる）";
+  }else if(action.cost?.type==="focus")label+="（集中力）";
+  return label;
+}
 function refreshActions(){
-  $("legalAction").replaceChildren();const active=!!engine&&!engine.done;
-  const myTurn=active && (mode==="manual" || engine.currentPlayer()===human);
-  const candidates=myTurn?engine.legalActions():[];
-  for(const [i,action] of candidates.entries()){
+  const legal=legalForControl(),active=legal.length>0;
+  $("legalAction").replaceChildren();
+  for(const [i,action] of legal.entries()){
     const option=document.createElement("option");option.value=String(i);
-    const cost=action.cost?.type==="facedown"?"（伏せ札:"+String(action.cost.cardId)+")":
-      action.cost?.type==="focus"?"（集中力）":"";
-    option.textContent=(action.label||action.kind||action.rule)+cost;$("legalAction").append(option);
+    option.textContent=describeAction(action);$("legalAction").append(option);
   }
-  $("legalAction").disabled=$("performAction").disabled=!myTurn||!candidates.length;
+  $("legalAction").disabled=$("performAction").disabled=!active;
+  const phaseBtns=[["phaseStandard","turn-main-standard"],["phaseFull","turn-main-fullpower"],["phaseEnd","sandbox-end-turn"]];
+  for(const [id,rule]of phaseBtns){
+    const button=$(id),can=legal.some(x=>x.rule===rule);button.disabled=!can;
+    button.classList.toggle("available",can);
+  }
+  for(const button of $("basicToolbar").querySelectorAll("button[data-basic]")){
+    const kind=Number(button.dataset.basic);
+    const available=legal.some(a=>a.rule==="core-standard-basic"&&Number(a.basicAction)===kind)||
+      legal.some(a=>a.rule==="turn-main-standard");
+    button.disabled=!available;
+    button.classList.toggle("available",available);
+    button.classList.toggle("pending",pendingBasic===kind);
+  }
+}
+function synchronizeFromEngine(){
+  if(!engine)return;
+  game.history=clone(engine.history);
+  game.done=engine.done;game.winner=engine.winner;game.doneReason=engine.doneReason;
+  if(mode==="human")advanceAI();
+  stepIndex=game.history.length;
+  render();
+}
+function commitAction(action){
+  if(!engine||!action)throw Error("実行可能な行動がありません");
+  engine.step(action);
+  pendingFoldCard=null;pendingBasic=null;
+  $("playError").textContent="";
+  setHint("基本動作はボタン、カードは手札から使用欄へドラッグ。伏せ札へのドラッグ後は基本動作を選択してください。");
+  synchronizeFromEngine();
+}
+function playPhase(rule){
+  const found=legalForControl().find(a=>a.rule===rule);
+  if(!found){$("playError").textContent="現在このフェイズ行動は実行できません。";return;}
+  try{commitAction(found)}catch(e){$("playError").textContent=String(e.message||e);}
+}
+function previewWithPhase(phase,matching){
+  const sim=new CoreTurnSandboxEnvironment(game.initial,game.opts);
+  for(const entry of engine.history)sim.step(entry.action);
+  sim.step(phase);
+  return sim.legalActions().find(matching)||null;
+}
+function performBasic(kind,cardId=null){
+  if(!engine||!legalForControl().length)return false;
+  let choices=legalForControl(),wanted=choices.find(a=>a.rule==="core-standard-basic"&&
+    Number(a.basicAction)===kind&&(
+      cardId!=null ? a.cost?.type==="facedown"&&String(a.cost.cardId)===String(cardId)
+                   : a.cost?.type==="focus"
+    ));
+  const phase=choices.find(a=>a.rule==="turn-main-standard");
+  try{
+    if(!wanted&&phase){
+      wanted=previewWithPhase(phase,a=>a.rule==="core-standard-basic"&&
+        Number(a.basicAction)===kind&&(
+          cardId!=null?a.cost?.type==="facedown"&&String(a.cost.cardId)===String(cardId)
+                      :a.cost?.type==="focus"
+        ));
+      if(wanted){
+        engine.step(phase);
+        wanted=engine.legalActions().find(a=>a.rule==="core-standard-basic"&&
+          Number(a.basicAction)===kind&&
+          (cardId!=null?a.cost?.type==="facedown"&&String(a.cost.cardId)===String(cardId):a.cost?.type==="focus"));
+      }
+    }
+    if(!wanted)return false;
+    commitAction(wanted);return true;
+  }catch(error){$("playError").textContent=String(error.message||error);return false;}
+}
+function clickBasic(kind){
+  if(!legalForControl().length)return;
+  if(pendingFoldCard){
+    if(performBasic(kind,pendingFoldCard))return;
+    $("playError").textContent="このカードを伏せて「"+({1:"前進",2:"後退",3:"纏い",4:"宿し",5:"離脱"}[kind]||kind)+"」は実行できません。";
+    return;
+  }
+  if(performBasic(kind))return;
+  const phase=legalForControl().find(a=>a.rule==="turn-main-standard");
+  let facedownLegal=legalForControl().some(a=>a.rule==="core-standard-basic"&&Number(a.basicAction)===kind&&a.cost?.type==="facedown");
+  if(!facedownLegal&&phase)facedownLegal=!!previewWithPhase(phase,a=>a.rule==="core-standard-basic"&&Number(a.basicAction)===kind&&a.cost?.type==="facedown");
+  if(facedownLegal){
+    pendingBasic=kind;$("playError").textContent="";
+    setHint("「"+({1:"前進",2:"後退",3:"纏い",4:"宿し",5:"離脱"}[kind]||kind)+"」を選択中です。伏せる手札を右端の伏せ札欄へドラッグしてください。");
+    refreshActions();
+  }else $("playError").textContent="この基本動作は現在実行できません。";
+}
+function foldCard(pid,id){
+  if(!canControl(pid))return;
+  if(!(engine.state["p"+pid+"_hand"]||[]).includes(id)){
+    $("playError").textContent="手札からのみ伏せられます。";return;
+  }
+  if(pendingBasic){
+    if(performBasic(pendingBasic,id))return;
+    $("playError").textContent="この札を伏せた場合、選んだ基本動作は実行できません。";
+    return;
+  }
+  const legal=legalForControl();
+  const usable=legal.some(a=>a.rule==="core-standard-basic"&&a.cost?.type==="facedown"&&String(a.cost.cardId)===id)||
+    legal.some(a=>a.rule==="turn-main-standard");
+  if(!usable){$("playError").textContent="現在、この手札を伏せて基本動作を行えません。";return;}
+  pendingFoldCard=id;$("playError").textContent="";
+  const slug=cardOf(engine.state,pid,id);
+  setHint("「"+cardName(slug)+"」を伏せる札に指定しました。上の基本動作ボタンを押すと伏せ札に移して実行します。");
+  refreshActions();
+}
+function useCard(pid,id){
+  if(!canControl(pid))return;
+  if(!(engine.state["p"+pid+"_hand"]||[]).includes(id)&&
+     !(engine.state["p"+pid+"_special"]||[]).includes(id)){
+    $("playError").textContent="手札または切札から使用してください。";return;
+  }
+  const slug=cardOf(engine.state,pid,id),rule=reg.get(slug)?.mainUse;
+  if(!rule){$("playError").textContent="使用できないカードです。";return;}
+  const legal=legalForControl();
+  let move=legal.find(a=>a.rule==="turn-use-card"&&String(a.cardId)===id);
+  const phaseRule=rule.fullPower?"turn-main-fullpower":"turn-main-standard";
+  const phase=legal.find(a=>a.rule===phaseRule);
+  try{
+    if(!move &&phase){
+      const candidate=previewWithPhase(phase,a=>a.rule==="turn-use-card"&&String(a.cardId)===id);
+      if(candidate){
+        engine.step(phase);
+        move=engine.legalActions().find(a=>a.rule==="turn-use-card"&&String(a.cardId)===id);
+      }
+    }
+    if(!move){$("playError").textContent="「"+cardName(slug)+"」は現在使用できません（間合・コスト・行動種類を確認）。";return;}
+    commitAction(move);
+  }catch(e){$("playError").textContent=String(e.message||e);}
 }
 function chooseMove(){
-  if(!engine||engine.done)return;
-  try{
-    const index=Number($("legalAction").value),action=engine.legalActions()[index];
-    if(!action)throw Error("選択した行動がありません");
-    engine.step(action);
-    game.history=clone(engine.history);
-    game.done=engine.done;game.winner=engine.winner;game.doneReason=engine.doneReason;
-    if(mode==="human")advanceAI();
-    stepIndex=game.history.length;$("playError").textContent="";render();
-  }catch(e){$("playError").textContent=String(e.message||e);}
+  const legal=legalForControl();
+  const action=legal[Number($("legalAction").value)];
+  if(!action){$("playError").textContent="合法手を選択してください。";return;}
+  try{commitAction(action)}catch(e){$("playError").textContent=String(e.message||e);}
 }
 function advanceAI(){
   if(!engine)return;
@@ -517,6 +649,13 @@ $("autoReplay").addEventListener("click",()=>{
 $("branchManual").addEventListener("click",()=>branchAt(stepIndex,"manual"));
 $("branchHumanAI").addEventListener("click",()=>branchAt(stepIndex,"human"));
 $("performAction").addEventListener("click",chooseMove);
+$("phaseStandard").addEventListener("click",()=>playPhase("turn-main-standard"));
+$("phaseFull").addEventListener("click",()=>playPhase("turn-main-fullpower"));
+$("phaseEnd").addEventListener("click",()=>playPhase("sandbox-end-turn"));
+for(const button of $("basicToolbar").querySelectorAll("button[data-basic]")){
+  button.addEventListener("click",()=>clickBasic(Number(button.dataset.basic)));
+}
+
 $("saveBranch").addEventListener("click",saveBranch);
 $("loadBranch").addEventListener("click",()=>{try{const node=stored().find(x=>x.id===$("savedBranches").value);if(node)openBranch(node)}catch(e){$("playError").textContent=String(e.message||e)}});
 $("exportBranch").addEventListener("click",exportBranches);
