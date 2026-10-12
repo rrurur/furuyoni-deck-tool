@@ -3398,6 +3398,7 @@ export class CoreTurnSandboxEnvironment{
     this.pendingEnhancementDiscardSelected=null;
     this.pendingEnhancementTickPlayers=[];
     this.enhancementTickOwner=null;
+    this.skipFirstStartEnhancementRest=false;
     this.pendingCardDecision=null;
     this.pendingAttack=null;
     this.attackStack=[];
@@ -9210,6 +9211,11 @@ export class CoreTurnSandboxEnvironment{
       return;
     }
     this.enhancementTickOwner=null;
+    if(this.skipFirstStartEnhancementRest){
+      this.skipFirstStartEnhancementRest=false;
+      this._enterMainPhase(events);
+      return;
+    }
     this.phase="start-reconstruct";
     const beforeReconstruct=this._ruleHook("beforeReconstructionChoice",{events});
     if(beforeReconstruct.stop||this.done) return;
@@ -9503,8 +9509,10 @@ export class CoreTurnSandboxEnvironment{
     this.turnStartDistance=n(this.state.distance);
     this._resetPhaseAttackTracking();
     if(this.turnsTaken[pid]===0){
-      events.push({kind:"最初のターン開始フェイズ全処理スキップ",playerId:pid});
-      this._enterMainPhase(events);
+      events.push({kind:"最初のターン集中・ドロースキップ",playerId:pid});
+      this.pendingEnhancementTickPlayers=[pid,pid===1?2:1];
+      this.skipFirstStartEnhancementRest=true;
+      this._processNextStartEnhancementTick(events);
       return;
     }
     this.phase="start-effects";
