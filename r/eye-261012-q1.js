@@ -1,0 +1,401 @@
+import {createDefaultCardRuleRegistry,CoreTurnSandboxEnvironment,runCoreTurnSandbox,BaselineCoreTurnAgent} from "./engine-261012-q1.js";
+
+const $=id=>document.getElementById(id);
+const reg=createDefaultCardRuleRegistry();
+const sides={1:[4,8],2:[1,2]};
+const labels={1:["トコヨ","ハガネ"],2:["ユリナ","サイネ"]};
+const kinds={n:"normal",s:"special"};
+const decks={1:{n:new Set(),s:new Set()},2:{n:new Set(),s:new Set()}};
+let game=null,stepIndex=0,engine=null,agent=null,playTimer=null,mode="replay",human=1,reviews={};
+const ZONES=["hand","deck","discard","facedown","special","enhancement","using","outside"];
+const KEY="furuyoni-private-match-261012";
+const clone=v=>JSON.parse(JSON.stringify(v));
+const safeNum=(v,fall=0)=>Number.isFinite(Number(v))?Number(v):fall;
+function cardPool(player,kind){
+  const ids=sides[player];
+  return [...reg.rules.keys()].filter(slug=>ids.some(id=>slug.startsWith("re_"+String(id).padStart(2,"0")+"_"))&&new RegExp("_o_"+kind+"_[0-9]+$").test(slug)).sort((a,b)=>{
+    const ai=ids.findIndex(id=>a.startsWith("re_"+String(id).padStart(2,"0")+"_"));
+    const bi=ids.findIndex(id=>b.startsWith("re_"+String(id).padStart(2,"0")+"_"));
+    return ai-bi||Number(a.match(/_(\d+)$/)[1])-Number(b.match(/_(\d+)$/)[1]);
+  });
+}
+function cardName(slug){return reg.get(slug)?.name||slug;}
+function imageFor(slug){return "https://furuyoni-diary-1918f.web.app/assets/replay/images/"+(slug.startsWith("re_")?"na_"+slug.slice(3):slug)+".png";}
+function imgCard(slug,small=false){
+  const img=document.createElement("img");img.src=imageFor(slug);img.alt=cardName(slug);img.loading="lazy";
+  img.addEventListener("error",()=>{const fallback=document.createElement("span");fallback.className="fallback";fallback.textContent=cardName(slug);img.replaceWith(fallback);},{once:true});
+  if(!small)img.className="cardImage";
+  return img;
+}
+function selectCard(player,kind,slug){
+  const chosen=decks[player][kind],cap=kind==="n"?7:3;
+  if(chosen.has(slug))chosen.delete(slug);
+  else if(chosen.size<cap)chosen.add(slug);
+  else{$("buildError").textContent=(kind==="n"?"通常札7枚":"切札3枚")+"を超えて選択できません。";return;}
+  $("buildError").textContent="";refreshDeck();
+}
+function renderDeckChoices(player){
+  const parent=$("choices"+player);parent.replaceChildren();
+  for(const kind of ["n","s"]){
+    const box=document.createElement("section");box.className="deckGroup";
+    const title=document.createElement("div");title.className="deckGroupTitle";title.textContent=kind==="n"?"通常札（7枚選択）":"切札（3枚選択）";box.append(title);
+    const grid=document.createElement("div");grid.className="choiceGrid";
+    for(const slug of cardPool(player,kind)){
+      const button=document.createElement("button");button.type="button";button.className="choice";
+      if(decks[player][kind].has(slug))button.classList.add("selected");
+      button.setAttribute("aria-pressed",String(decks[player][kind].has(slug)));
+      button.append(imgCard(slug));
+      const sub=document.createElement("span");sub.className="cardName";sub.textContent=cardName(slug);button.append(sub);
+      const source=document.createElement("span");source.className="kind";
+      source.textContent=labels[player][sides[player].findIndex(id=>slug.startsWith("re_"+String(id).padStart(2,"0")+"_"))]||"";button.append(source);
+      button.addEventListener("click",()=>selectCard(player,kind,slug));grid.append(button);
+    }
+    box.append(grid);parent.append(box);
+  }
+}
+function refreshDeck(){
+  for(const p of [1,2]){
+    $("count"+p).textContent="通常札 "+decks[p].n.size+"/7 ｜ 切札 "+decks[p].s.size+"/3";
+    renderDeckChoices(p);
+  }
+  const ready=[1,2].every(p=>decks[p].n.size===7&&decks[p].s.size===3);
+  $("startAIVsAI").disabled=$("startHumanVsAI").disabled=!ready;
+}
+function setPreset(pid){
+  // An optional reproducible O/O example; unlike old sampled variants, it
+  // does not silently choose the negative-tempo opening 気炎万丈.
+  const pick=pid===1?{
+    n:["re_04_tokoyo_o_n_2","re_04_tokoyo_o_n_3","re_04_tokoyo_o_n_4","re_08_hagane_o_n_3","re_08_hagane_o_n_4","re_08_hagane_o_n_5","re_08_hagane_o_n_6"],
+    s:["re_04_tokoyo_o_s_2","re_08_hagane_o_s_1","re_08_hagane_o_s_3"]
+  }:{
+    n:["re_01_yurina_o_n_1","re_01_yurina_o_n_2","re_01_yurina_o_n_3","re_01_yurina_o_n_4","re_01_yurina_o_n_5","re_02_saine_o_n_2","re_02_saine_o_n_3"],
+    s:["re_01_yurina_o_s_1","re_01_yurina_o_s_2","re_02_saine_o_s_1"]
+  };
+  for(const kind of ["n","s"]){
+    const pool=new Set(cardPool(pid,kind));
+    if(pick[kind].some(x=>!pool.has(x)))throw Error("構築例のカードが登録されていません。");
+    decks[pid][kind]=new Set(pick[kind]);
+  }
+  refreshDeck();
+}
+function selectedDecks(){return [1,2].map(p=>({n:[...decks[p].n],s:[...decks[p].s]}));}
+function options(first,seed){
+  return {startingPlayer:first,turnsTaken:{1:0,2:0},openingSetup:true,maxTurns:96,maxActions:3500,
+    openingMulliganRate:.35,randomizeHiddenDecks:true,chanceSeed:seed,
+    seed1:seed*3+1,seed2:seed*3+2,endTurnRate:.18};
+}
+function initializeState(chosen){
+  const state={distance:10,dust:0};
+  for(const pid of [1,2]){
+    const prefix="p"+pid+"_";const deck=chosen[pid-1];
+    if(deck.n.length!==7||deck.s.length!==3||new Set([...deck.n,...deck.s]).size!==10)
+      throw Error("各プレイヤーは通常札7枚・切札3枚を選択してください。");
+    for(const zone of ZONES)state[prefix+zone]=[];
+    for(const key of ["flare","focus","freeze"])state[prefix+key]=0;
+    state[prefix+"life"]=10;state[prefix+"aura"]=3;
+    state[prefix+"chara_ids"]=sides[pid];
+    state[prefix+"card_status"]={};state[prefix+"special_status"]={};
+    for(const kind of ["n","s"])deck[kind].forEach((slug,i)=>{
+      if(!cardPool(pid,kind).includes(slug))throw Error("選択できないカード: "+slug);
+      const rule=reg.get(slug);
+      const id="p"+pid+kind+i,p=prefix;
+      state[p+"card_status"][id]={Slug:slug,
+        MainType:rule?.mainUse?.kind==="attack-card"?1:rule?.mainUse?.kind==="enhancement-card"?3:2,
+        SubType:rule?.response?1:0,IsSpecial:kind==="s",Charge:0,TokenCharges:{}};
+      if(kind==="s"){state[p+"special"].push(id);state[p+"special_status"][id]=0;}
+      else state[p+(i<3?"hand":"deck")].push(id);
+    });
+  }
+  return state;
+}
+function configuration(){
+  const chosen=selectedDecks(),first=Number($("firstPlayer").value);
+  const seed=Number($("seed").value);
+  if(!Number.isInteger(seed)||seed<1||seed>999999999)throw Error("山札乱数は1～999999999の整数で指定してください。");
+  return {chosen,first,seed};
+}
+function signature(g){
+  return JSON.stringify({chosen:g.config.chosen,first:g.config.first,seed:g.config.seed});
+}
+function makeGame(config){
+  const state=initializeState(config.chosen),opts=options(config.first,config.seed);
+  return {config:clone(config),initial:state,opts,openingState:null,history:[],done:false,doneReason:"",winner:null,mode:"replay"};
+}
+function setView(){
+  $("builder").classList.add("hidden");$("replayPane").classList.remove("hidden");
+  $("revealOpponent").checked=false;$("playError").textContent="";
+}
+function beginAIMatch(){
+  try{
+    stopReplay();const config=configuration();const g=makeGame(config);
+    const result=runCoreTurnSandbox(g.initial,g.opts);
+    if(!result.ok||result.invariantErrors.length||![1,2].includes(result.winner)){
+      throw Error("AI対戦処理が正常に決着しませんでした: "+result.doneReason);
+    }
+    g.history=result.history;g.openingState=result.openingState;g.done=true;g.winner=result.winner;g.doneReason=result.doneReason;g.actions=result.actions;
+    game=g;engine=null;mode="replay";human=Number($("humanSide").value)||1;
+    stepIndex=0;setView();reviews={};render();
+  }catch(error){$("buildError").textContent=String(error.message||error);}
+}
+function beginHumanMatch(){
+  try{
+    stopReplay();const g=makeGame(configuration());const env=new CoreTurnSandboxEnvironment(g.initial,g.opts);
+    g.openingState=clone(env.openingState);
+    game=g;engine=env;mode="human";human=Number($("humanSide").value)||1;agent=new BaselineCoreTurnAgent(g.config.seed*3+999,.18);
+    stepIndex=0;setView();reviews={};advanceAI();render();
+  }catch(error){$("buildError").textContent=String(error.message||error);}
+}
+function stepRows(){return game?[{turn:0,actor:0,phase:"initial",action:null,after:game.openingState,events:[]},...game.history]:[];}
+function cardOf(state,pid,id){
+  const slug=state["p"+pid+"_card_status"]?.[String(id)]?.Slug;
+  return slug||"";
+}
+function makeSmallCard(state,pid,id,{mask=false,used=false,enh=false}={}){
+  const span=document.createElement("div");span.className="smallCard"+(used?" used":"");
+  if(mask){
+    const img=document.createElement("img");img.alt="非公開";img.src="https://furuyoni-diary-1918f.web.app/assets/replay/images/cardback_normal.png";span.append(img);
+  }else{
+    const slug=cardOf(state,pid,id);
+    if(slug)span.append(imgCard(slug,true));
+    else{const div=document.createElement("span");div.className="fallback";div.textContent="?";span.append(div);}
+    span.title=slug?cardName(slug):"";
+    if(enh){
+      const charge=Number(state["p"+pid+"_card_status"]?.[String(id)]?.Charge||0);
+      if(charge){const t=document.createElement("div");t.className="charge";t.textContent="● "+charge;span.append(t);}
+    }
+  }
+  return span;
+}
+function addZone(target,name,ids,state,pid,{mask=false,enh=false,special=false}={}){
+  const label=document.createElement("div");label.className="zoneHeading";label.textContent=name+" "+ids.length;target.append(label);
+  const area=document.createElement("div");area.className="zoneCards";
+  for(const id of ids){const used=special&&Number(state["p"+pid+"_special_status"]?.[String(id)]||0)===2;
+    area.append(makeSmallCard(state,pid,id,{mask:mask&&!used,used,enh}));}
+  target.append(area);
+}
+function sideBoard(target,st,pid,current,hidden=false){
+  target.replaceChildren();target.classList.toggle("active",current===pid);
+  const head=document.createElement("div");head.className="sideTitle";
+  head.textContent=(pid===1?"扇槌（トコヨ・ハガネ）":"刀薙（ユリナ・サイネ）");
+  const res=document.createElement("div");res.className="res";
+  for(const [k,name] of [["life","ライフ"],["aura","オーラ"],["focus","集中"],["flare","フレア"],["freeze","凍結"]]){
+    const t=document.createElement("span");t.textContent=name+" "+Number(st["p"+pid+"_"+k]||0);res.append(t);
+  }
+  target.append(head,res);
+  addZone(target,"手札",st["p"+pid+"_hand"]||[],st,pid,{mask:hidden});
+  addZone(target,"切札",st["p"+pid+"_special"]||[],st,pid,{mask:hidden,special:true});
+  addZone(target,"展開中",st["p"+pid+"_enhancement"]||[],st,pid,{enh:true});
+  addZone(target,"捨て札",st["p"+pid+"_discard"]||[],st,pid,{});
+  addZone(target,"伏せ札",st["p"+pid+"_facedown"]||[],st,pid,{mask:hidden});
+  const deck=document.createElement("div");deck.className="zoneHeading";deck.textContent="山札 "+(st["p"+pid+"_deck"]||[]).length+"枚";target.append(deck);
+}
+function eventText(e,st){
+  const pieces=[String(e?.kind||e||"")];
+  if(e?.cardId!=null){const id=String(e.cardId),pid=id.startsWith("p1")?1:2;const s=cardOf(st,pid,id);if(s)pieces.push(cardName(s));}
+  if(e?.choice!=null)pieces.push("選択: "+String(e.choice));
+  if(e?.moved!=null)pieces.push("移動: "+String(e.moved));
+  if(e?.amount!=null)pieces.push("量: "+String(e.amount));
+  if(e?.auraDamage!=null||e?.lifeDamage!=null)pieces.push(String(e.auraDamage??"-")+"/"+String(e.lifeDamage??"-"));
+  return pieces.join(" / ");
+}
+function render(){
+  if(!game)return;
+  const rows=stepRows();stepIndex=Math.max(0,Math.min(rows.length-1,stepIndex));
+  const entry=rows[stepIndex],st=entry.after,actor=entry.actor;
+  const hiddenSide=mode==="human"?3-human:2,hide=!$("revealOpponent").checked;
+  sideBoard($("topSide"),st,2,actor,hide&&hiddenSide===2);
+  sideBoard($("bottomSide"),st,1,actor,hide&&hiddenSide===1);
+  const rawTurn=Number(entry.turn)||0;
+  $("position").textContent="間合 "+st.distance+"　ダスト "+st.dust;
+  $("moveTitle").textContent=(rawTurn?"T"+Math.ceil(rawTurn/2)+"／"+(rawTurn%2?"先行":"後攻"):"初期局面")+
+    "　"+String(entry.action?.label||"マリガン");
+  const source=entry.action?.cardId,cardId=String(source??""),pid=cardId.startsWith("p1")?1:2;
+  $("currentCard").replaceChildren();
+  if(source && cardOf(st,pid,source)){
+    const node=makeSmallCard(st,pid,source);
+    $("currentCard").append(node);
+  }
+  $("eventLog").textContent=(entry.events||[]).map(e=>eventText(e,st)).join("\n");
+  const full=game.done?("勝者: "+(game.winner===1?"扇槌":"刀薙")+" ／ "+game.doneReason):"対戦途中";
+  $("matchSummary").textContent=full+" ／ "+game.history.length+"操作 ／ 初期間合10・ダスト0・手札3";
+  $("stepCount").textContent=stepIndex+"/"+(rows.length-1);
+  $("prevStep").disabled=$("firstStep").disabled=stepIndex<=0;
+  $("nextStep").disabled=$("lastStep").disabled=stepIndex===rows.length-1;
+  $("history").replaceChildren();
+  rows.forEach((row,i)=>{
+    const btn=document.createElement("button");btn.type="button";btn.className="stepLink"+(i===stepIndex?" current":"");
+    btn.textContent=i+" | "+(row.turn?"T"+Math.ceil(row.turn/2)+" ":"")+String(row.action?.label||"初期局面");
+    btn.addEventListener("click",()=>{stopReplay();stepIndex=i;render()});$("history").append(btn);
+  });
+  $("history").querySelector(".current")?.scrollIntoView({block:"nearest"});
+  refreshActions();
+  loadCurrentReview();
+  refreshSaved();
+}
+function refreshActions(){
+  $("legalAction").replaceChildren();const active=!!engine&&!engine.done;
+  const myTurn=active && (mode==="manual" || engine.currentPlayer()===human);
+  const candidates=myTurn?engine.legalActions():[];
+  for(const [i,action] of candidates.entries()){
+    const option=document.createElement("option");option.value=String(i);
+    const cost=action.cost?.type==="facedown"?"（伏せ札:"+String(action.cost.cardId)+")":
+      action.cost?.type==="focus"?"（集中力）":"";
+    option.textContent=(action.label||action.kind||action.rule)+cost;$("legalAction").append(option);
+  }
+  $("legalAction").disabled=$("performAction").disabled=!myTurn||!candidates.length;
+}
+function chooseMove(){
+  if(!engine||engine.done)return;
+  try{
+    const index=Number($("legalAction").value),action=engine.legalActions()[index];
+    if(!action)throw Error("選択した行動がありません");
+    engine.step(action);
+    game.history=clone(engine.history);
+    game.done=engine.done;game.winner=engine.winner;game.doneReason=engine.doneReason;
+    if(mode==="human")advanceAI();
+    stepIndex=game.history.length;$("playError").textContent="";render();
+  }catch(e){$("playError").textContent=String(e.message||e);}
+}
+function advanceAI(){
+  if(!engine)return;
+  let iterations=0;
+  while(!engine.done && engine.currentPlayer()!==human && mode==="human"){
+    if(++iterations>400){$("playError").textContent="AIの連続手数上限です";break;}
+    const pid=engine.currentPlayer(),legal=engine.legalActions();
+    if(!legal.length)throw Error("AIの合法手がありません");
+    const chosen=agent.chooseAction({playerId:pid,observation:engine.observe(pid),legalActions:clone(legal),actionIndex:engine.history.length});
+    engine.step(chosen);
+  }
+  game.history=clone(engine.history);game.done=engine.done;game.winner=engine.winner;game.doneReason=engine.doneReason;
+}
+function branchAt(step,branchMode){
+  try{
+    stopReplay();if(!game)throw Error("対戦データがありません");
+    const rows=stepRows(),selected=rows[Math.max(0,Math.min(rows.length-1,step))];
+    const env=new CoreTurnSandboxEnvironment(game.initial,game.opts);
+    if(JSON.stringify(env.openingState)!==JSON.stringify(game.openingState))throw Error("初期局面を再現できません");
+    for(const prev of game.history.slice(0,step))env.step(prev.action);
+    if(JSON.stringify(env.state)!==JSON.stringify(selected.after))throw Error("指定局面の状態に一致しません");
+    engine=env;mode=branchMode;human=Number($("humanSide").value)||1;
+    agent=new BaselineCoreTurnAgent(game.config.seed*3+999,.18);
+    game.history=clone(env.history);game.done=env.done;game.winner=env.winner;game.doneReason=env.doneReason;
+    if(mode==="human")advanceAI();
+    stepIndex=game.history.length;$("playError").textContent="";render();
+  }catch(e){$("playError").textContent=String(e.message||e);}
+}
+function advanceStep(offset){stopReplay();stepIndex=Math.max(0,Math.min(stepRows().length-1,stepIndex+offset));render();}
+function stopReplay(){if(playTimer){clearInterval(playTimer);playTimer=null;$("autoReplay").textContent="自動再生";}}
+function download(name,data){
+  const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+  const a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2500);
+}
+function storageKey(){return KEY+":"+signature(game);}
+function stored(){try{const data=JSON.parse(localStorage.getItem(storageKey())||"[]");return Array.isArray(data)?data:[];}catch{return [];}}
+function refreshSaved(){
+  if(!game)return;
+  const previous=$("savedBranches").value;$("savedBranches").replaceChildren();
+  for(const node of stored()){const opt=document.createElement("option");opt.value=node.id;opt.textContent=node.id+" / "+node.actions.length+"手";$("savedBranches").append(opt);}
+  if([...$("savedBranches").options].some(x=>x.value===previous))$("savedBranches").value=previous;
+}
+function saveBranch(){
+  if(!game)return;
+  try{
+    const list=stored();const at=engine?game.history.length:stepIndex;
+    const actions=game.history.slice(0,at).map(x=>clone(x.action));
+    const lastState=at?game.history[at-1].after:game.openingState;
+    const item={id:String(Date.now())+"-"+Math.floor(Math.random()*1000),config:game.config,
+      actions,mode,human,signature:JSON.stringify(lastState),createdAt:new Date().toISOString()};
+    list.push(item);localStorage.setItem(storageKey(),JSON.stringify(list));refreshSaved();$("savedBranches").value=item.id;
+    $("playError").textContent="分岐を保存しました";
+  }catch(e){$("playError").textContent=String(e.message||e);}
+}
+function openBranch(node){
+  if(!node||!Array.isArray(node.actions)||node.actions.length>3500)throw Error("分岐の行動数が不正です");
+  const g=makeGame(node.config),env=new CoreTurnSandboxEnvironment(g.initial,g.opts);g.openingState=clone(env.openingState);
+  for(const action of node.actions)env.step(action);
+  if(JSON.stringify(env.state)!==node.signature)throw Error("保存した分岐と再計算した局面が異なります");
+  game=g;engine=env;mode=node.mode==="manual"?"manual":node.mode==="human"?"human":"manual";
+  human=Number(node.human)||1;g.history=clone(env.history);g.done=env.done;g.winner=env.winner;g.doneReason=env.doneReason;
+  agent=new BaselineCoreTurnAgent(g.config.seed*3+999,.18);
+  stepIndex=g.history.length;setView();render();
+}
+function exportBranches(){
+  if(!game)return;
+  if(!stored().length)saveBranch();
+  download("furuyoni_eye_branches.json",{kind:"furuyoni-eye-branches",version:1,config:game.config,branches:stored()});
+}
+async function importBranches(file){
+  try{
+    const json=JSON.parse(await file.text());
+    if(json.kind!=="furuyoni-eye-branches"||json.version!==1||!Array.isArray(json.branches))
+      throw Error("この画面の分岐JSONではありません");
+    const first=json.branches[0];
+    if(first && JSON.stringify(first.config)!==JSON.stringify(json.config))throw Error("構築が一致しません");
+    if(!game || signature(game)!==JSON.stringify({chosen:json.config.chosen,first:json.config.first,seed:json.config.seed})){
+      for(const pid of [1,2]){decks[pid].n=new Set(json.config.chosen[pid-1].n);decks[pid].s=new Set(json.config.chosen[pid-1].s);}
+      $("firstPlayer").value=String(json.config.first);$("seed").value=String(json.config.seed);refreshDeck();
+      game=makeGame(json.config);
+    }
+    const list=stored(),seen=new Set(list.map(x=>x.id));
+    for(const node of json.branches){
+      if(node.actions?.length>3500||!Array.isArray(node.actions))throw Error("行動データが不正です");
+      // Replay through the rules before retaining any imported branch.
+      const g=makeGame(node.config),env=new CoreTurnSandboxEnvironment(g.initial,g.opts);
+      for(const action of node.actions)env.step(action);
+      if(JSON.stringify(env.state)!==node.signature)throw Error("状態が一致しない分岐が含まれています");
+      if(!seen.has(node.id)){list.push(node);seen.add(node.id);}
+    }
+    localStorage.setItem(storageKey(),JSON.stringify(list));openBranch(list.at(-1));$("playError").textContent="読込完了";
+  }catch(e){$("playError").textContent=String(e.message||e);}
+}
+function feedbackKey(){return KEY+":reviews:"+signature(game);}
+function feedbackLoad(){try{return JSON.parse(localStorage.getItem(feedbackKey())||"{}")}catch{return {}}}
+function loadCurrentReview(){
+  if(!game)return;
+  reviews=feedbackLoad();const v=reviews[stepIndex]||{};
+  $("reviewNote").value=String(v.note||"");
+}
+function review(verdict){
+  if(!game)return;
+  reviews=feedbackLoad();
+  reviews[stepIndex]={verdict:verdict??reviews[stepIndex]?.verdict??"",note:$("reviewNote").value,
+    turn:stepRows()[stepIndex]?.turn,action:stepRows()[stepIndex]?.action?.label||"初期局面"};
+  localStorage.setItem(feedbackKey(),JSON.stringify(reviews));
+}
+function exportFeedback(){if(!game)return;review();download("furuyoni_eye_feedback.json",
+  {kind:"furuyoni-eye-feedback",version:1,config:game.config,review:feedbackLoad()});}
+
+$("preset1").addEventListener("click",()=>setPreset(1));$("preset2").addEventListener("click",()=>setPreset(2));
+for(const p of [1,2])$("clear"+p).addEventListener("click",()=>{decks[p].n.clear();decks[p].s.clear();refreshDeck()});
+$("startAIVsAI").addEventListener("click",beginAIMatch);
+$("startHumanVsAI").addEventListener("click",beginHumanMatch);
+$("backToDeck").addEventListener("click",()=>{stopReplay();$("replayPane").classList.add("hidden");$("builder").classList.remove("hidden");});
+$("revealOpponent").addEventListener("change",render);
+$("firstStep").addEventListener("click",()=>{stopReplay();stepIndex=0;render()});
+$("prevStep").addEventListener("click",()=>advanceStep(-1));
+$("nextStep").addEventListener("click",()=>advanceStep(1));
+$("lastStep").addEventListener("click",()=>{stopReplay();stepIndex=stepRows().length-1;render()});
+$("autoReplay").addEventListener("click",()=>{
+  if(playTimer){stopReplay();return;}
+  if(stepIndex>=stepRows().length-1)stepIndex=0;
+  $("autoReplay").textContent="停止";
+  playTimer=setInterval(()=>{if(stepIndex>=stepRows().length-1){stopReplay();return}stepIndex++;render()},600);
+});
+$("branchManual").addEventListener("click",()=>branchAt(stepIndex,"manual"));
+$("branchHumanAI").addEventListener("click",()=>branchAt(stepIndex,"human"));
+$("performAction").addEventListener("click",chooseMove);
+$("saveBranch").addEventListener("click",saveBranch);
+$("loadBranch").addEventListener("click",()=>{try{const node=stored().find(x=>x.id===$("savedBranches").value);if(node)openBranch(node)}catch(e){$("playError").textContent=String(e.message||e)}});
+$("exportBranch").addEventListener("click",exportBranches);
+$("importBranch").addEventListener("click",()=>$("importFile").click());
+$("importFile").addEventListener("change",async e=>{if(e.target.files?.[0])await importBranches(e.target.files[0]);e.target.value=""});
+for(const [id,val]of [["good","ok"],["bad","bad"],["unsure","uncertain"]])$(id).addEventListener("click",()=>review(val));
+$("saveReview").addEventListener("click",()=>review());
+$("exportReview").addEventListener("click",exportFeedback);
+window.addEventListener("keydown",e=>{
+  if(["INPUT","TEXTAREA","SELECT"].includes(e.target?.tagName)||!game||$("replayPane").classList.contains("hidden"))return;
+  if(e.key==="ArrowLeft"){e.preventDefault();advanceStep(-1);}
+  if(e.key==="ArrowRight"){e.preventDefault();advanceStep(1);}
+});
+refreshDeck();
