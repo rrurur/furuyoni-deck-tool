@@ -113,3 +113,8 @@
 .deckBack img,.smallCard.zoneFacedown img{background:#b0a3bb}
 .advancedActions select option{font-size:12px}
 @media(max-width:1120px){.playerLayout{grid-template-columns:minmax(150px,1.7fr) minmax(126px,1fr) minmax(120px,.9fr) minmax(140px,.85fr)}}
+
+.deckBottomOptions{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:7px}
+.deckBottomCard{display:flex;flex-direction:column;align-items:center;gap:3px;max-width:100px;padding:5px;min-width:74px;min-height:90px}
+.deckBottomCard img{width:52px;height:72px;object-fit:contain}
+.deckBottomCard span{font-size:11px;overflow-wrap:anywhere}
