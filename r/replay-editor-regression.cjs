@@ -153,4 +153,29 @@ assert.equal(main.includes('$("phaseStandard")'),false,"Do not show explicit sta
  nodes.get("fullPowerNormal").listeners.click();
  assert(env.history.some(x=>x.action.rule==="turn-main-standard"),"Normal Korunu card selects standard action implicitly");
 }
+// Both players' enhancements must decrement at the start of either player's turn.
+// Empty legacy TokenCharges maps still represent normal Sakura crystals by Charge.
+{
+ const state={distance:5,dust:0};
+ for(const pid of [1,2]){
+   const p="p"+pid+"_";
+   for(const zone of ["hand","deck","discard","facedown","special","enhancement","using","outside"])state[p+zone]=[];
+   state[p+"card_status"]={};state[p+"special_status"]={};
+   Object.assign(state,{[p+"life"]:10,[p+"aura"]:3,[p+"flare"]:0,[p+"focus"]:0,[p+"freeze"]:0,[p+"chara_ids"]:pid===1?[1,2]:[4,8]});
+   const id="p"+pid+"n0";
+   state[p+"card_status"][id]={Slug:pid===1?"re_01_yurina_o_n_6":"re_04_tokoyo_o_n_7",MainType:3,SubType:0,IsSpecial:false,Charge:3,TokenCharges:{}};
+   state[p+"enhancement"]=[id];
+ }
+ const env=new api.CoreTurnSandboxEnvironment(state,{startingPlayer:1,openingSetup:false,turnsTaken:{1:1,2:1},randomizeHiddenDecks:false,maxTurns:6});
+ env.step(env.legalActions().find(x=>x.rule==="turn-main-standard"));
+ env.step(env.legalActions().find(x=>x.rule==="sandbox-end-turn"));
+ assert.equal(env.state.p1_card_status.p1n0.Charge,2,"Own enhancement must tick at next player's turn start");
+ assert.equal(env.state.p2_card_status.p2n0.Charge,2,"Opponent enhancement must tick at next player's turn start");
+}
+assert(html.indexOf('id="basicToolbar"')>html.indexOf('class="centerboard"'),"Basic toolbar must be within center field");
+for(const resource of [".resourceStat.focus{grid-column:1;grid-row:1}",".resourceStat.flare{grid-column:2;grid-row:1}",".resourceStat.aura{grid-column:1;grid-row:2}",".resourceStat.life{grid-column:2;grid-row:2}",".smallCard.zoneFacedown",".deckBack img"])assert(css.includes(resource),"Replay layout resource/face-down regression "+resource);
+assert(css.includes(".resourceStat.flare .resourceNum{color:#bf324b}")&&css.includes(".resourceStat.life .resourceNum{color:#296fbd}"),"Flare red / life blue contract");
+assert(!html.includes('id="phaseStandard"')&&!html.includes('id="phaseFull"'),"Do not expose global standard/fullpower selectors");
+assert(html.includes('id="enhanceLessDust"')&&html.includes('id="enhanceMoreDust"')&&html.includes('id="enhanceConfirm"'),"Enhancement Japanese arrow chooser missing");
+
 console.log("PASS replay editor: manual mulligan, focus and facedown basics, drag play, saved branch and private placement");
