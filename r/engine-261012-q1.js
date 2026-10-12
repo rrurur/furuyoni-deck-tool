@@ -6916,6 +6916,13 @@ export class CoreTurnSandboxEnvironment{
         // At high life, spending the fullpower action to place it is usually
         // negative tempo; do not advertise it as a worthwhile opening.
         if(slug==="re_01_yurina_o_n_7" && n(this.state["p"+pid+"_life"])>3) return false;
+        // 要返し is a fullpower action. With no discard/facedown cards,
+        // its only possible effect is dust->aura (at most 2AP), less than
+        // the ~3AP standard-action opportunity cost.
+        if(slug==="re_04_tokoyo_o_n_5" &&
+           !arr(this.state["p"+pid+"_discard"]).length &&
+           !arr(this.state["p"+pid+"_facedown"]).length &&
+           !arr(this.state["p"+pid+"_chara_ids"]).some(id=>[10,12].includes(Number(id)))) return false;
         return !(
           Number.isFinite(Number(action?.baselineResourceOnlyApCeiling)) &&
           Number(action.baselineResourceOnlyApCeiling)<=1
@@ -11294,6 +11301,12 @@ export class BaselineCoreTurnAgent{
         .every(id=>Number(templateSpecialStatus?.[String(id)]||0)===2);
     };
     basics=basics.filter(action=>!unprimedMegalobell(action));
+    basics=basics.filter(action=>!(
+      action?.rule===TURN_USE_CARD &&
+      normalizeCardSlug(templateStatus?.[String(action.cardId)]?.Slug||"")==="re_04_tokoyo_o_n_5" &&
+      !arr(templateSelf.discard).length && !arr(templateSelf.facedown).length &&
+      !arr(templateSelf.characters).some(id=>[10,12].includes(Number(id)))
+    ));
     // A fullpower 気炎万丈 at life>3 supplies no current attack bonus.
     // Preserve 3AP of standard actions instead of speculative turn-one setup.
     basics=basics.filter(action=>!(
