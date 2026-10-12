@@ -1201,7 +1201,7 @@ function enhancementChargeInfo(state,playerId,cardId){
   const charaIds=state?.[`p${pid}_chara_ids`];
   const charasKnown=Array.isArray(charaIds);
   const hasMegumi=charasKnown&&charaIds.map(Number).includes(19);
-  if(tokenCharges){
+  if(tokenCharges && Object.keys(tokenCharges).length){
     const sakura=Math.max(0,Number(tokenCharges["1"])||0);
     const total=Object.values(tokenCharges).reduce((sum,x)=>sum+n(x),0);
     const special=Object.entries(tokenCharges).filter(([type,value])=>type!=="1"&&n(value)>0)
