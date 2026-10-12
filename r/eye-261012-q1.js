@@ -334,6 +334,22 @@ function eventText(e,st){
   if(e?.auraDamage!=null||e?.lifeDamage!=null)pieces.push(String(e.auraDamage??"-")+"/"+String(e.lifeDamage??"-"));
   return pieces.join(" / ");
 }
+function pendingAttackDisplay(rows,selected,st){
+  const responseRules=new Set(["turn-attack-respond","turn-attack-pass","turn-attack-damage","turn-response-effect-choice","turn-use-response"]);
+  if(!responseRules.has(String(rows[selected]?.action?.rule||"")))return null;
+  for(let i=selected;i>=0;i--){
+    const events=rows[i]?.events||[];
+    for(let j=events.length-1;j>=0;j--){
+      const e=events[j];
+      if(e?.kind!=="攻撃開始")continue;
+      const attacker=Number(e.attacker);
+      const statuses=st["p"+attacker+"_card_status"]||{};
+      const found=Object.entries(statuses).find(([,v])=>cardName(v.Slug)===e.label);
+      return {pid:attacker,id:found?.[0]||null,label:String(e.label||"攻撃")};
+    }
+  }
+  return null;
+}
 function render(){
   if(!game)return;
   const rows=stepRows();stepIndex=Math.max(0,Math.min(rows.length-1,stepIndex));
@@ -347,9 +363,17 @@ function render(){
     "　"+String(entry.action?.label||"マリガン");
   const source=entry.action?.cardId,cardId=String(source??""),pid=cardId.startsWith("p1")?1:2;
   $("currentCard").replaceChildren();
+  const attacking=pendingAttackDisplay(rows,stepIndex,st);
+  if(attacking){
+    const attack=document.createElement("div");attack.className="activeAttackPreview";
+    const label=document.createElement("span");label.textContent="処理中の攻撃："+attacking.label;attack.append(label);
+    if(attacking.id)attack.append(makeSmallCard(st,attacking.pid,attacking.id));
+    $("currentCard").append(attack);
+  }
   if(source && cardOf(st,pid,source)){
-    const node=makeSmallCard(st,pid,source);
-    $("currentCard").append(node);
+    const item=document.createElement("div");item.className="activeCardPreview";
+    if(attacking){const tag=document.createElement("span");tag.textContent="対応札";item.append(tag);}
+    item.append(makeSmallCard(st,pid,source));$("currentCard").append(item);
   }
   $("eventLog").textContent=(entry.events||[]).map(e=>eventText(e,st)).join("\n");
   const full=game.done?("勝者: "+(game.winner===1?"扇槌":"刀薙")+" ／ "+game.doneReason):"対戦途中";
