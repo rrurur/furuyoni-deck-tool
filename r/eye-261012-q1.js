@@ -7,7 +7,7 @@ const labels={1:["トコヨ","ハガネ"],2:["ユリナ","サイネ"]};
 const kinds={n:"normal",s:"special"};
 const decks={1:{n:new Set(),s:new Set()},2:{n:new Set(),s:new Set()}};
 let game=null,stepIndex=0,engine=null,agent=null,playTimer=null,mode="replay",human=1,reviews={};
-let mulliganSession=null,pendingFoldCard=null,pendingBasic=null;
+let mulliganSession=null,pendingFoldCard=null,pendingBasic=null,pendingFullPowerCard=null,enhanceSelectedKey=null;
 const ZONES=["hand","deck","discard","facedown","special","enhancement","using","outside"];
 const KEY="furuyoni-private-match-261012";
 const clone=v=>JSON.parse(JSON.stringify(v));
@@ -235,6 +235,7 @@ function makeSmallCard(state,pid,id,{mask=false,used=false,enh=false,zone=""}={}
     }
   }
   if(zone==="hand"&&pendingFoldCard===id)span.classList.add("pendingCost");
+  if(zone==="facedown")span.classList.add("zoneFacedown");
   const interactive=!mask&&canControl(pid)&&["hand","special"].includes(zone);
   if(interactive){
     span.draggable=true;span.classList.add("cardPlayable","cardClickable");
@@ -265,7 +266,7 @@ function makeDropZone(pid,type){
   hint.textContent=type==="play"?"通常札・切札を使う":"伏せる札を選び、基本動作を実行";box.append(hint);
   if(type==="fold"&&pendingFoldCard&&engine?.state?.["p"+pid+"_card_status"]?.[pendingFoldCard]){
     const slug=cardOf(engine.state,pid,pendingFoldCard);
-    title.textContent="伏せる予定："+cardName(slug);
+    title.textContent="伏せ札："+cardName(slug);
     const note=document.createElement("span");note.className="dropHint";note.textContent="基本動作ボタンを押して確定";box.append(note);
     box.classList.add("pendingFoldDrop");
   }
@@ -309,11 +310,13 @@ function sideBoard(target,st,pid,current,hidden=false){
   facedown.append(makeDropZone(pid,"fold"));
   addZone(facedown,"伏せ札",st["p"+pid+"_facedown"]||[],st,pid,{mask:hidden,zone:"facedown"});
   const deck=document.createElement("div");deck.className="zoneHeading";
-  deck.textContent="山札 "+(st["p"+pid+"_deck"]||[]).length+" 枚";
+  deck.className="deckBack";
+  const back=document.createElement("img");back.src="https://furuyoni-diary-1918f.web.app/assets/replay/images/cardback_normal.png";back.alt="山札の裏面";deck.append(back);
+  const count=document.createElement("strong");count.textContent=String((st["p"+pid+"_deck"]||[]).length)+"枚";deck.append(count);
   facedown.append(deck);
   const resources=document.createElement("div");resources.className="resourceDock";
   const resourceGrid=document.createElement("div");resourceGrid.className="resourceGrid";
-  for(const [key,name] of [["life","ライフ"],["aura","オーラ"],["flare","フレア"],["focus","集中力"]]){
+  for(const [key,name] of [["focus","集中力"],["flare","フレア"],["aura","オーラ"],["life","ライフ"]]){
     const item=document.createElement("div");item.className="resourceStat "+key;
     const label=document.createElement("span");label.className="resourceName";label.textContent=name;
     const value=document.createElement("strong");value.className="resourceNum";value.textContent=String(Number(st["p"+pid+"_"+key]||0));
