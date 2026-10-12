@@ -32,21 +32,25 @@
 <section id="replayPane" class="panel hidden">
 <div class="toolbar"><button id="backToDeck">眼前構築に戻る</button><button id="firstStep">最初</button><button id="prevStep">前</button><button id="nextStep">次</button><button id="lastStep">最後</button><button id="autoReplay">自動再生</button><span id="stepCount" class="counts"></span><label><input type="checkbox" id="revealOpponent">相手の非公開情報を表示</label></div>
 <div class="sub" id="matchSummary"></div>
-<div class="mainControlBar" id="mainControlBar">
-  <div class="actionCluster"><span class="actionCaption">フェイズ</span><button id="phaseStandard" type="button">標準行動</button><button id="phaseFull" type="button">全力行動</button><button id="phaseEnd" type="button">ターン終了</button></div>
-  <div class="actionCluster"><span class="actionCaption">攻撃の受け方</span><button id="damageAura" type="button">オーラ受け</button><button id="damageLife" type="button">ライフ受け</button></div>
-  <div class="actionCluster" id="basicToolbar"><span class="actionCaption">基本動作</span><button type="button" data-basic="1">前進</button><button type="button" data-basic="2">後退</button><button type="button" data-basic="3">纏い</button><button type="button" data-basic="4">宿し</button><button type="button" data-basic="5">離脱</button></div>
-</div>
-<div id="operationHint" class="operationHint">カードを使用欄へドラッグ。基本動作は上のボタンから操作できます。</div>
+<div id="operationHint" class="operationHint">手札・切札は使用欄へドラッグ。伏せ札にした札は基本動作の支払いに使います。</div>
 <div class="replayLayout">
 <div class="board">
 <section class="side" id="topSide"></section>
-<div class="centerboard"><div class="distance" id="position"></div><div id="moveTitle" style="font-weight:800"></div><div id="currentCard"></div><div class="eventLog" id="eventLog"></div></div>
+<div class="centerboard">
+<div class="distance" id="position"></div><div id="moveTitle" style="font-weight:800"></div>
+<div id="currentCard"></div>
+<div id="reconstructPanel" class="centralDecision hidden"><strong>開始フェイズ：山札を再構成しますか？</strong><div class="toolbar"><button id="reconstructYes" type="button" class="primary">再構成する</button><button id="reconstructNo" type="button">再構成しない</button></div></div>
+<div id="attackDecision" class="centralDecision hidden"><div class="attackNumbers"><div>オーラ <strong id="attackAuraValue">—</strong></div><div>ライフ <strong id="attackLifeValue">—</strong></div></div><div class="attackChoices"><button id="damageAura" type="button">オーラで受ける</button><button id="damageLife" type="button">ライフで受ける</button><button id="responsePass" type="button">対応しない</button></div></div>
+<div id="fullPowerChoice" class="centralDecision hidden"><strong id="fullPowerName"></strong><div class="toolbar"><button id="fullPowerNormal" type="button">通常使用</button><button id="fullPowerUse" type="button">全力化</button><button id="fullPowerCancel" type="button">キャンセル</button></div></div>
+<div id="enhancePlacement" class="centralDecision hidden"><strong>付与の結晶を選択</strong><div class="enhanceSplit"><div class="enhanceArrows"><button id="enhanceLessDust" type="button" aria-label="ダストを減らす">←</button><span>ダスト <strong id="enhanceDust">0</strong> ： オーラ <strong id="enhanceAura">0</strong></span><button id="enhanceMoreDust" type="button" aria-label="ダストを増やす">→</button></div><button id="enhanceConfirm" type="button" class="primary">決定</button></div></div>
+<div class="mainControlBar" id="mainControlBar"><div class="actionCluster" id="basicToolbar"><span class="actionCaption">基本動作</span><button type="button" data-basic="1">前進</button><button type="button" data-basic="2">後退</button><button type="button" data-basic="3">纏い</button><button type="button" data-basic="4">宿し</button><button type="button" data-basic="5">離脱</button></div><button id="phaseEnd" type="button">ターン終了</button></div>
+<div class="eventLog" id="eventLog"></div>
+</div>
 <section class="side" id="bottomSide"></section>
 </div>
 <aside class="editCol">
 <div class="panel"><div class="sectionLabel">操作履歴</div><div class="stepList" id="history"></div></div>
-<div class="panel"><div class="sectionLabel">選択局面から分岐</div><div class="toolbar"><button id="branchManual">両者を操作</button><button id="branchHumanAI">自分とAIで続行</button></div><details class="advancedActions"><summary>カード効果の選択・その他の合法手</summary><div class="sectionLabel">追加の選択肢</div><select id="legalAction" disabled></select><button id="performAction" disabled>選択した行動を実行</button></details><div id="playError" class="error"></div></div>
+<div class="panel"><div class="sectionLabel">選択局面から分岐</div><div class="toolbar"><button id="branchManual">両者を操作</button><button id="branchHumanAI">自分とAIで続行</button></div><details class="advancedActions"><summary>特殊効果・追加の選択肢</summary><div class="sectionLabel">追加の選択肢</div><select id="legalAction" disabled></select><button id="performAction" disabled>選択した行動を実行</button></details><div id="playError" class="error"></div></div>
 <div class="panel savePane"><div class="sectionLabel">分岐の保存と読込</div><div class="toolbar"><button id="saveBranch">保存</button><button id="exportBranch">JSON出力</button><button id="importBranch">JSON読込</button><input id="importFile" type="file" accept=".json" hidden></div><select id="savedBranches"></select><button id="loadBranch">保存した分岐を開く</button></div>
 <div class="panel reviewPane"><div class="sectionLabel">この行動へのフィードバック</div><div class="toolbar"><button id="good">問題なし</button><button id="bad">悪い判断</button><button id="unsure">保留</button></div><textarea id="reviewNote" placeholder="指摘と推奨行動を記入"></textarea><div class="toolbar"><button id="saveReview">評価を保存</button><button id="exportReview">評価JSON出力</button></div></div>
 </aside>
