@@ -558,8 +558,15 @@ function download(name,data){
   const a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),2500);
 }
+function legacySignature(g){return JSON.stringify({chosen:g.config.chosen,first:g.config.first,seed:g.config.seed});}
 function storageKey(){return KEY+":"+signature(game);}
-function stored(){try{const data=JSON.parse(localStorage.getItem(storageKey())||"[]");return Array.isArray(data)?data:[];}catch{return [];}}
+function oldStorageKey(){return KEY+":"+legacySignature(game);}
+function readSavedList(key){try{const data=JSON.parse(localStorage.getItem(key)||"[]");return Array.isArray(data)?data:[];}catch{return [];}}
+function stored(){
+  // Preserve earlier saved branches after extending the game key with manual mulligan choices.
+  const entries=[...readSavedList(oldStorageKey()),...readSavedList(storageKey())];
+  return [...new Map(entries.filter(x=>typeof x?.id==="string").map(x=>[x.id,x])).values()];
+}
 function refreshSaved(){
   if(!game)return;
   const previous=$("savedBranches").value;$("savedBranches").replaceChildren();
@@ -618,7 +625,10 @@ async function importBranches(file){
   }catch(e){$("playError").textContent=String(e.message||e);}
 }
 function feedbackKey(){return KEY+":reviews:"+signature(game);}
-function feedbackLoad(){try{return JSON.parse(localStorage.getItem(feedbackKey())||"{}")}catch{return {}}}
+function feedbackLoad(){
+  const read=(key)=>{try{const data=JSON.parse(localStorage.getItem(key)||"{}");return data&&typeof data==="object"&&!Array.isArray(data)?data:{};}catch{return {}}};
+  return {...read(KEY+":reviews:"+legacySignature(game)),...read(feedbackKey())};
+}
 function loadCurrentReview(){
   if(!game)return;
   reviews=feedbackLoad();const v=reviews[stepIndex]||{};
