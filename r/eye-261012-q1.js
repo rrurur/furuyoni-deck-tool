@@ -422,31 +422,83 @@ function describeAction(action){
   }
   return label;
 }
+function parseEnhanceAction(action){
+  const m=/^d(\d+):a(\d+)$/.exec(String(action?.choice||""));
+  return action?.rule==="turn-main-enhancement-choice"&&m?
+    {action,dust:Number(m[1]),aura:Number(m[2])}:null;
+}
+function standardLegalPreview(legal){
+  const phase=legal.find(x=>x.rule==="turn-main-standard");
+  if(!phase)return [];
+  const simulation=new CoreTurnSandboxEnvironment(game.initial,game.opts);
+  for(const row of engine.history)simulation.step(row.action);
+  simulation.step(phase);
+  return simulation.legalActions();
+}
+function refreshContextPanels(legal,standard){
+  const controls=legal.length>0;
+  const reconstruct=legal.some(a=>a.rule==="turn-reconstruct"||a.rule==="turn-skip-reconstruct");
+  $("reconstructPanel").classList.toggle("hidden",!reconstruct);
+  $("reconstructYes").disabled=!legal.some(a=>a.rule==="turn-reconstruct");
+  $("reconstructNo").disabled=!legal.some(a=>a.rule==="turn-skip-reconstruct");
+
+  const attack=controls&&engine?.pendingAttack&&legal.some(a=>[
+    "turn-attack-pass","turn-attack-respond","turn-attack-damage"].includes(a.rule));
+  $("attackDecision").classList.toggle("hidden",!attack);
+  $("attackAuraValue").textContent=attack?String(engine.pendingAttack.auraDamage??"—"):"—";
+  $("attackLifeValue").textContent=attack?String(engine.pendingAttack.lifeDamage??"—"):"—";
+  $("damageAura").disabled=!legal.some(a=>a.rule==="turn-attack-damage"&&a.damageChoice==="aura");
+  $("damageLife").disabled=!legal.some(a=>a.rule==="turn-attack-damage"&&a.damageChoice==="life");
+  $("responsePass").disabled=!legal.some(a=>a.rule==="turn-attack-pass");
+
+  const enhanced=legal.map(parseEnhanceAction).filter(Boolean).sort((a,b)=>a.dust-b.dust);
+  const showEnhance=enhanced.length>0;
+  $("enhancePlacement").classList.toggle("hidden",!showEnhance);
+  if(showEnhance){
+    if(!enhanced.some(a=>a.action.choice===enhanceSelectedKey))
+      enhanceSelectedKey=enhanced[enhanced.length-1].action.choice; // Prefer dust first.
+    const index=enhanced.findIndex(a=>a.action.choice===enhanceSelectedKey);
+    $("enhanceDust").textContent=String(enhanced[index].dust);
+    $("enhanceAura").textContent=String(enhanced[index].aura);
+    $("enhanceLessDust").disabled=index===0;
+    $("enhanceMoreDust").disabled=index===enhanced.length-1;
+    $("enhanceConfirm").disabled=false;
+  }else enhanceSelectedKey=null;
+  const fullChoice=!!pendingFullPowerCard&&controls;
+  $("fullPowerChoice").classList.toggle("hidden",!fullChoice);
+  if(fullChoice){
+    const slug=cardOf(engine.state,engine.currentPlayer(),pendingFullPowerCard);
+    $("fullPowerName").textContent=cardName(slug)+"の使用方法";
+    const canUse=(rule)=>legal.some(a=>a.rule===rule);
+    $("fullPowerNormal").disabled=!canUse("turn-main-standard")&&!legal.some(a=>a.rule==="turn-use-card"&&a.cardId===pendingFullPowerCard&&engine.mainMode==="standard");
+    $("fullPowerUse").disabled=!canUse("turn-main-fullpower")&&!legal.some(a=>a.rule==="turn-use-card"&&a.cardId===pendingFullPowerCard&&engine.mainMode==="fullpower");
+  }
+}
 function refreshActions(){
-  const legal=legalForControl(),active=legal.length>0;
+  const legal=legalForControl(),standard=standardLegalPreview(legal);
   $("legalAction").replaceChildren();
-  for(const [i,action] of legal.entries()){
-    const option=document.createElement("option");option.value=String(i);
+  const advanced=legal.filter(action=>![
+    "turn-main-standard","turn-main-fullpower","turn-use-card","turn-attack-respond",
+    "turn-attack-damage","turn-attack-pass","core-standard-basic","sandbox-end-turn",
+    "turn-reconstruct","turn-skip-reconstruct","turn-main-enhancement-choice"
+  ].includes(action.rule));
+  for(const action of advanced){
+    const option=document.createElement("option");option.value=String(legal.indexOf(action));
     option.textContent=describeAction(action);$("legalAction").append(option);
   }
-  $("legalAction").disabled=$("performAction").disabled=!active;
-  const phaseBtns=[["phaseStandard","turn-main-standard"],["phaseFull","turn-main-fullpower"],["phaseEnd","sandbox-end-turn"]];
-  for(const [id,rule]of phaseBtns){
-    const button=$(id),can=legal.some(x=>x.rule===rule);button.disabled=!can;
-    button.classList.toggle("available",can);
-  }
-  for(const [id,choice] of [["damageAura","aura"],["damageLife","life"]]){
-    const button=$(id),available=legal.some(a=>a.rule==="turn-attack-damage"&&a.damageChoice===choice);
-    button.disabled=!available;button.classList.toggle("available",available);
-  }
+  $("legalAction").disabled=$("performAction").disabled=!advanced.length;
+  const canEnd=legal.some(a=>a.rule==="sandbox-end-turn")||legal.some(a=>a.rule==="turn-main-standard");
+  $("phaseEnd").disabled=!canEnd;
+  $("phaseEnd").classList.toggle("available",canEnd);
   for(const button of $("basicToolbar").querySelectorAll("button[data-basic]")){
     const kind=Number(button.dataset.basic);
-    const available=legal.some(a=>a.rule==="core-standard-basic"&&Number(a.basicAction)===kind)||
-      legal.some(a=>a.rule==="turn-main-standard");
+    const matching=[...legal,...standard].filter(a=>a.rule==="core-standard-basic"&&Number(a.basicAction)===kind);
+    const available=matching.some(a=>a.cost?.type==="focus"||a.cost?.type==="facedown");
     button.disabled=!available;
     button.classList.toggle("available",available);
     button.classList.toggle("pending",pendingBasic===kind);
   }
+  refreshContextPanels(legal,standard);
 }
 function synchronizeFromEngine(){
   if(!engine)return;
