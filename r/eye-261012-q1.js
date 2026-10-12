@@ -7,6 +7,7 @@ const labels={1:["トコヨ","ハガネ"],2:["ユリナ","サイネ"]};
 const kinds={n:"normal",s:"special"};
 const decks={1:{n:new Set(),s:new Set()},2:{n:new Set(),s:new Set()}};
 let game=null,stepIndex=0,engine=null,agent=null,playTimer=null,mode="replay",human=1,reviews={};
+let mulliganSession=null,pendingFoldCard=null,pendingBasic=null;
 const ZONES=["hand","deck","discard","facedown","special","enhancement","using","outside"];
 const KEY="furuyoni-private-match-261012";
 const clone=v=>JSON.parse(JSON.stringify(v));
@@ -115,36 +116,98 @@ function configuration(){
   return {chosen,first,seed};
 }
 function signature(g){
-  return JSON.stringify({chosen:g.config.chosen,first:g.config.first,seed:g.config.seed});
+  return JSON.stringify({chosen:g.config.chosen,first:g.config.first,seed:g.config.seed,
+    mulliganChoices:g.config.mulliganChoices||null});
 }
 function makeGame(config){
-  const state=initializeState(config.chosen),opts=options(config.first,config.seed);
+  const state=initializeState(config.chosen);
+  const opts={...options(config.first,config.seed),
+    openingMulliganChoices:config.mulliganChoices||null};
   return {config:clone(config),initial:state,opts,openingState:null,history:[],done:false,doneReason:"",winner:null,mode:"replay"};
 }
 function setView(){
-  $("builder").classList.add("hidden");$("replayPane").classList.remove("hidden");
+  $("builder").classList.add("hidden");$("mulliganPane").classList.add("hidden");
+  $("replayPane").classList.remove("hidden");
   $("revealOpponent").checked=false;$("playError").textContent="";
+  pendingFoldCard=null;pendingBasic=null;
 }
-function beginAIMatch(){
+function prepareMulligan(kind){
   try{
-    stopReplay();const config=configuration();const g=makeGame(config);
-    const result=runCoreTurnSandbox(g.initial,g.opts);
-    if(!result.ok||result.invariantErrors.length||![1,2].includes(result.winner)){
-      throw Error("AI対戦処理が正常に決着しませんでした: "+result.doneReason);
+    stopReplay();$("buildError").textContent="";$("mulliganError").textContent="";
+    const config=configuration();
+    const previewOpts={...options(config.first,config.seed),
+      openingMulliganChoices:{1:[],2:[]}};
+    const env=new CoreTurnSandboxEnvironment(initializeState(config.chosen),previewOpts);
+    mulliganSession={kind,config,preview:env.openingState,selected:{1:new Set(),2:new Set()}};
+    human=Number($("humanSide").value)||1;
+    $("builder").classList.add("hidden");$("replayPane").classList.add("hidden");
+    $("mulliganPane").classList.remove("hidden");
+    renderMulligan();
+  }catch(error){$("buildError").textContent=String(error.message||error);}
+}
+function renderMulligan(){
+  if(!mulliganSession)return;
+  for(const pid of [1,2]){
+    const view=$("mulliganCards"+pid);
+    view.replaceChildren();
+    const selected=mulliganSession.selected[pid];
+    const cards=mulliganSession.preview["p"+pid+"_hand"]||[];
+    const hidden=mulliganSession.kind==="human"&&pid!==human;
+    $("mulliganCount"+pid).textContent=hidden?"相手が自動で交換":
+      "交換 "+selected.size+" 枚 / 手札 3 枚";
+    if(hidden){
+      for(const cardId of cards){
+        const el=document.createElement("span");el.className="mulliganCard";
+        const img=document.createElement("img");img.alt="非公開";
+        img.src="https://furuyoni-diary-1918f.web.app/assets/replay/images/cardback_normal.png";
+        el.append(img);view.append(el);
+      }
+      continue;
     }
-    g.history=result.history;g.openingState=result.openingState;g.done=true;g.winner=result.winner;g.doneReason=result.doneReason;g.actions=result.actions;
-    game=g;engine=null;mode="replay";human=Number($("humanSide").value)||1;
-    stepIndex=0;setView();reviews={};render();
-  }catch(error){$("buildError").textContent=String(error.message||error);}
+    for(const id of cards){
+      const slug=cardOf(mulliganSession.preview,pid,id),btn=document.createElement("button");
+      btn.type="button";btn.className="mulliganCard"+(selected.has(id)?" selected":"");
+      btn.setAttribute("aria-pressed",String(selected.has(id)));
+      btn.title=selected.has(id)?"交換する札（クリックで解除）":"残す札（クリックで交換対象）";
+      btn.append(imgCard(slug));
+      const label=document.createElement("span");label.className="cardName";label.textContent=cardName(slug);
+      btn.append(label);
+      btn.addEventListener("click",()=>{
+        selected.has(id)?selected.delete(id):selected.add(id);
+        renderMulligan();
+      });
+      view.append(btn);
+    }
+  }
 }
-function beginHumanMatch(){
+function confirmMulligan(){
+  if(!mulliganSession)return;
   try{
-    stopReplay();const g=makeGame(configuration());const env=new CoreTurnSandboxEnvironment(g.initial,g.opts);
-    g.openingState=clone(env.openingState);
-    game=g;engine=env;mode="human";human=Number($("humanSide").value)||1;agent=new BaselineCoreTurnAgent(g.config.seed*3+999,.18);
-    stepIndex=0;setView();reviews={};advanceAI();render();
-  }catch(error){$("buildError").textContent=String(error.message||error);}
+    const config=clone(mulliganSession.config),kind=mulliganSession.kind;
+    config.mulliganChoices={
+      1:kind==="human"&&human!==1?null:[...mulliganSession.selected[1]],
+      2:kind==="human"&&human!==2?null:[...mulliganSession.selected[2]]
+    };
+    const g=makeGame(config);
+    if(kind==="ai"){
+      const result=runCoreTurnSandbox(g.initial,g.opts);
+      if(!result.ok||result.invariantErrors.length||![1,2].includes(result.winner))
+        throw Error("AI対戦処理が正常に決着しませんでした: "+result.doneReason);
+      g.history=result.history;g.openingState=result.openingState;
+      g.done=true;g.winner=result.winner;g.doneReason=result.doneReason;g.actions=result.actions;
+      game=g;engine=null;mode="replay";
+    }else{
+      const env=new CoreTurnSandboxEnvironment(g.initial,g.opts);
+      g.openingState=clone(env.openingState);game=g;engine=env;mode="human";
+      agent=new BaselineCoreTurnAgent(g.config.seed*3+999,.18);
+    }
+    mulliganSession=null;stepIndex=0;setView();reviews={};
+    if(kind==="human")advanceAI();
+    stepIndex=game.history.length;render();
+  }catch(error){$("mulliganError").textContent=String(error.message||error);}
 }
+function beginAIMatch(){prepareMulligan("ai");}
+function beginHumanMatch(){prepareMulligan("human");}
 function stepRows(){return game?[{turn:0,actor:0,phase:"initial",action:null,after:game.openingState,events:[]},...game.history]:[];}
 function cardOf(state,pid,id){
   const slug=state["p"+pid+"_card_status"]?.[String(id)]?.Slug;
@@ -332,7 +395,7 @@ async function importBranches(file){
       throw Error("この画面の分岐JSONではありません");
     const first=json.branches[0];
     if(first && JSON.stringify(first.config)!==JSON.stringify(json.config))throw Error("構築が一致しません");
-    if(!game || signature(game)!==JSON.stringify({chosen:json.config.chosen,first:json.config.first,seed:json.config.seed})){
+    if(!game || signature(game)!==JSON.stringify({chosen:json.config.chosen,first:json.config.first,seed:json.config.seed,mulliganChoices:json.config.mulliganChoices||null})){
       for(const pid of [1,2]){decks[pid].n=new Set(json.config.chosen[pid-1].n);decks[pid].s=new Set(json.config.chosen[pid-1].s);}
       $("firstPlayer").value=String(json.config.first);$("seed").value=String(json.config.seed);refreshDeck();
       game=makeGame(json.config);
@@ -370,6 +433,9 @@ $("preset1").addEventListener("click",()=>setPreset(1));$("preset2").addEventLis
 for(const p of [1,2])$("clear"+p).addEventListener("click",()=>{decks[p].n.clear();decks[p].s.clear();refreshDeck()});
 $("startAIVsAI").addEventListener("click",beginAIMatch);
 $("startHumanVsAI").addEventListener("click",beginHumanMatch);
+$("confirmMulligan").addEventListener("click",confirmMulligan);
+$("backToBuilder").addEventListener("click",()=>{$("mulliganPane").classList.add("hidden");$("builder").classList.remove("hidden");});
+
 $("backToDeck").addEventListener("click",()=>{stopReplay();$("replayPane").classList.add("hidden");$("builder").classList.remove("hidden");});
 $("revealOpponent").addEventListener("change",render);
 $("firstStep").addEventListener("click",()=>{stopReplay();stepIndex=0;render()});
