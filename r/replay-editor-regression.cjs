@@ -37,7 +37,7 @@ function mount(){
  const document={getElementById:id=>nodes.get(id),createElement:tag=>new Node(tag),body:new Node("body")};
  const stored=new Map(),localStorage={getItem:k=>stored.get(k)||null,setItem:(k,v)=>stored.set(k,v)};
  const fn=new Function("createDefaultCardRuleRegistry","CoreTurnSandboxEnvironment","runCoreTurnSandbox","BaselineCoreTurnAgent","document","window","localStorage","setInterval","clearInterval","URL","Blob",
-   main.replace(/^import [^\n]*\n/g,"")+"\nreturn {setPreset,prepareMulligan,confirmMulligan,mulliganState:()=>mulliganSession,engineState:()=>engine,gameState:()=>game,stepIndexState:()=>stepIndex,clickBasic,foldCard,branchAt,makeDropZone,saveBranch,stored,openBranch};");
+   main.replace(/^import [^\n]*\n/g,"")+"\nreturn {setPreset,prepareMulligan,confirmMulligan,mulliganState:()=>mulliganSession,engineState:()=>engine,gameState:()=>game,stepIndexState:()=>stepIndex,clickBasic,foldCard,branchAt,makeDropZone,saveBranch,stored,openBranch,pendingAttackDisplay};");
  const app=fn(api.createDefaultCardRuleRegistry,api.CoreTurnSandboxEnvironment,api.runCoreTurnSandbox,api.BaselineCoreTurnAgent,
    document,{addEventListener(){}},localStorage,()=>1,()=>{},{createObjectURL(){},revokeObjectURL(){}},class BlobStub{});
  app.setPreset(1);app.setPreset(2);
@@ -54,6 +54,13 @@ function mount(){
  assert.equal(app.stepIndexState(),0,"Replay should open on initial position");
  assert.equal(game.config.mulliganChoices[1].length,1);
  assert.equal(game.config.mulliganChoices[2].length,1);
+ const damageIndex=game.history.findIndex(e=>e.action?.rule==="turn-attack-damage");
+ if(damageIndex>=0){
+   const rows=[{action:null,after:game.openingState,events:[]},...game.history];
+   const attacker=app.pendingAttackDisplay(rows,damageIndex+1,rows[damageIndex+1].after);
+   assert(attacker?.label,"Attack card should stay identifiable during aura/life decision");
+ }
+ assert(requiredIds.includes("damageAura")&&requiredIds.includes("damageLife"),"Missing one-click damage buttons");
  const index=game.history.findIndex(e=>e.action?.rule==="turn-use-card"&&e.phase==="main"&&Number(e.actor)===1);
  assert(index>=0,"No testable card action found");
  const used=game.history[index].action;
