@@ -411,7 +411,7 @@ function describeAction(action){
     label+="（"+cardName(slug)+"を伏せる）";
   }else if(action.cost?.type==="focus")label+="（集中力）";
   if(action.rule==="turn-main-enhancement-choice"){
-    const found=/^d(\d+):a(\d+)$/.exec(String(action.choice||""));
+    const found=/^(?:enhance:)?d(\d+):a(\d+)$/.exec(String(action.choice||""));
     if(found)label="付与：ダスト"+Number(found[1])+"・オーラ"+Number(found[2]);
   }
   if(action.rule==="turn-use-card"&&action.cardId!=null){
@@ -423,7 +423,7 @@ function describeAction(action){
   return label;
 }
 function parseEnhanceAction(action){
-  const m=/^d(\d+):a(\d+)$/.exec(String(action?.choice||""));
+  const m=/^(?:enhance:)?d(\d+):a(\d+)$/.exec(String(action?.choice||""));
   return action?.rule==="turn-main-enhancement-choice"&&m?
     {action,dust:Number(m[1]),aura:Number(m[2])}:null;
 }
