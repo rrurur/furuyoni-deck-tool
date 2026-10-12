@@ -216,7 +216,7 @@ function cardOf(state,pid,id){
 function canControl(pid){
   return !!engine&&!engine.done&&engine.currentPlayer()===pid&&
     (mode==="manual"||(mode==="human"&&pid===human))&&
-    stepIndex===game.history.length;
+    engine.history.length===stepIndex;
 }
 function makeSmallCard(state,pid,id,{mask=false,used=false,enh=false,zone=""}={}){
   const span=document.createElement("div");
@@ -394,7 +394,7 @@ function render(){
     item.append(makeSmallCard(st,pid,source));$("currentCard").append(item);
   }
   $("eventLog").textContent=(entry.events||[]).map(e=>eventText(e,st)).join("\n");
-  const full=game.done?("勝者: "+(game.winner===1?"扇槌":"刀薙")+" ／ "+game.doneReason):"対戦途中";
+  const full=game.done&&stepIndex===game.history.length?("勝者: "+(game.winner===1?"扇槌":"刀薙")+" ／ "+game.doneReason):"対戦途中";
   $("matchSummary").textContent=full+" ／ "+game.history.length+"操作 ／ 初期間合10・ダスト0・手札3";
   $("stepCount").textContent=stepIndex+"/"+(rows.length-1);
   $("prevStep").disabled=$("firstStep").disabled=stepIndex<=0;
@@ -403,7 +403,7 @@ function render(){
   rows.forEach((row,i)=>{
     const btn=document.createElement("button");btn.type="button";btn.className="stepLink"+(i===stepIndex?" current":"");
     btn.textContent=i+" | "+(row.turn?"T"+Math.ceil(row.turn/2)+" ":"")+readableHistoryAction(row);
-    btn.addEventListener("click",()=>{stopReplay();stepIndex=i;render()});$("history").append(btn);
+    btn.addEventListener("click",()=>seekStep(i));$("history").append(btn);
   });
   $("history").querySelector(".current")?.scrollIntoView({block:"nearest"});
   refreshActions();
@@ -411,7 +411,7 @@ function render(){
   refreshSaved();
 }
 function legalForControl(){
-  if(!engine||engine.done||stepIndex!==game.history.length)return [];
+  if(!engine||engine.done||engine.history.length!==stepIndex)return [];
   if(mode==="human"&&engine.currentPlayer()!==human)return [];
   if(mode!=="human"&&mode!=="manual")return [];
   return engine.legalActions();
@@ -477,6 +477,23 @@ function refreshContextPanels(legal,standard){
     $("enhanceMoreDust").disabled=index===enhanced.length-1;
     $("enhanceConfirm").disabled=false;
   }else enhanceSelectedKey=null;
+  const deckBottom=controls&&engine?.phase==="main-effect-choice"&&
+    engine?.pendingMainCard?.pendingChoice?.kind==="cards-to-deck-bottom";
+  $("deckBottomChoice").classList.toggle("hidden",!deckBottom);
+  $("deckBottomOptions").replaceChildren();
+  if(deckBottom){
+    const pid=engine.currentPlayer(),statuses=engine.state["p"+pid+"_card_status"]||{};
+    for(const action of legal.filter(a=>a.rule==="turn-main-effect-choice"&&String(a.choice)!=="done")){
+      const slug=statuses[String(action.choice)]?.Slug;
+      if(!slug)continue;
+      const button=document.createElement("button");button.type="button";button.className="deckBottomCard";
+      button.append(imgCard(slug,true));
+      const label=document.createElement("span");label.textContent=cardName(slug);button.append(label);
+      button.addEventListener("click",()=>{try{commitAction(action)}catch(e){$("playError").textContent=String(e.message||e)}});
+      $("deckBottomOptions").append(button);
+    }
+  }
+  $("deckBottomDone").disabled=!deckBottom||!legal.some(a=>a.rule==="turn-main-effect-choice"&&String(a.choice)==="done");
   const fullChoice=!!pendingFullPowerCard&&controls;
   $("fullPowerChoice").classList.toggle("hidden",!fullChoice);
   if(fullChoice){
@@ -494,7 +511,7 @@ function refreshActions(){
     "turn-main-standard","turn-main-fullpower","turn-use-card","turn-attack-respond",
     "turn-attack-damage","turn-attack-pass","core-standard-basic","sandbox-end-turn",
     "turn-reconstruct","turn-skip-reconstruct","turn-main-enhancement-choice"
-  ].includes(action.rule));
+  ].includes(action.rule) && !(engine?.pendingMainCard?.pendingChoice?.kind==="cards-to-deck-bottom" && action.rule==="turn-main-effect-choice"));
   for(const action of advanced){
     const option=document.createElement("option");option.value=String(legal.indexOf(action));
     option.textContent=describeAction(action);$("legalAction").append(option);
@@ -521,8 +538,23 @@ function synchronizeFromEngine(){
   stepIndex=game.history.length;
   render();
 }
+function preserveAndForkOnAction(){
+  if(!engine||!game||stepIndex>=game.history.length)return;
+  if(engine.history.length!==stepIndex)throw Error("選択局面の再現に失敗しました");
+  const actions=game.history.map(x=>clone(x.action));
+  const signature=JSON.stringify(game.history.at(-1)?.after||game.openingState);
+  const list=stored();
+  if(!list.some(x=>x.signature===signature&&JSON.stringify(x.actions)===JSON.stringify(actions))){
+    list.push({id:String(Date.now())+"-"+Math.floor(Math.random()*1000),
+      config:clone(game.config),actions,mode:"manual",human,signature,
+      createdAt:new Date().toISOString()});
+    localStorage.setItem(storageKey(),JSON.stringify(list));
+  }
+  game.history=clone(engine.history);game.done=engine.done;game.winner=engine.winner;game.doneReason=engine.doneReason;
+}
 function commitAction(action){
   if(!engine||!action)throw Error("実行可能な行動がありません");
+  preserveAndForkOnAction();
   engine.step(action);
   pendingFoldCard=null;pendingBasic=null;pendingFullPowerCard=null;enhanceSelectedKey=null;
   $("playError").textContent="";
@@ -556,6 +588,7 @@ function performBasic(kind,cardId=null){
                       :a.cost?.type==="focus"
         ));
       if(wanted){
+        preserveAndForkOnAction();
         engine.step(phase);
         wanted=engine.legalActions().find(a=>a.rule==="core-standard-basic"&&
           Number(a.basicAction)===kind&&
@@ -628,6 +661,7 @@ function useCard(pid,id,requestedMode=null){
     if(!action&&phase){
       const candidate=previewWithPhase(phase,a=>a.rule==="turn-use-card"&&String(a.cardId)===String(id));
       if(candidate){
+        preserveAndForkOnAction();
         engine.step(phase);
         action=engine.legalActions().find(a=>a.rule==="turn-use-card"&&String(a.cardId)===String(id));
       }
@@ -670,7 +704,25 @@ function branchAt(step,branchMode){
     stepIndex=game.history.length;$("playError").textContent="";render();
   }catch(e){$("playError").textContent=String(e.message||e);}
 }
-function advanceStep(offset){stopReplay();stepIndex=Math.max(0,Math.min(stepRows().length-1,stepIndex+offset));render();}
+function seekStep(step){
+  stopReplay();if(!game)return;
+  const target=Math.max(0,Math.min(game.history.length,Number(step)||0));
+  try{
+    const env=new CoreTurnSandboxEnvironment(game.initial,game.opts);
+    if(JSON.stringify(env.openingState)!==JSON.stringify(game.openingState))throw Error("初期局面を再現できません");
+    for(const row of game.history.slice(0,target))env.step(row.action);
+    if(JSON.stringify(env.state)!==JSON.stringify(stepRows()[target].after))throw Error("指定局面の状態に一致しません");
+    engine=env;stepIndex=target;
+    if(mode==="replay")mode="manual";
+    pendingFoldCard=null;pendingBasic=null;pendingFullPowerCard=null;enhanceSelectedKey=null;
+    $("playError").textContent="";render();
+  }catch(e){$("playError").textContent=String(e.message||e);}
+}
+function advanceStep(offset){
+  const next=Math.max(0,Math.min(stepRows().length-1,stepIndex+offset));
+  if(offset<0||mode!=="replay")seekStep(next);
+  else {stopReplay();stepIndex=next;render();}
+}
 function stopReplay(){if(playTimer){clearInterval(playTimer);playTimer=null;$("autoReplay").textContent="自動再生";}}
 function download(name,data){
   const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
@@ -695,7 +747,7 @@ function refreshSaved(){
 function saveBranch(){
   if(!game)return;
   try{
-    const list=stored();const at=engine?game.history.length:stepIndex;
+    const list=stored();const at=engine?Math.min(engine.history.length,game.history.length):stepIndex;
     const actions=game.history.slice(0,at).map(x=>clone(x.action));
     const lastState=at?game.history[at-1].after:game.openingState;
     const item={id:String(Date.now())+"-"+Math.floor(Math.random()*1000),config:game.config,
@@ -773,10 +825,10 @@ $("backToBuilder").addEventListener("click",()=>{$("mulliganPane").classList.add
 
 $("backToDeck").addEventListener("click",()=>{stopReplay();$("replayPane").classList.add("hidden");$("builder").classList.remove("hidden");});
 $("revealOpponent").addEventListener("change",render);
-$("firstStep").addEventListener("click",()=>{stopReplay();stepIndex=0;render()});
+$("firstStep").addEventListener("click",()=>seekStep(0));
 $("prevStep").addEventListener("click",()=>advanceStep(-1));
 $("nextStep").addEventListener("click",()=>advanceStep(1));
-$("lastStep").addEventListener("click",()=>{stopReplay();stepIndex=stepRows().length-1;render()});
+$("lastStep").addEventListener("click",()=>seekStep(stepRows().length-1));
 $("autoReplay").addEventListener("click",()=>{
   if(playTimer){stopReplay();return;}
   if(stepIndex>=stepRows().length-1)stepIndex=0;
@@ -793,10 +845,15 @@ $("phaseEnd").addEventListener("click",()=>{
     if(!end){
       const standard=legal.find(a=>a.rule==="turn-main-standard");
       if(!standard||!previewWithPhase(standard,a=>a.rule==="sandbox-end-turn"))return;
-      engine.step(standard);end=engine.legalActions().find(a=>a.rule==="sandbox-end-turn");
+      preserveAndForkOnAction();engine.step(standard);end=engine.legalActions().find(a=>a.rule==="sandbox-end-turn");
     }
     if(end)commitAction(end);
   }catch(e){$("playError").textContent=String(e.message||e);}
+});
+$("deckBottomDone").addEventListener("click",()=>{
+  const action=legalForControl().find(a=>a.rule==="turn-main-effect-choice"&&String(a.choice)==="done"&&
+    engine?.pendingMainCard?.pendingChoice?.kind==="cards-to-deck-bottom");
+  if(action)try{commitAction(action)}catch(e){$("playError").textContent=String(e.message||e);}
 });
 for(const [id,rule] of [["reconstructYes","turn-reconstruct"],["reconstructNo","turn-skip-reconstruct"],["responsePass","turn-attack-pass"]]){
   $(id).addEventListener("click",()=>{
