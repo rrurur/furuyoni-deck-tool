@@ -7952,9 +7952,10 @@ export class CoreTurnSandboxEnvironment{
     if(resume?.kind==="enhancement-discard"){
       const source=this.pendingEnhancementDiscards[0];
       if(String(source)!==String(resume.cardId)) throw new Error("attack resume enhancement card mismatch");
-      const moved=finishEnhancementDiscard(this.state,this.turnPlayer,source);
-      events.push({kind:"付与札の破棄完了",playerId:this.turnPlayer,cards:[{cardId:source,...moved}]});
-      this._onEnhancementDiscarded(this.turnPlayer,source,events);
+      const owner=this.pendingEnhancementDiscardOwner||this.enhancementTickOwner||this.turnPlayer;
+      const moved=finishEnhancementDiscard(this.state,owner,source);
+      events.push({kind:"付与札の破棄完了",playerId:owner,cards:[{cardId:source,...moved}]});
+      this._onEnhancementDiscarded(owner,source,events);
       if(this.done) return;
       this.pendingEnhancementDiscards.shift();
       this._advanceEnhancementDiscardQueue(events);
@@ -10855,9 +10856,10 @@ export class CoreTurnSandboxEnvironment{
         this.pendingCardDecision=null;
         const source=this.pendingEnhancementDiscards[0];
         if(String(source)!==String(d.sourceCardId)) throw new Error("pending enhancement discard queue changed unexpectedly");
-        const moved=finishEnhancementDiscard(this.state,actor,source);
-        events.push({kind:"付与札の破棄完了",playerId:actor,cards:[{cardId:source,...moved}]});
-        this._onEnhancementDiscarded(actor,source,events);
+        const owner=this.pendingEnhancementDiscardOwner||actor;
+        const moved=finishEnhancementDiscard(this.state,owner,source);
+        events.push({kind:"付与札の破棄完了",playerId:owner,cards:[{cardId:source,...moved}]});
+        this._onEnhancementDiscarded(owner,source,events);
         if(this.done) return;
         this.pendingEnhancementDiscards.shift();
         this._advanceEnhancementDiscardQueue(events);
