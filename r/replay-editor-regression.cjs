@@ -240,5 +240,16 @@ assert(html.includes('id="enhanceLessDust"')&&html.includes('id="enhanceMoreDust
  assert(source,"Original replay must be auto-preserved among saved branches");
  app.openBranch(source);
  assert.equal(app.gameState().history.length,originalActions,"Original replay must restore");
+ const mid=app.gameState().history.findIndex(x=>x.action?.rule==="turn-use-card"&&x.phase==="main"&&x.actor===1);
+ assert(mid>=0);
+ app.seekStep(mid);
+ assert.equal(app.stepIndexState(),mid,"Mid-match seek should reach the selected pre-action state");
+ assert.equal(app.engineState().history.length,mid,"Mid-match seek must replay exactly the retained prefix");
+ assert.equal(nodes.get("phaseEnd").disabled,false,"Alternative end-turn should remain available");
+ nodes.get("phaseEnd").listeners.click();
+ assert.equal(app.gameState().history.length,mid+1,"Alternate end-turn should replace the previous action");
+ assert.equal(app.gameState().history.at(-1).action.rule,"sandbox-end-turn");
+ assert.equal(app.stored().filter(x=>x.actions.length===originalActions).length,1,"Preserve the original only once");
+
 }
 console.log("PASS replay editor: rewind-branch, optional 要返し return, mulligan, basics, drag play and saved source");
