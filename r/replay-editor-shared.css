@@ -77,3 +77,39 @@
 
 #currentCard{display:flex;justify-content:center;align-items:flex-start;gap:18px;flex-wrap:wrap;margin:3px 0}
 .activeAttackPreview,.activeCardPreview{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:#426484;font-weight:800}
+
+/* 2026-10-12 shared board-layout revision */
+.centerboard{gap:9px;min-height:210px;padding:14px 16px}
+.centerboard .mainControlBar{align-self:stretch;justify-content:center;margin:6px 0}
+.centerboard #basicToolbar{justify-content:center}
+.centerboard .actionCluster button:disabled,.centralDecision button:disabled{opacity:.32;filter:grayscale(1);cursor:not-allowed}
+.centerboard .actionCluster button.available{box-shadow:0 0 0 1px #729cbd}
+.centralDecision{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;padding:10px;background:#fafcfe;border:1px solid #ccd8e5;border-radius:8px;width:100%;font-size:13px}
+.centralDecision .toolbar{justify-content:center}
+.attackNumbers{display:flex;flex-direction:column;text-align:left;gap:3px;background:#fff;border:1px solid #c6d7e8;padding:8px 14px;border-radius:7px;min-width:112px;font-size:15px}
+.attackNumbers strong{font-size:20px;font-variant-numeric:tabular-nums}
+.attackChoices{display:flex;flex-direction:row;align-items:center;flex-wrap:wrap;gap:7px}
+.attackChoices button{min-height:43px;min-width:86px}
+.enhanceSplit{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+.enhanceArrows{display:flex;align-items:center;gap:9px}
+.enhanceArrows strong{font-size:19px}
+.enhanceArrows button{font-size:22px;font-weight:900;width:39px;height:38px;padding:0}
+.playerLayout{grid-template-columns:minmax(190px,1.65fr) minmax(138px,1fr) minmax(127px,.9fr) minmax(160px,.95fr)}
+.resourceGrid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:7px}
+.resourceStat.focus{grid-column:1;grid-row:1}
+.resourceStat.flare{grid-column:2;grid-row:1}
+.resourceStat.aura{grid-column:1;grid-row:2}
+.resourceStat.life{grid-column:2;grid-row:2}
+.resourceStat.flare .resourceNum{color:#bf324b}
+.resourceStat.life .resourceNum{color:#296fbd}
+.resourceStat.focus .resourceNum{color:#326b55}
+.resourceStat.aura .resourceNum{color:#366d95}
+.deckBack{display:flex;align-items:center;gap:9px;min-height:63px}
+.deckBack img{height:65px;width:46px;object-fit:cover;border-radius:3px;border:1px solid #9ba6b0}
+.deckBack strong{font-size:22px;color:#405c79}
+.smallCard.zoneFacedown{width:83px;height:65px;min-height:65px;flex:0 0 83px;background:#28323d;border-color:#303842;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.smallCard.zoneFacedown img{height:79px;width:60px;object-fit:cover;transform:rotate(-90deg);filter:brightness(.48) grayscale(.5)}
+.smallCard.zoneFacedown.pendingCost{opacity:.4}
+.deckBack img,.smallCard.zoneFacedown img{background:#b0a3bb}
+.advancedActions select option{font-size:12px}
+@media(max-width:1120px){.playerLayout{grid-template-columns:minmax(150px,1.7fr) minmax(126px,1fr) minmax(120px,.9fr) minmax(140px,.85fr)}}
