@@ -2513,7 +2513,7 @@
         },
         {}
       ],
-      "reason": "reduce excess hand with lowest future card opportunity cost"
+      "reason": "手札超過回避のため、伏せる札の将来価値を比較して基本動作"
     },
     {
       "step": 3,
@@ -3518,7 +3518,7 @@
         },
         {}
       ],
-      "reason": "fallback legal nonharmful action"
+      "reason": "該当する専用評価がなく合法手から選択（最適性は未検証）"
     },
     {
       "step": 14,
@@ -3842,7 +3842,7 @@
         },
         {}
       ],
-      "reason": "fallback legal nonharmful action"
+      "reason": "該当する専用評価がなく合法手から選択（最適性は未検証）"
     },
     {
       "step": 17,
@@ -4624,7 +4624,7 @@
         },
         {}
       ],
-      "reason": "prepare next productive melee attack"
+      "reason": "近距離攻撃へつなぐために前進"
     },
     {
       "step": 25,
@@ -5108,7 +5108,7 @@
         },
         {}
       ],
-      "reason": "fallback legal nonharmful action"
+      "reason": "該当する専用評価がなく合法手から選択（最適性は未検証）"
     },
     {
       "step": 30,
@@ -5293,7 +5293,7 @@
         },
         {}
       ],
-      "reason": "reduce excess hand with lowest future card opportunity cost"
+      "reason": "手札超過回避のため、伏せる札の将来価値を比較して基本動作"
     },
     {
       "step": 32,
@@ -6489,7 +6489,7 @@
         },
         {}
       ],
-      "reason": "fallback legal nonharmful action"
+      "reason": "該当する専用評価がなく合法手から選択（最適性は未検証）"
     },
     {
       "step": 44,
@@ -6847,7 +6847,7 @@
         },
         {}
       ],
-      "reason": "reduce excess hand with lowest future card opportunity cost"
+      "reason": "手札超過回避のため、伏せる札の将来価値を比較して基本動作"
     },
     {
       "step": 48,
@@ -7035,7 +7035,7 @@
         },
         {}
       ],
-      "reason": "fallback legal nonharmful action"
+      "reason": "該当する専用評価がなく合法手から選択（最適性は未検証）"
     },
     {
       "step": 50,
@@ -7134,7 +7134,7 @@
         },
         {}
       ],
-      "reason": "fallback legal nonharmful action"
+      "reason": "該当する専用評価がなく合法手から選択（最適性は未検証）"
     },
     {
       "step": 51,
@@ -8066,7 +8066,7 @@
         },
         {}
       ],
-      "reason": "fallback legal nonharmful action"
+      "reason": "該当する専用評価がなく合法手から選択（最適性は未検証）"
     },
     {
       "step": 60,
@@ -8643,7 +8643,7 @@
         },
         {}
       ],
-      "reason": "fallback legal nonharmful action"
+      "reason": "該当する専用評価がなく合法手から選択（最適性は未検証）"
     },
     {
       "step": 66,
@@ -9950,7 +9950,7 @@
         },
         {}
       ],
-      "reason": "fallback legal nonharmful action"
+      "reason": "該当する専用評価がなく合法手から選択（最適性は未検証）"
     },
     {
       "step": 79,
@@ -10043,7 +10043,7 @@
         },
         {}
       ],
-      "reason": "fallback legal nonharmful action"
+      "reason": "該当する専用評価がなく合法手から選択（最適性は未検証）"
     },
     {
       "step": 80,
@@ -10587,7 +10587,7 @@
         },
         {}
       ],
-      "reason": "preserve 2+ DP against life"
+      "reason": "ライフ2点以上の被害を避けるためオーラ受け"
     },
     {
       "step": 85,
@@ -11385,7 +11385,7 @@
         },
         {}
       ],
-      "reason": "reduce excess hand with lowest future card opportunity cost"
+      "reason": "手札超過回避のため、伏せる札の将来価値を比較して基本動作"
     },
     {
       "step": 93,
@@ -11472,7 +11472,7 @@
         },
         {}
       ],
-      "reason": "reduce excess hand with lowest future card opportunity cost"
+      "reason": "手札超過回避のため、伏せる札の将来価値を比較して基本動作"
     },
     {
       "step": 94,
@@ -11561,7 +11561,7 @@
         },
         {}
       ],
-      "reason": "reduce excess hand with lowest future card opportunity cost"
+      "reason": "手札超過回避のため、伏せる札の将来価値を比較して基本動作"
     },
     {
       "step": 95,
@@ -11739,7 +11739,7 @@
         },
         {}
       ],
-      "reason": "recover Himika range"
+      "reason": "ヒミカが得意な遠距離へ後退"
     },
     {
       "step": 97,
@@ -12112,7 +12112,7 @@
         },
         {}
       ],
-      "reason": "prepare next productive melee attack"
+      "reason": "近距離攻撃へつなぐために前進"
     },
     {
       "step": 101,
@@ -12341,7 +12341,7 @@
         },
         {}
       ],
-      "reason": "fallback legal nonharmful action"
+      "reason": "該当する専用評価がなく合法手から選択（最適性は未検証）"
     },
     {
       "step": 103,
@@ -12557,7 +12557,7 @@
         },
         {}
       ],
-      "reason": "fallback legal nonharmful action"
+      "reason": "該当する専用評価がなく合法手から選択（最適性は未検証）"
     },
     {
       "step": 105,
@@ -13178,7 +13178,7 @@
         },
         {}
       ],
-      "reason": "fallback legal nonharmful action"
+      "reason": "該当する専用評価がなく合法手から選択（最適性は未検証）"
     },
     {
       "step": 111,
@@ -13379,7 +13379,7 @@
         },
         {}
       ],
-      "reason": "fallback legal nonharmful action"
+      "reason": "該当する専用評価がなく合法手から選択（最適性は未検証）"
     },
     {
       "step": 113,
@@ -13472,7 +13472,7 @@
         },
         {}
       ],
-      "reason": "recover Himika range"
+      "reason": "ヒミカが得意な遠距離へ後退"
     },
     {
       "step": 114,
@@ -13947,7 +13947,7 @@
         },
         {}
       ],
-      "reason": "prepare next productive melee attack"
+      "reason": "近距離攻撃へつなぐために前進"
     },
     {
       "step": 119,
@@ -14168,7 +14168,8 @@
         },
         {}
       ],
-      "reason": "fallback legal nonharmful action"
+      "reason": "該当する専用評価がなく合法手から選択（最適性は未検証）"
     }
-  ]
+  ],
+  "note": "AP0 on action cards may mean unmeasured effects; AP+2.5*DP does not reflect lethal win value or all defense."
 }
