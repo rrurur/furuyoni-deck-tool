@@ -8,7 +8,7 @@
   "qualityAudit": {
     "criteria": "Every played normal card has measured AP > 1 OR real opponent life DP > 0. Special cards are excluded from absolute AP floor; lethal can justify lower AP.",
     "normalUses": 22,
-    "normalViolations": 0,
+    "normalViolations": 3,
     "specialUses": 2,
     "engineInvariantErrors": [],
     "forcedHandDiscards": [
@@ -20,11 +20,14 @@
         "label": "手札上限: p1n2"
       }
     ],
-    "notCertified": "The threshold covers executed normal-card uses, NOT other bad moves, optimal construction, unplayed cards, or perfect tactics.",
+    "notCertified": "Withdrawn under stricter Backstep +1AP evaluation. See seed1370_strict_v1 instead.",
     "manualFlags": [
       "Hand limit discard occurs once (paired turn 2).",
       "Some speculative Hoshi and card payment choices may be suboptimal."
-    ]
+    ],
+    "pass": false,
+    "normalViolationsReason": "Prior 2AP Backstep accounting conflicts with user's explicit +1AP total valuation; all 3 uses of Backstep are at/below 1AP and cannot be certified.",
+    "normalCardUsesThresholdPassed": false
   },
   "meta": {
     "p1": "ユリナ＋サイネ",
@@ -35,7 +38,7 @@
     "seed": 1632,
     "variant": 0,
     "policy": "tactical-v2",
-    "normalCardUsesThresholdPassed": true
+    "normalCardUsesThresholdPassed": false
   },
   "cards": [
     [
