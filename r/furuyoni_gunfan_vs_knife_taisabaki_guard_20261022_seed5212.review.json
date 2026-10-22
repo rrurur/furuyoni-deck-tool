@@ -1,0 +1,8165 @@
+{
+  "schemaVersion": 3,
+  "kind": "furuyoni-ai-vs-ai-replay-review",
+  "source": {
+    "replayFingerprint": "68bbd119e0fc25a5a694bd7ec1916cfafdcb99c321aaf5e2ab3ca6d99e272ab1",
+    "p1Characters": [
+      1,
+      2
+    ],
+    "p2Characters": [
+      3,
+      4
+    ],
+    "variant": 1,
+    "seed": 5212,
+    "winner": 1,
+    "doneReason": "life-zero-attack"
+  },
+  "semantics": {
+    "onlyExplicitReviewedItemsMayBecomeFeedback": true,
+    "unreviewedItemsAreTrainingData": false,
+    "uncertainItemsAreTrainingData": false,
+    "allowedVerdicts": [
+      "ok",
+      "bad",
+      "uncertain"
+    ],
+    "badWithoutPreferredActionIsAvoidOnly": true,
+    "preferredActionRequiresLaterLegalValidation": true,
+    "legalActionsCapturedPerDecision": true,
+    "changesAiBehavior": false
+  },
+  "items": [
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_002",
+      "step": 2,
+      "turn": 1,
+      "actor": 1,
+      "phase": "main",
+      "label": "前進",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "前進",
+        "basicAction": 1
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n1"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_003",
+      "step": 3,
+      "turn": 1,
+      "actor": 1,
+      "phase": "main",
+      "label": "ターン終了",
+      "action": {
+        "rule": "sandbox-end-turn",
+        "kind": "ターン終了",
+        "label": "ターン終了"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n1"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_005",
+      "step": 5,
+      "turn": 2,
+      "actor": 2,
+      "phase": "main",
+      "label": "フルバースト(全力)",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "フルバースト(全力)",
+        "cardId": "p2n4"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "フルバースト(全力)",
+          "cardId": "p2n4"
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_006",
+      "step": 6,
+      "turn": 2,
+      "actor": 1,
+      "phase": "attack-response",
+      "label": "対応しない",
+      "action": {
+        "rule": "turn-attack-pass",
+        "kind": "対応",
+        "label": "対応しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-pass",
+          "kind": "対応",
+          "label": "対応しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_007",
+      "step": 7,
+      "turn": 3,
+      "actor": 1,
+      "phase": "start-reconstruct",
+      "label": "再構成しない",
+      "action": {
+        "rule": "turn-skip-reconstruct",
+        "kind": "開始フェイズ",
+        "label": "再構成しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成"
+        },
+        {
+          "rule": "turn-skip-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_009",
+      "step": 9,
+      "turn": 3,
+      "actor": 1,
+      "phase": "main",
+      "label": "前進",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "前進",
+        "basicAction": 1
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "体捌き",
+          "cardId": "p1n4"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_010",
+      "step": 10,
+      "turn": 3,
+      "actor": 1,
+      "phase": "main",
+      "label": "前進",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "前進",
+        "basicAction": 1
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "体捌き",
+          "cardId": "p1n4"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_011",
+      "step": 11,
+      "turn": 3,
+      "actor": 1,
+      "phase": "main",
+      "label": "前進",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "前進",
+        "basicAction": 1
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "体捌き",
+          "cardId": "p1n4"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_012",
+      "step": 12,
+      "turn": 3,
+      "actor": 1,
+      "phase": "main",
+      "label": "前進",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "前進",
+        "basicAction": 1
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "体捌き",
+          "cardId": "p1n4"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_013",
+      "step": 13,
+      "turn": 3,
+      "actor": 1,
+      "phase": "main",
+      "label": "ターン終了",
+      "action": {
+        "rule": "sandbox-end-turn",
+        "kind": "ターン終了",
+        "label": "ターン終了"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_014",
+      "step": 14,
+      "turn": 4,
+      "actor": 2,
+      "phase": "start-reconstruct",
+      "label": "再構成しない",
+      "action": {
+        "rule": "turn-skip-reconstruct",
+        "kind": "開始フェイズ",
+        "label": "再構成しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成"
+        },
+        {
+          "rule": "turn-skip-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_016",
+      "step": 16,
+      "turn": 4,
+      "actor": 2,
+      "phase": "main",
+      "label": "シュート",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "シュート",
+        "cardId": "p2n0"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "シュート",
+          "cardId": "p2n0"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "バックステップ",
+          "cardId": "p2n6"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "レッドバレット",
+          "cardId": "p2s0"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_017",
+      "step": 17,
+      "turn": 4,
+      "actor": 1,
+      "phase": "attack-response",
+      "label": "対応しない",
+      "action": {
+        "rule": "turn-attack-pass",
+        "kind": "対応",
+        "label": "対応しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-pass",
+          "kind": "対応",
+          "label": "対応しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_018",
+      "step": 18,
+      "turn": 4,
+      "actor": 1,
+      "phase": "attack-damage-choice",
+      "label": "オーラ受け",
+      "action": {
+        "rule": "turn-attack-damage",
+        "kind": "ダメージ選択",
+        "label": "オーラ受け",
+        "damageChoice": "aura"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "オーラ受け",
+          "damageChoice": "aura"
+        },
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "ライフ受け",
+          "damageChoice": "life"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_019",
+      "step": 19,
+      "turn": 4,
+      "actor": 2,
+      "phase": "main",
+      "label": "バックステップ",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "バックステップ",
+        "cardId": "p2n6"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "バックステップ",
+          "cardId": "p2n6"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "レッドバレット",
+          "cardId": "p2s0"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_020",
+      "step": 20,
+      "turn": 4,
+      "actor": 2,
+      "phase": "main",
+      "label": "ラピッドファイア",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "ラピッドファイア",
+        "cardId": "p2n2"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "ラピッドファイア",
+          "cardId": "p2n2"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "レッドバレット",
+          "cardId": "p2s0"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_021",
+      "step": 21,
+      "turn": 4,
+      "actor": 1,
+      "phase": "attack-response",
+      "label": "対応しない",
+      "action": {
+        "rule": "turn-attack-pass",
+        "kind": "対応",
+        "label": "対応しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-pass",
+          "kind": "対応",
+          "label": "対応しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_022",
+      "step": 22,
+      "turn": 4,
+      "actor": 1,
+      "phase": "attack-damage-choice",
+      "label": "オーラ受け",
+      "action": {
+        "rule": "turn-attack-damage",
+        "kind": "ダメージ選択",
+        "label": "オーラ受け",
+        "damageChoice": "aura"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "オーラ受け",
+          "damageChoice": "aura"
+        },
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "ライフ受け",
+          "damageChoice": "life"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_023",
+      "step": 23,
+      "turn": 4,
+      "actor": 2,
+      "phase": "main",
+      "label": "ターン終了",
+      "action": {
+        "rule": "sandbox-end-turn",
+        "kind": "ターン終了",
+        "label": "ターン終了"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "レッドバレット",
+          "cardId": "p2s0"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_024",
+      "step": 24,
+      "turn": 5,
+      "actor": 1,
+      "phase": "start-reconstruct",
+      "label": "再構成しない",
+      "action": {
+        "rule": "turn-skip-reconstruct",
+        "kind": "開始フェイズ",
+        "label": "再構成しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成"
+        },
+        {
+          "rule": "turn-skip-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_026",
+      "step": 26,
+      "turn": 5,
+      "actor": 1,
+      "phase": "main",
+      "label": "前進",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "前進",
+        "basicAction": 1
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n6"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_027",
+      "step": 27,
+      "turn": 5,
+      "actor": 1,
+      "phase": "main",
+      "label": "前進",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "前進",
+        "basicAction": 1
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n6"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_028",
+      "step": 28,
+      "turn": 5,
+      "actor": 1,
+      "phase": "main",
+      "label": "纏い",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "纏い",
+        "basicAction": 3
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n6"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_029",
+      "step": 29,
+      "turn": 5,
+      "actor": 1,
+      "phase": "main",
+      "label": "纏い",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "纏い",
+        "basicAction": 3
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_030",
+      "step": 30,
+      "turn": 5,
+      "actor": 1,
+      "phase": "main",
+      "label": "ターン終了",
+      "action": {
+        "rule": "sandbox-end-turn",
+        "kind": "ターン終了",
+        "label": "ターン終了"
+      },
+      "legalActions": [
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_031",
+      "step": 31,
+      "turn": 6,
+      "actor": 2,
+      "phase": "start-reconstruct",
+      "label": "再構成",
+      "action": {
+        "rule": "turn-reconstruct",
+        "kind": "開始フェイズ",
+        "label": "再構成"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成"
+        },
+        {
+          "rule": "turn-skip-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_033",
+      "step": 33,
+      "turn": 6,
+      "actor": 2,
+      "phase": "main",
+      "label": "梳流し",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "梳流し",
+        "cardId": "p2n1"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "梳流し",
+          "cardId": "p2n1"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "バックステップ",
+          "cardId": "p2n6"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_034",
+      "step": 34,
+      "turn": 6,
+      "actor": 1,
+      "phase": "attack-response",
+      "label": "対応しない",
+      "action": {
+        "rule": "turn-attack-pass",
+        "kind": "対応",
+        "label": "対応しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-pass",
+          "kind": "対応",
+          "label": "対応しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_035",
+      "step": 35,
+      "turn": 6,
+      "actor": 2,
+      "phase": "main",
+      "label": "バックステップ",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "バックステップ",
+        "cardId": "p2n6"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "バックステップ",
+          "cardId": "p2n6"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n6"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_036",
+      "step": 36,
+      "turn": 6,
+      "actor": 2,
+      "phase": "main",
+      "label": "纏い",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "纏い",
+        "basicAction": 3
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "レッドバレット",
+          "cardId": "p2s0"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_037",
+      "step": 37,
+      "turn": 6,
+      "actor": 2,
+      "phase": "main",
+      "label": "纏い",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "纏い",
+        "basicAction": 3
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "レッドバレット",
+          "cardId": "p2s0"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_038",
+      "step": 38,
+      "turn": 6,
+      "actor": 2,
+      "phase": "main",
+      "label": "後退",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "後退",
+        "basicAction": 2
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "レッドバレット",
+          "cardId": "p2s0"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_039",
+      "step": 39,
+      "turn": 6,
+      "actor": 2,
+      "phase": "main",
+      "label": "ターン終了",
+      "action": {
+        "rule": "sandbox-end-turn",
+        "kind": "ターン終了",
+        "label": "ターン終了"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "レッドバレット",
+          "cardId": "p2s0"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_040",
+      "step": 40,
+      "turn": 7,
+      "actor": 1,
+      "phase": "start-reconstruct",
+      "label": "再構成",
+      "action": {
+        "rule": "turn-reconstruct",
+        "kind": "開始フェイズ",
+        "label": "再構成"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成"
+        },
+        {
+          "rule": "turn-skip-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_042",
+      "step": 42,
+      "turn": 7,
+      "actor": 1,
+      "phase": "main",
+      "label": "前進",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "前進",
+        "basicAction": 1
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "体捌き",
+          "cardId": "p1n4"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_043",
+      "step": 43,
+      "turn": 7,
+      "actor": 1,
+      "phase": "main",
+      "label": "ターン終了",
+      "action": {
+        "rule": "sandbox-end-turn",
+        "kind": "ターン終了",
+        "label": "ターン終了"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "体捌き",
+          "cardId": "p1n4"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_044",
+      "step": 44,
+      "turn": 8,
+      "actor": 2,
+      "phase": "start-reconstruct",
+      "label": "再構成しない",
+      "action": {
+        "rule": "turn-skip-reconstruct",
+        "kind": "開始フェイズ",
+        "label": "再構成しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成"
+        },
+        {
+          "rule": "turn-skip-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_046",
+      "step": 46,
+      "turn": 8,
+      "actor": 2,
+      "phase": "main",
+      "label": "フルバースト(全力)",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "フルバースト(全力)",
+        "cardId": "p2n4"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "フルバースト(全力)",
+          "cardId": "p2n4"
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_047",
+      "step": 47,
+      "turn": 8,
+      "actor": 1,
+      "phase": "attack-response",
+      "label": "対応しない",
+      "action": {
+        "rule": "turn-attack-pass",
+        "kind": "対応",
+        "label": "対応しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-pass",
+          "kind": "対応",
+          "label": "対応しない"
+        },
+        {
+          "rule": "turn-attack-respond",
+          "kind": "対応",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "turn-attack-respond",
+          "kind": "対応",
+          "label": "浦波嵐",
+          "cardId": "p1s2"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_048",
+      "step": 48,
+      "turn": 8,
+      "actor": 2,
+      "phase": "start-card-choice",
+      "label": "手札上限: p2n1",
+      "action": {
+        "rule": "turn-card-choice",
+        "kind": "選択",
+        "label": "手札上限: p2n1",
+        "choiceKind": "end-hand-limit-discard",
+        "choiceCardId": "p2n1"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-card-choice",
+          "kind": "選択",
+          "label": "手札上限: p2n1",
+          "choiceKind": "end-hand-limit-discard",
+          "choiceCardId": "p2n1"
+        },
+        {
+          "rule": "turn-card-choice",
+          "kind": "選択",
+          "label": "手札上限: p2n2",
+          "choiceKind": "end-hand-limit-discard",
+          "choiceCardId": "p2n2"
+        },
+        {
+          "rule": "turn-card-choice",
+          "kind": "選択",
+          "label": "手札上限: p2n0",
+          "choiceKind": "end-hand-limit-discard",
+          "choiceCardId": "p2n0"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_049",
+      "step": 49,
+      "turn": 9,
+      "actor": 1,
+      "phase": "start-reconstruct",
+      "label": "再構成しない",
+      "action": {
+        "rule": "turn-skip-reconstruct",
+        "kind": "開始フェイズ",
+        "label": "再構成しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成"
+        },
+        {
+          "rule": "turn-skip-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_051",
+      "step": 51,
+      "turn": 9,
+      "actor": 1,
+      "phase": "main",
+      "label": "薙斬り",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "薙斬り",
+        "cardId": "p1n3"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "体捌き",
+          "cardId": "p1n4"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "薙斬り",
+          "cardId": "p1n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n3"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_052",
+      "step": 52,
+      "turn": 9,
+      "actor": 2,
+      "phase": "attack-response",
+      "label": "対応しない",
+      "action": {
+        "rule": "turn-attack-pass",
+        "kind": "対応",
+        "label": "対応しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-pass",
+          "kind": "対応",
+          "label": "対応しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_053",
+      "step": 53,
+      "turn": 9,
+      "actor": 2,
+      "phase": "attack-damage-choice",
+      "label": "ライフ受け",
+      "action": {
+        "rule": "turn-attack-damage",
+        "kind": "ダメージ選択",
+        "label": "ライフ受け",
+        "damageChoice": "life"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "オーラ受け",
+          "damageChoice": "aura"
+        },
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "ライフ受け",
+          "damageChoice": "life"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_054",
+      "step": 54,
+      "turn": 9,
+      "actor": 1,
+      "phase": "main",
+      "label": "前進",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "前進",
+        "basicAction": 1
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "体捌き",
+          "cardId": "p1n4"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_055",
+      "step": 55,
+      "turn": 9,
+      "actor": 1,
+      "phase": "main",
+      "label": "一閃",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "一閃",
+        "cardId": "p1n2"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "体捌き",
+          "cardId": "p1n4"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "一閃",
+          "cardId": "p1n2"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n2"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_056",
+      "step": 56,
+      "turn": 9,
+      "actor": 2,
+      "phase": "attack-response",
+      "label": "対応しない",
+      "action": {
+        "rule": "turn-attack-pass",
+        "kind": "対応",
+        "label": "対応しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-pass",
+          "kind": "対応",
+          "label": "対応しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_057",
+      "step": 57,
+      "turn": 9,
+      "actor": 2,
+      "phase": "attack-damage-choice",
+      "label": "オーラ受け",
+      "action": {
+        "rule": "turn-attack-damage",
+        "kind": "ダメージ選択",
+        "label": "オーラ受け",
+        "damageChoice": "aura"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "オーラ受け",
+          "damageChoice": "aura"
+        },
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "ライフ受け",
+          "damageChoice": "life"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_058",
+      "step": 58,
+      "turn": 9,
+      "actor": 1,
+      "phase": "main",
+      "label": "体捌き",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "体捌き",
+        "cardId": "p1n4"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "体捌き",
+          "cardId": "p1n4"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_059",
+      "step": 59,
+      "turn": 9,
+      "actor": 1,
+      "phase": "main-effect-basic",
+      "label": "纏い",
+      "action": {
+        "rule": "turn-main-effect-basic",
+        "kind": "効果による基本動作",
+        "label": "纏い",
+        "basicAction": 3
+      },
+      "legalActions": [
+        {
+          "rule": "turn-main-effect-basic",
+          "kind": "効果による基本動作",
+          "label": "前進",
+          "basicAction": 1
+        },
+        {
+          "rule": "turn-main-effect-basic",
+          "kind": "効果による基本動作",
+          "label": "後退",
+          "basicAction": 2
+        },
+        {
+          "rule": "turn-main-effect-basic",
+          "kind": "効果による基本動作",
+          "label": "纏い",
+          "basicAction": 3
+        },
+        {
+          "rule": "turn-main-effect-basic",
+          "kind": "効果による基本動作",
+          "label": "宿し",
+          "basicAction": 4
+        },
+        {
+          "rule": "turn-main-effect-basic",
+          "kind": "効果による基本動作",
+          "label": "ここで終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_060",
+      "step": 60,
+      "turn": 9,
+      "actor": 1,
+      "phase": "main-effect-basic",
+      "label": "纏い",
+      "action": {
+        "rule": "turn-main-effect-basic",
+        "kind": "効果による基本動作",
+        "label": "纏い",
+        "basicAction": 3
+      },
+      "legalActions": [
+        {
+          "rule": "turn-main-effect-basic",
+          "kind": "効果による基本動作",
+          "label": "前進",
+          "basicAction": 1
+        },
+        {
+          "rule": "turn-main-effect-basic",
+          "kind": "効果による基本動作",
+          "label": "後退",
+          "basicAction": 2
+        },
+        {
+          "rule": "turn-main-effect-basic",
+          "kind": "効果による基本動作",
+          "label": "纏い",
+          "basicAction": 3
+        },
+        {
+          "rule": "turn-main-effect-basic",
+          "kind": "効果による基本動作",
+          "label": "宿し",
+          "basicAction": 4
+        },
+        {
+          "rule": "turn-main-effect-basic",
+          "kind": "効果による基本動作",
+          "label": "ここで終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_061",
+      "step": 61,
+      "turn": 9,
+      "actor": 1,
+      "phase": "main",
+      "label": "ターン終了",
+      "action": {
+        "rule": "sandbox-end-turn",
+        "kind": "ターン終了",
+        "label": "ターン終了"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_062",
+      "step": 62,
+      "turn": 10,
+      "actor": 2,
+      "phase": "start-reconstruct",
+      "label": "再構成",
+      "action": {
+        "rule": "turn-reconstruct",
+        "kind": "開始フェイズ",
+        "label": "再構成"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成"
+        },
+        {
+          "rule": "turn-skip-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_064",
+      "step": 64,
+      "turn": 10,
+      "actor": 2,
+      "phase": "main",
+      "label": "梳流し",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "梳流し",
+        "cardId": "p2n1"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "シュート",
+          "cardId": "p2n0"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "梳流し",
+          "cardId": "p2n1"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "千歳ノ鳥",
+          "cardId": "p2s1"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "ヴァーミリオンフィールド",
+          "cardId": "p2s2"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_065",
+      "step": 65,
+      "turn": 10,
+      "actor": 1,
+      "phase": "attack-response",
+      "label": "対応しない",
+      "action": {
+        "rule": "turn-attack-pass",
+        "kind": "対応",
+        "label": "対応しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-pass",
+          "kind": "対応",
+          "label": "対応しない"
+        },
+        {
+          "rule": "turn-attack-respond",
+          "kind": "対応",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "turn-attack-respond",
+          "kind": "対応",
+          "label": "浦波嵐",
+          "cardId": "p1s2"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_066",
+      "step": 66,
+      "turn": 10,
+      "actor": 2,
+      "phase": "main",
+      "label": "シュート",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "シュート",
+        "cardId": "p2n0"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "シュート",
+          "cardId": "p2n0"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "千歳ノ鳥",
+          "cardId": "p2s1"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "ヴァーミリオンフィールド",
+          "cardId": "p2s2"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_067",
+      "step": 67,
+      "turn": 10,
+      "actor": 1,
+      "phase": "attack-response",
+      "label": "対応しない",
+      "action": {
+        "rule": "turn-attack-pass",
+        "kind": "対応",
+        "label": "対応しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-pass",
+          "kind": "対応",
+          "label": "対応しない"
+        },
+        {
+          "rule": "turn-attack-respond",
+          "kind": "対応",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "turn-attack-respond",
+          "kind": "対応",
+          "label": "浦波嵐",
+          "cardId": "p1s2"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_068",
+      "step": 68,
+      "turn": 10,
+      "actor": 1,
+      "phase": "attack-damage-choice",
+      "label": "オーラ受け",
+      "action": {
+        "rule": "turn-attack-damage",
+        "kind": "ダメージ選択",
+        "label": "オーラ受け",
+        "damageChoice": "aura"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "オーラ受け",
+          "damageChoice": "aura"
+        },
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "ライフ受け",
+          "damageChoice": "life"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_069",
+      "step": 69,
+      "turn": 10,
+      "actor": 2,
+      "phase": "main",
+      "label": "ヴァーミリオンフィールド",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "ヴァーミリオンフィールド",
+        "cardId": "p2s2"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "千歳ノ鳥",
+          "cardId": "p2s1"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "ヴァーミリオンフィールド",
+          "cardId": "p2s2"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_070",
+      "step": 70,
+      "turn": 10,
+      "actor": 2,
+      "phase": "main",
+      "label": "ラピッドファイア",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "ラピッドファイア",
+        "cardId": "p2n2"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "ラピッドファイア",
+          "cardId": "p2n2"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "レッドバレット",
+          "cardId": "p2s0"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n2"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_071",
+      "step": 71,
+      "turn": 10,
+      "actor": 1,
+      "phase": "attack-response",
+      "label": "対応しない",
+      "action": {
+        "rule": "turn-attack-pass",
+        "kind": "対応",
+        "label": "対応しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-pass",
+          "kind": "対応",
+          "label": "対応しない"
+        },
+        {
+          "rule": "turn-attack-respond",
+          "kind": "対応",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "turn-attack-respond",
+          "kind": "対応",
+          "label": "浦波嵐",
+          "cardId": "p1s2"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_072",
+      "step": 72,
+      "turn": 10,
+      "actor": 1,
+      "phase": "attack-damage-choice",
+      "label": "オーラ受け",
+      "action": {
+        "rule": "turn-attack-damage",
+        "kind": "ダメージ選択",
+        "label": "オーラ受け",
+        "damageChoice": "aura"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "オーラ受け",
+          "damageChoice": "aura"
+        },
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "ライフ受け",
+          "damageChoice": "life"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_073",
+      "step": 73,
+      "turn": 10,
+      "actor": 2,
+      "phase": "main",
+      "label": "ターン終了",
+      "action": {
+        "rule": "sandbox-end-turn",
+        "kind": "ターン終了",
+        "label": "ターン終了"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "レッドバレット",
+          "cardId": "p2s0"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_074",
+      "step": 74,
+      "turn": 11,
+      "actor": 1,
+      "phase": "start-reconstruct",
+      "label": "再構成しない",
+      "action": {
+        "rule": "turn-skip-reconstruct",
+        "kind": "開始フェイズ",
+        "label": "再構成しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成"
+        },
+        {
+          "rule": "turn-skip-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_076",
+      "step": 76,
+      "turn": 11,
+      "actor": 1,
+      "phase": "main",
+      "label": "前進",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "前進",
+        "basicAction": 1
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_077",
+      "step": 77,
+      "turn": 11,
+      "actor": 1,
+      "phase": "main",
+      "label": "八方振り",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "八方振り",
+        "cardId": "p1n1"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "八方振り",
+          "cardId": "p1n1"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_078",
+      "step": 78,
+      "turn": 11,
+      "actor": 2,
+      "phase": "attack-response",
+      "label": "対応しない",
+      "action": {
+        "rule": "turn-attack-pass",
+        "kind": "対応",
+        "label": "対応しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-pass",
+          "kind": "対応",
+          "label": "対応しない"
+        },
+        {
+          "rule": "turn-attack-respond",
+          "kind": "対応",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_079",
+      "step": 79,
+      "turn": 11,
+      "actor": 2,
+      "phase": "attack-damage-choice",
+      "label": "ライフ受け",
+      "action": {
+        "rule": "turn-attack-damage",
+        "kind": "ダメージ選択",
+        "label": "ライフ受け",
+        "damageChoice": "life"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "オーラ受け",
+          "damageChoice": "aura"
+        },
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "ライフ受け",
+          "damageChoice": "life"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_080",
+      "step": 80,
+      "turn": 11,
+      "actor": 2,
+      "phase": "attack-response",
+      "label": "対応しない",
+      "action": {
+        "rule": "turn-attack-pass",
+        "kind": "対応",
+        "label": "対応しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-pass",
+          "kind": "対応",
+          "label": "対応しない"
+        },
+        {
+          "rule": "turn-attack-respond",
+          "kind": "対応",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_081",
+      "step": 81,
+      "turn": 11,
+      "actor": 2,
+      "phase": "attack-damage-choice",
+      "label": "ライフ受け",
+      "action": {
+        "rule": "turn-attack-damage",
+        "kind": "ダメージ選択",
+        "label": "ライフ受け",
+        "damageChoice": "life"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "オーラ受け",
+          "damageChoice": "aura"
+        },
+        {
+          "rule": "turn-attack-damage",
+          "kind": "ダメージ選択",
+          "label": "ライフ受け",
+          "damageChoice": "life"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_082",
+      "step": 82,
+      "turn": 11,
+      "actor": 1,
+      "phase": "main",
+      "label": "前進",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "前進",
+        "basicAction": 1
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_083",
+      "step": 83,
+      "turn": 11,
+      "actor": 1,
+      "phase": "main",
+      "label": "纏い",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "纏い",
+        "basicAction": 3
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "見切り",
+          "cardId": "p1n5"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n5"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_084",
+      "step": 84,
+      "turn": 11,
+      "actor": 1,
+      "phase": "main",
+      "label": "ターン終了",
+      "action": {
+        "rule": "sandbox-end-turn",
+        "kind": "ターン終了",
+        "label": "ターン終了"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_085",
+      "step": 85,
+      "turn": 12,
+      "actor": 2,
+      "phase": "start-reconstruct",
+      "label": "再構成しない",
+      "action": {
+        "rule": "turn-skip-reconstruct",
+        "kind": "開始フェイズ",
+        "label": "再構成しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成"
+        },
+        {
+          "rule": "turn-skip-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_087",
+      "step": 87,
+      "turn": 12,
+      "actor": 2,
+      "phase": "main",
+      "label": "梳流し",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "梳流し",
+        "cardId": "p2n1"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "梳流し",
+          "cardId": "p2n1"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "千歳ノ鳥",
+          "cardId": "p2s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n1"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_088",
+      "step": 88,
+      "turn": 12,
+      "actor": 1,
+      "phase": "attack-response",
+      "label": "対応しない",
+      "action": {
+        "rule": "turn-attack-pass",
+        "kind": "対応",
+        "label": "対応しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-pass",
+          "kind": "対応",
+          "label": "対応しない"
+        },
+        {
+          "rule": "turn-attack-respond",
+          "kind": "対応",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "turn-attack-respond",
+          "kind": "対応",
+          "label": "浦波嵐",
+          "cardId": "p1s2"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_089",
+      "step": 89,
+      "turn": 12,
+      "actor": 2,
+      "phase": "main",
+      "label": "後退",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "後退",
+        "basicAction": 2
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "千歳ノ鳥",
+          "cardId": "p2s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_090",
+      "step": 90,
+      "turn": 12,
+      "actor": 2,
+      "phase": "main",
+      "label": "纏い",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "纏い",
+        "basicAction": 3
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "レッドバレット",
+          "cardId": "p2s0"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_091",
+      "step": 91,
+      "turn": 12,
+      "actor": 2,
+      "phase": "main",
+      "label": "後退",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "後退",
+        "basicAction": 2
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "詩舞",
+          "cardId": "p2n3"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "レッドバレット",
+          "cardId": "p2s0"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n3"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_092",
+      "step": 92,
+      "turn": 12,
+      "actor": 2,
+      "phase": "main",
+      "label": "纏い",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "纏い",
+        "basicAction": 3
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "レッドバレット",
+          "cardId": "p2s0"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p2n4"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_093",
+      "step": 93,
+      "turn": 12,
+      "actor": 2,
+      "phase": "main",
+      "label": "ターン終了",
+      "action": {
+        "rule": "sandbox-end-turn",
+        "kind": "ターン終了",
+        "label": "ターン終了"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "レッドバレット",
+          "cardId": "p2s0"
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_094",
+      "step": 94,
+      "turn": 13,
+      "actor": 1,
+      "phase": "start-reconstruct",
+      "label": "再構成",
+      "action": {
+        "rule": "turn-reconstruct",
+        "kind": "開始フェイズ",
+        "label": "再構成"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成"
+        },
+        {
+          "rule": "turn-skip-reconstruct",
+          "kind": "開始フェイズ",
+          "label": "再構成しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_096",
+      "step": 96,
+      "turn": 13,
+      "actor": 1,
+      "phase": "main",
+      "label": "前進",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "前進",
+        "basicAction": 1
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "体捌き",
+          "cardId": "p1n4"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "focus"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_097",
+      "step": 97,
+      "turn": 13,
+      "actor": 1,
+      "phase": "main",
+      "label": "前進",
+      "action": {
+        "rule": "core-standard-basic",
+        "kind": "基本動作",
+        "label": "前進",
+        "basicAction": 1
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "体捌き",
+          "cardId": "p1n4"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "前進",
+          "basicAction": 1,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "纏い",
+          "basicAction": 3,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n4"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_098",
+      "step": 98,
+      "turn": 13,
+      "actor": 1,
+      "phase": "main",
+      "label": "月影落",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "月影落",
+        "cardId": "p1s0"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "斬",
+          "cardId": "p1n0"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "月影落",
+          "cardId": "p1s0"
+        },
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "音無砕氷",
+          "cardId": "p1s1"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_099",
+      "step": 99,
+      "turn": 13,
+      "actor": 2,
+      "phase": "attack-response",
+      "label": "対応しない",
+      "action": {
+        "rule": "turn-attack-pass",
+        "kind": "対応",
+        "label": "対応しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-pass",
+          "kind": "対応",
+          "label": "対応しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_100",
+      "step": 100,
+      "turn": 13,
+      "actor": 1,
+      "phase": "main",
+      "label": "斬",
+      "action": {
+        "rule": "turn-use-card",
+        "kind": "カード使用",
+        "label": "斬",
+        "cardId": "p1n0"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-use-card",
+          "kind": "カード使用",
+          "label": "斬",
+          "cardId": "p1n0"
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "後退",
+          "basicAction": 2,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "core-standard-basic",
+          "kind": "基本動作",
+          "label": "宿し",
+          "basicAction": 4,
+          "cost": {
+            "type": "facedown",
+            "cardId": "p1n0"
+          }
+        },
+        {
+          "rule": "sandbox-end-turn",
+          "kind": "ターン終了",
+          "label": "ターン終了"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    },
+    {
+      "decisionId": "o2_1-2_vs_3-4_v1_s5212_h68bbd119e0fc25a5_step_101",
+      "step": 101,
+      "turn": 13,
+      "actor": 2,
+      "phase": "attack-response",
+      "label": "対応しない",
+      "action": {
+        "rule": "turn-attack-pass",
+        "kind": "対応",
+        "label": "対応しない"
+      },
+      "legalActions": [
+        {
+          "rule": "turn-attack-pass",
+          "kind": "対応",
+          "label": "対応しない"
+        }
+      ],
+      "review": {
+        "status": "unreviewed",
+        "verdict": null,
+        "preferredAction": null,
+        "note": null
+      }
+    }
+  ]
+}
