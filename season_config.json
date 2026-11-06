@@ -1,9 +1,10 @@
 {
   "schemaVersion": 1,
-  "assetVersion": "20261005-replay-gzip-batch1",
-  "currentSeason": "再演",
+  "assetVersion": "20261106-s1-2-utsuro-1",
+  "currentSeason": "1-2",
   "legacySeason": "10-2",
   "pastSeasons": [
+    "再演",
     "10-2",
     "10-1",
     "10-0"
@@ -15,6 +16,7 @@
   "assetBaseUrl": "https://furuyoni-diary-1918f.web.app/assets",
   "currentAssetFolder": "replay",
   "assetFoldersBySeason": {
+    "再演": "replay",
     "10-2": "s10-2"
   },
   "replayTarotNames": [
@@ -50,7 +52,8 @@
     "yukihi_a1",
     "yurina",
     "yurina_a1",
-    "yurina_a2"
+    "yurina_a2",
+    "utsuro"
   ],
   "matchTypes": [
     "complete",
