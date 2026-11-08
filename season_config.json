@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "assetVersion": "20261106-s1-2-utsuro-1",
+  "assetVersion": "20261109-s1-2-utsuro-a1",
   "currentSeason": "1-2",
   "legacySeason": "10-2",
   "pastSeasons": [
@@ -53,7 +53,8 @@
     "yurina",
     "yurina_a1",
     "yurina_a2",
-    "utsuro"
+    "utsuro",
+    "utsuro_a1"
   ],
   "matchTypes": [
     "complete",
